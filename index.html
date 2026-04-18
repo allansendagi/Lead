@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free 3-minute AI Readiness Assessment for SME founders. Get your personalised AI Navigator score and roadmap recommendation.">
+  <meta property="og:title" content="AI Readiness Assessment — AI Navigator">
+  <meta property="og:description" content="Is your business ready for AI? 5 questions. Instant results. Built on the AI Navigator framework.">
+  <meta property="og:type" content="website">
+  <title>AI Readiness Assessment — AI Navigator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:          #0C0E14;
+      --bg-card:     #131720;
+      --bg-hover:    #181d2a;
+      --accent:      #3B82F6;
+      --accent-2:    #6366F1;
+      --gold:        #F59E0B;
+      --green:       #10B981;
+      --purple:      #8B5CF6;
+      --border:      rgba(255,255,255,0.08);
+      --border-hi:   rgba(59,130,246,0.45);
+      --text:        #F1F5F9;
+      --text-2:      #94A3B8;
+      --text-3:      #64748B;
+      --font:        'Inter', -apple-system, sans-serif;
+      --mono:        'JetBrains Mono', monospace;
+      --r:           13px;
+      --ease:        cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100vh; background: var(--bg); color: var(--text);
+      font-family: var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    }
+
+    /* ─ Screen system ─ */
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    .screen.active {
+      display: flex;
+      animation: sEnter 380ms var(--ease) forwards;
+    }
+    .screen.exiting {
+      display: flex;
+      animation: sExit 260ms ease forwards;
+      pointer-events: none;
+    }
+    @keyframes sEnter { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes sExit  { from { opacity:1; transform:translateY(0); }   to { opacity:0; transform:translateY(-14px); } }
+
+    /* ─ Nav ─ */
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 8px; }
+    .nav-dot   { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+    .nav-name  { font-size: 13px; font-weight: 700; letter-spacing: 0.03em; }
+    .nav-meta  { font-size: 12px; color: var(--text-3); font-family: var(--mono); }
+
+    /* ─ Page & wrap ─ */
+    .page { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 36px 20px 64px; }
+    .wrap { width: 100%; max-width: 500px; }
+
+    /* ─ Buttons ─ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      font-family: var(--font); font-weight: 600; border: none; cursor: pointer;
+      transition: opacity 150ms, transform 120ms, box-shadow 150ms, background 150ms;
+    }
+    .btn:active { transform: scale(0.975); }
+
+    .btn-primary {
+      background: var(--accent); color: #fff; border-radius: 10px;
+      padding: 13px 22px; font-size: 15px;
+    }
+    .btn-primary:hover  { background: #2563eb; box-shadow: 0 4px 18px rgba(59,130,246,0.32); }
+    .btn-primary:disabled { opacity: 0.28; cursor: not-allowed; }
+    .btn-primary.full   { width: 100%; }
+    .btn-primary.lg     { padding: 15px 30px; font-size: 16px; border-radius: 11px; }
+
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-2); border-radius: 8px; padding: 8px 14px; font-size: 13px;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.16); color: var(--text); }
+
+    .btn-wa {
+      background: #16a34a; color: #fff; border-radius: 10px;
+      padding: 13px 22px; font-size: 15px; font-weight: 600;
+      box-shadow: 0 3px 14px rgba(22,163,74,0.26);
+    }
+    .btn-wa:hover { background: #15803d; box-shadow: 0 5px 20px rgba(22,163,74,0.36); }
+    .btn-wa.full  { width: 100%; }
+
+    .btn-li {
+      background: #0A66C2; color: #fff; border-radius: 10px;
+      padding: 13px 22px; font-size: 15px; font-weight: 600;
+      box-shadow: 0 3px 14px rgba(10,102,194,0.26);
+    }
+    .btn-li:hover { background: #004182; box-shadow: 0 5px 20px rgba(10,102,194,0.36); }
+    .btn-li.full  { width: 100%; }
+
+    /* ─ Hero ─ */
+    .hero-credibility {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: rgba(59,130,246,0.06);
+      border: 1px solid rgba(59,130,246,0.14);
+      border-radius: 10px;
+      margin-bottom: 32px;
+    }
+    .cred-book {
+      width: 30px; height: 40px; flex-shrink: 0;
+      background: linear-gradient(160deg, #1e3a5f 0%, #1d4ed8 100%);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #93c5fd;
+      font-family: var(--mono); letter-spacing: 0.05em;
+      border-left: 3px solid #3B82F6;
+    }
+    .cred-text {}
+    .cred-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .cred-sub   { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+    .eyebrow {
+      font-size: 12px; font-family: var(--mono); color: var(--text-3);
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(30px, 6vw, 50px); font-weight: 700;
+      line-height: 1.1; letter-spacing: -0.025em; margin-bottom: 16px;
+    }
+    h1 em { font-style: normal; color: #60A5FA; }
+    .lead {
+      font-size: 15px; color: var(--text-2); line-height: 1.65; margin-bottom: 28px;
+    }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 28px; }
+    .tag {
+      font-size: 12px; color: var(--text-3);
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 999px; padding: 4px 11px;
+    }
+    .hero-disclaimer {
+      margin-top: 14px; font-size: 12px; color: var(--text-3); line-height: 1.55;
+    }
+    .hero-disclaimer span { color: var(--text-2); }
+
+    /* ─ Progress ─ */
+    .q-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
+    .progress-track { flex: 1; height: 3px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .progress-fill  {
+      height: 100%; background: var(--accent); border-radius: 999px;
+      transition: width 500ms var(--ease);
+    }
+    .progress-pct { font-size: 11px; font-family: var(--mono); color: var(--text-3); white-space: nowrap; }
+
+    /* ─ Question ─ */
+    .q-wrap { width: 100%; max-width: 500px; }
+    .q-counter { font-size: 11px; font-family: var(--mono); color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+    .q-title  { font-size: clamp(18px, 3.5vw, 23px); font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; margin-bottom: 7px; }
+    .q-hint   { font-size: 13px; color: var(--text-3); line-height: 1.5; margin-bottom: 22px; }
+
+    /* ─ Options ─ */
+    .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .opt {
+      position: relative; display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r); cursor: pointer; overflow: hidden;
+      transition: border-color 170ms, background 170ms, transform 110ms;
+    }
+    .opt:hover { border-color: rgba(59,130,246,0.28); background: var(--bg-hover); transform: translateY(-1px); }
+    .opt.sel {
+      border-color: var(--accent); background: rgba(59,130,246,0.06);
+      box-shadow: 0 0 0 1px rgba(59,130,246,0.2);
+    }
+    .opt.sel::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--accent);
+    }
+    .opt-radio {
+      width: 17px; height: 17px; border-radius: 50%; border: 2px solid var(--text-3);
+      flex-shrink: 0; margin-top: 2px;
+      transition: border-color 150ms, background 150ms;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .opt.sel .opt-radio { border-color: var(--accent); background: var(--accent); }
+    .opt.sel .opt-radio::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+    .opt-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .opt-desc  { font-size: 13px; color: var(--text-2); line-height: 1.4; }
+
+    .screen.active .opt { animation: optIn 300ms var(--ease) both; }
+    .screen.active .opt:nth-child(1) { animation-delay: 70ms; }
+    .screen.active .opt:nth-child(2) { animation-delay: 135ms; }
+    .screen.active .opt:nth-child(3) { animation-delay: 200ms; }
+    .opt.sel { animation: none !important; opacity: 1 !important; }
+    @keyframes optIn { from { opacity:0; transform:translateY(9px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes ripple { to { transform:scale(30); opacity:0; } }
+
+    .q-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 4px; }
+
+    /* ─ Gate ─ */
+    .gate-teaser {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 16px 18px; margin-bottom: 26px;
+    }
+    .teaser-label {
+      font-size: 11px; font-family: var(--mono); color: var(--accent);
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .teaser-rows { display: flex; flex-direction: column; gap: 9px; }
+    .teaser-row { display: flex; align-items: center; gap: 9px; filter: blur(3px); user-select: none; pointer-events: none; }
+    .teaser-row-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
+    .teaser-row-line { height: 10px; background: rgba(255,255,255,0.06); border-radius: 5px; }
+
+    .gate-title { font-size: clamp(19px, 4vw, 25px); font-weight: 700; letter-spacing: -0.015em; margin-bottom: 7px; }
+    .gate-sub   { font-size: 14px; color: var(--text-2); line-height: 1.55; margin-bottom: 22px; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 13px; }
+    .field-label { font-size: 13px; font-weight: 500; color: var(--text-2); }
+    .field-label span { font-weight: 400; color: var(--text-3); }
+    .field-input {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 9px;
+      padding: 12px 13px; color: var(--text); font-size: 15px; font-family: var(--font);
+      outline: none; width: 100%; transition: border-color 170ms, box-shadow 170ms;
+      -webkit-appearance: none;
+    }
+    .field-input:focus { border-color: var(--border-hi); box-shadow: 0 0 0 3px rgba(59,130,246,0.11); }
+    .field-input::placeholder { color: var(--text-3); }
+    .field-input.invalid { border-color: rgba(248,113,113,0.6); }
+    .field-input.invalid:focus { box-shadow: 0 0 0 3px rgba(248,113,113,0.12); }
+
+    .phone-row { display: flex; gap: 7px; }
+    .phone-prefix {
+      flex-shrink: 0; width: 98px; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748B' stroke-width='1.4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px;
+    }
+    .field-error { font-size: 12px; color: #F87171; display: none; }
+    .field-error.show { display: block; }
+
+    .contact-tabs { display: flex; gap: 0; margin-bottom: 4px; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+    .ctab {
+      flex: 1; padding: 9px; font-size: 13px; font-weight: 500; cursor: pointer;
+      background: transparent; border: none; color: var(--text-3); font-family: var(--font);
+      transition: background 150ms, color 150ms;
+    }
+    .ctab.active { background: var(--bg-hover); color: var(--text); }
+
+    .contact-panel { display: none; }
+    .contact-panel.show { display: block; }
+
+    .gate-privacy { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 13px; line-height: 1.5; }
+    .gate-privacy a { color: var(--text-3); text-decoration: underline; text-underline-offset: 2px; }
+
+    /* ─ Results ─ */
+    .results-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px 22px 20px; margin-bottom: 14px;
+    }
+    .rc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+    .rc-brand  { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.16em; }
+    .rc-doc    { font-size: 11px; color: var(--text-3); font-family: var(--mono); }
+
+    /* Score ring */
+    .score-center { display: flex; flex-direction: column; align-items: center; margin-bottom: 18px; }
+    .ring-wrap { position: relative; width: 118px; height: 118px; }
+    .ring-wrap svg { transform: rotate(-90deg); }
+    .ring-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 7; }
+    .ring-fill  {
+      fill: none; stroke: url(#rg); stroke-width: 7; stroke-linecap: round;
+      stroke-dasharray: 301.6; stroke-dashoffset: 301.6;
+      transition: stroke-dashoffset 1.4s var(--ease);
+    }
+    .ring-inner {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; font-family: var(--mono);
+    }
+    .ring-num  { font-size: 34px; font-weight: 700; line-height: 1; }
+    .ring-den  { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+    .band-chip {
+      display: inline-flex; align-items: center; padding: 5px 13px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; font-family: var(--mono);
+      letter-spacing: 0.05em; text-transform: uppercase; margin-top: 12px;
+    }
+    .bc-found { background: rgba(245,158,11,0.1); color: var(--gold);   border: 1px solid rgba(245,158,11,0.22); }
+    .bc-get   { background: rgba(59,130,246,0.1); color: var(--accent); border: 1px solid rgba(59,130,246,0.22); }
+    .bc-good  { background: rgba(139,92,246,0.1); color: var(--purple); border: 1px solid rgba(139,92,246,0.22); }
+    .bc-ready { background: rgba(16,185,129,0.1); color: var(--green);  border: 1px solid rgba(16,185,129,0.22); }
+
+    .score-tag { font-size: 12px; color: var(--text-3); font-family: var(--mono); margin-top: 5px; }
+
+    .rc-div { height: 1px; background: var(--border); margin: 16px 0; }
+    .rc-hl  { font-size: clamp(16px, 3vw, 20px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; margin-bottom: 9px; }
+    .rc-bod { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+
+    /* Dimensions */
+    .dims { display: flex; flex-direction: column; }
+    .dim-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 0; border-bottom: 1px solid var(--border); gap: 8px;
+    }
+    .dim-row:last-child { border-bottom: none; }
+    .dim-k { font-size: 13px; color: var(--text-3); }
+    .dim-v { font-size: 13px; font-weight: 600; text-align: right; }
+
+    /* Offer */
+    .offer-block {
+      background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.13);
+      border-radius: 11px; padding: 15px 16px;
+    }
+    .offer-eyebrow { font-size: 11px; font-family: var(--mono); color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 9px; }
+    .offer-title   { font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+    .offer-desc    { font-size: 13px; color: var(--text-2); line-height: 1.5; margin-bottom: 11px; }
+    .offer-price-row { display: flex; align-items: baseline; gap: 7px; }
+    .offer-price   { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--gold); }
+    .offer-note    { font-size: 12px; color: var(--text-3); }
+
+    .rc-footer {
+      margin-top: 18px; display: flex; justify-content: space-between;
+      font-size: 10px; color: rgba(100,116,139,0.38); font-family: var(--mono);
+    }
+    .rc-footer a { color: rgba(100,116,139,0.38); text-decoration: none; }
+    .rc-footer a:hover { color: var(--text-3); }
+
+    /* Result CTAs */
+    .result-ctas { display: flex; flex-direction: column; gap: 9px; margin-bottom: 10px; }
+    .cta-row { display: flex; gap: 9px; }
+    .cta-row .btn-li   { flex: 1; font-size: 13px; padding: 11px 14px; }
+    .cta-row .btn-ghost { flex: 1; font-size: 13px; padding: 11px 14px; }
+
+    /* LinkedIn share hint */
+    .li-hint {
+      font-size: 11px; color: var(--text-3); text-align: center;
+      margin-top: -4px; margin-bottom: 2px;
+    }
+
+    /* Stagger reveal */
+    .rv { opacity: 0; transform: translateY(7px); }
+    .rv.in { animation: rvIn 320ms var(--ease) forwards; }
+    @keyframes rvIn { to { opacity:1; transform:translateY(0); } }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 22px; left: 50%;
+      transform: translateX(-50%) translateY(56px);
+      background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text); padding: 10px 20px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; opacity: 0; z-index: 9999;
+      pointer-events: none; white-space: nowrap;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+      transition: transform 260ms var(--ease), opacity 260ms;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 400px) {
+      .page { padding: 24px 14px 52px; }
+      h1 { font-size: 27px; }
+      .cta-row { flex-direction: column; }
+      .hero-credibility { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- honeypot (bots fill this, humans don't) -->
+<div style="position:absolute;left:-9999px;top:-9999px;aria-hidden:true">
+  <input type="text" id="hp-field" tabindex="-1" autocomplete="off">
+</div>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<div id="s-hero" class="screen">
+  <nav class="nav">
+    <div class="nav-brand"><div class="nav-dot"></div><span class="nav-name">AI Navigator</span></div>
+    <span class="nav-meta">Free Assessment · 3 minutes</span>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+      <div class="hero-credibility">
+        <div class="cred-book">AI</div>
+        <div class="cred-text">
+          <div class="cred-title">Based on <em>The AI Roadmap</em></div>
+          <div class="cred-sub">The AI Navigator framework — used by SMEs across Qatar &amp; Dubai</div>
+        </div>
+      </div>
+
+      <p class="eyebrow">AI Readiness Assessment</p>
+      <h1>Is your business<br><em>ready for AI?</em></h1>
+      <p class="lead">
+        5 questions. Instant results. A personalised AI readiness score built on the AI Navigator framework — so you know exactly where you stand and what to do next.
+      </p>
+
+      <div class="hero-tags">
+        <span class="tag">5 questions</span>
+        <span class="tag">~3 minutes</span>
+        <span class="tag">Personalised report</span>
+        <span class="tag">Free</span>
+      </div>
+
+      <button class="btn btn-primary lg full" onclick="startQuiz()">
+        Start the assessment
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <p class="hero-disclaimer">
+        🔒 <span>Your results are private.</span> We only ask for your contact details at the end — and only to send you your personalised report.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ Q1 ═══════════════════════ -->
+<div id="s-q1" class="screen">
+  <nav class="nav">
+    <div class="nav-brand"><div class="nav-dot"></div><span class="nav-name">AI Navigator</span></div>
+    <span class="nav-meta">1 of 5</span>
+  </nav>
+  <div class="page">
+    <div class="q-wrap">
+      <div class="q-progress">
+        <div class="progress-track"><div class="progress-fill" style="width:20%"></div></div>
+        <span class="progress-pct">20%</span>
+      </div>
+      <div class="q-counter">Question 1</div>
+      <h2 class="q-title">How does your business currently handle its most important workflow?</h2>
+      <p class="q-hint">Think about the process that takes the most time or where mistakes cost you the most.</p>
+      <div class="options">
+        <div class="opt" data-q="1" data-score="1" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">Manual process</div>
+            <div class="opt-desc">Spreadsheets, WhatsApp, email, or pen and paper. People do the work.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="1" data-score="2" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">Existing software</div>
+            <div class="opt-desc">We have a system but it's slow, inaccurate, or doesn't do what we need.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="1" data-score="3" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">No system yet</div>
+            <div class="opt-desc">It's a new challenge. We're building the approach from scratch.</div>
+          </div>
+        </div>
+      </div>
+      <div class="q-nav">
+        <button class="btn btn-ghost" onclick="goBack()">Back</button>
+        <button class="btn btn-primary" id="q1-next" disabled onclick="nextScreen()">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ Q2 ═══════════════════════ -->
+<div id="s-q2" class="screen">
+  <nav class="nav">
+    <div class="nav-brand"><div class="nav-dot"></div><span class="nav-name">AI Navigator</span></div>
+    <span class="nav-meta">2 of 5</span>
+  </nav>
+  <div class="page">
+    <div class="q-wrap">
+      <div class="q-progress">
+        <div class="progress-track"><div class="progress-fill" style="width:40%"></div></div>
+        <span class="progress-pct">40%</span>
+      </div>
+      <div class="q-counter">Question 2</div>
+      <h2 class="q-title">How complex are the decisions in that workflow?</h2>
+      <p class="q-hint">Simple = clear rules anyone can follow. Complex = needs expert judgment and context.</p>
+      <div class="options">
+        <div class="opt" data-q="2" data-score="1" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">High complexity</div>
+            <div class="opt-desc">Decisions need significant expertise, nuance, or creative judgment.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="2" data-score="2" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">Medium complexity</div>
+            <div class="opt-desc">Mix of routine decisions and occasional exceptions that need human review.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="2" data-score="3" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">Low complexity — rule-based</div>
+            <div class="opt-desc">Clear rules and conditions. Anyone trained can make the same decision.</div>
+          </div>
+        </div>
+      </div>
+      <div class="q-nav">
+        <button class="btn btn-ghost" onclick="goBack()">Back</button>
+        <button class="btn btn-primary" id="q2-next" disabled onclick="nextScreen()">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ Q3 ═══════════════════════ -->
+<div id="s-q3" class="screen">
+  <nav class="nav">
+    <div class="nav-brand"><div class="nav-dot"></div><span class="nav-name">AI Navigator</span></div>
+    <span class="nav-meta">3 of 5</span>
+  </nav>
+  <div class="page">
+    <div class="q-wrap">
+      <div class="q-progress">
+        <div class="progress-track"><div class="progress-fill" style="width:60%"></div></div>
+        <span class="progress-pct">60%</span>
+      </div>
+      <div class="q-counter">Question 3</div>
+      <h2 class="q-title">How available and organised is your data?</h2>
+      <p class="q-hint">Data is the fuel for AI. Without it, even the best framework can't take off.</p>
+      <div class="options">
+        <div class="opt" data-q="3" data-score="1" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">Poor or no data</div>
+            <div class="opt-desc">Data is scattered, inconsistent, or we don't capture it digitally at all.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="3" data-score="2" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">Some data — needs work</div>
+            <div class="opt-desc">Data exists but it's in different places, not always complete or structured.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="3" data-score="3" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">Good structured data</div>
+            <div class="opt-desc">Data is captured digitally, fairly consistent, and accessible when we need it.</div>
+          </div>
+        </div>
+      </div>
+      <div class="q-nav">
+        <button class="btn btn-ghost" onclick="goBack()">Back</button>
+        <button class="btn btn-primary" id="q3-next" disabled onclick="nextScreen()">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ Q4 ═══════════════════════ -->
+<div id="s-q4" class="screen">
+  <nav class="nav">
+    <div class="nav-brand"><div class="nav-dot"></div><span class="nav-name">AI Navigator</span></div>
+    <span class="nav-meta">4 of 5</span>
+  </nav>
+  <div class="page">
+    <div class="q-wrap">
+      <div class="q-progress">
+        <div class="progress-track"><div class="progress-fill" style="width:80%"></div></div>
+        <span class="progress-pct">80%</span>
+      </div>
+      <div class="q-counter">Question 4</div>
+      <h2 class="q-title">How often does this workflow run — and how much time does it consume?</h2>
+      <p class="q-hint">High volume, repetitive work is where AI delivers the fastest ROI.</p>
+      <div class="options">
+        <div class="opt" data-q="4" data-score="1" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">Low volume</div>
+            <div class="opt-desc">Happens infrequently — monthly or less. Small time investment overall.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="4" data-score="2" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">Medium volume</div>
+            <div class="opt-desc">Weekly occurrence. Takes meaningful time but not a daily burden.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="4" data-score="3" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">High volume — daily</div>
+            <div class="opt-desc">Runs daily or multiple times per day. Significant time cost for the team.</div>
+          </div>
+        </div>
+      </div>
+      <div class="q-nav">
+        <button class="btn btn-ghost" onclick="goBack()">Back</button>
+        <button class="btn btn-primary" id="q4-next" disabled onclick="nextScreen()">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ Q5 ═══════════════════════ -->
+<div id="s-q5" class="screen">
+  <nav class="nav">
+    <div class="nav-brand"><div class="nav-dot"></div><span class="nav-name">AI Navigator</span></div>
+    <span class="nav-meta">5 of 5</span>
+  </nav>
+  <div class="page">
+    <div class="q-wrap">
+      <div class="q-progress">
+        <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+        <span class="progress-pct">100%</span>
+      </div>
+      <div class="q-counter">Question 5</div>
+      <h2 class="q-title">How many people are on your team?</h2>
+      <p class="q-hint">Team size determines which AI Navigator programme fits your situation.</p>
+      <div class="options">
+        <div class="opt" data-q="5" data-score="1" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">1–5 people</div>
+            <div class="opt-desc">Small team. Every hour saved matters directly to you.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="5" data-score="2" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">6–20 people</div>
+            <div class="opt-desc">Growing team. Process inefficiencies are starting to compound.</div>
+          </div>
+        </div>
+        <div class="opt" data-q="5" data-score="3" onclick="pick(this,event)">
+          <div class="opt-radio"></div>
+          <div>
+            <div class="opt-title">20+ people</div>
+            <div class="opt-desc">Established team. AI adoption requires alignment across functions.</div>
+          </div>
+        </div>
+      </div>
+      <div class="q-nav">
+        <button class="btn btn-ghost" onclick="goBack()">Back</button>
+        <button class="btn btn-primary" id="q5-next" disabled onclick="nextScreen()">See my results</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ GATE ═══════════════════════ -->
+<div id="s-gate" class="screen">
+  <nav class="nav">
+    <div class="nav-brand"><div class="nav-dot"></div><span class="nav-name">AI Navigator</span></div>
+    <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="goBack()">Back</button>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+
+      <div class="gate-teaser">
+        <div class="teaser-label">Your report is ready. Unlock it below.</div>
+        <div class="teaser-rows">
+          <div class="teaser-row"><div class="teaser-row-dot"></div><div class="teaser-row-line" style="width:76%"></div></div>
+          <div class="teaser-row"><div class="teaser-row-dot"></div><div class="teaser-row-line" style="width:60%"></div></div>
+          <div class="teaser-row"><div class="teaser-row-dot"></div><div class="teaser-row-line" style="width:68%"></div></div>
+        </div>
+      </div>
+
+      <h2 class="gate-title">Where should we send your report?</h2>
+      <p class="gate-sub">Enter your details to see your score, all five dimensions, and your recommended next step.</p>
+
+      <form id="gate-form" onsubmit="submitGate(event)" novalidate>
+        <!-- honeypot: hidden from humans, bots fill it -->
+        <input type="text" id="hp" name="hp" style="display:none" tabindex="-1" autocomplete="off">
+
+        <div class="field">
+          <label class="field-label" for="f-name">Your name</label>
+          <input class="field-input" id="f-name" type="text" placeholder="e.g. James Osei" autocomplete="name" maxlength="60">
+          <span class="field-error" id="e-name">Please enter your name (letters only)</span>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="f-company">Company name <span>(optional)</span></label>
+          <input class="field-input" id="f-company" type="text" placeholder="e.g. Horizon Trading LLC" autocomplete="organization" maxlength="80">
+        </div>
+
+        <div class="field">
+          <label class="field-label">How would you like to receive your report?</label>
+          <div class="contact-tabs" role="tablist">
+            <button type="button" class="ctab active" id="tab-wa" role="tab" aria-selected="true" onclick="switchTab('wa')">WhatsApp</button>
+            <button type="button" class="ctab" id="tab-email" role="tab" aria-selected="false" onclick="switchTab('email')">Email</button>
+            <button type="button" class="ctab" id="tab-both" role="tab" aria-selected="false" onclick="switchTab('both')">Both</button>
+          </div>
+        </div>
+
+        <!-- WhatsApp panel -->
+        <div class="contact-panel show" id="panel-wa">
+          <div class="field">
+            <label class="field-label" for="f-phone">WhatsApp number</label>
+            <div class="phone-row">
+              <select class="field-input phone-prefix" id="f-prefix" aria-label="Country code">
+                <option value="+974">🇶🇦 +974</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+61">🇦🇺 +61</option>
+                <option value="+27">🇿🇦 +27</option>
+                <option value="+234">🇳🇬 +234</option>
+                <option value="+254">🇰🇪 +254</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+65">🇸🇬 +65</option>
+                <option value="+60">🇲🇾 +60</option>
+              </select>
+              <input class="field-input" id="f-phone" type="tel" placeholder="5000 0000" autocomplete="tel-national" maxlength="15">
+            </div>
+            <span class="field-error" id="e-phone">Please enter a valid WhatsApp number</span>
+          </div>
+        </div>
+
+        <!-- Email panel -->
+        <div class="contact-panel" id="panel-email">
+          <div class="field">
+            <label class="field-label" for="f-email">Email address</label>
+            <input class="field-input" id="f-email" type="email" placeholder="james@horizontrading.com" autocomplete="email" maxlength="100">
+            <span class="field-error" id="e-email">Please enter a valid email address</span>
+          </div>
+        </div>
+
+        <!-- Both panel -->
+        <div class="contact-panel" id="panel-both">
+          <div class="field">
+            <label class="field-label" for="f-phone-b">WhatsApp number</label>
+            <div class="phone-row">
+              <select class="field-input phone-prefix" id="f-prefix-b" aria-label="Country code">
+                <option value="+974">🇶🇦 +974</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+61">🇦🇺 +61</option>
+                <option value="+27">🇿🇦 +27</option>
+                <option value="+234">🇳🇬 +234</option>
+                <option value="+254">🇰🇪 +254</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+65">🇸🇬 +65</option>
+                <option value="+60">🇲🇾 +60</option>
+              </select>
+              <input class="field-input" id="f-phone-b" type="tel" placeholder="5000 0000" autocomplete="tel-national" maxlength="15">
+            </div>
+            <span class="field-error" id="e-phone-b">Please enter a valid WhatsApp number</span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="f-email-b">Email address</label>
+            <input class="field-input" id="f-email-b" type="email" placeholder="james@horizontrading.com" autocomplete="email" maxlength="100">
+            <span class="field-error" id="e-email-b">Please enter a valid email address</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary full" style="margin-top:8px;">
+          Unlock my AI Readiness Report →
+        </button>
+      </form>
+
+      <p class="gate-privacy">
+        🔒 Your details are only used to send your report and for Allan to follow up personally. No spam, ever.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ RESULTS ═══════════════════════ -->
+<div id="s-results" class="screen">
+  <canvas id="confetti" style="position:fixed;inset:0;pointer-events:none;z-index:999;display:none;" aria-hidden="true"></canvas>
+
+  <nav class="nav">
+    <div class="nav-brand"><div class="nav-dot"></div><span class="nav-name">AI Navigator</span></div>
+    <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="retake()">Start over</button>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+
+      <div class="results-card">
+        <div class="rc-header rv">
+          <span class="rc-brand">AI NAVIGATOR</span>
+          <span class="rc-doc">AI Readiness Report</span>
+        </div>
+
+        <div class="score-center rv">
+          <div class="ring-wrap">
+            <svg width="118" height="118" viewBox="0 0 118 118" aria-hidden="true">
+              <defs>
+                <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#3B82F6"/>
+                  <stop offset="100%" stop-color="#6366F1"/>
+                </linearGradient>
+              </defs>
+              <circle class="ring-track" cx="59" cy="59" r="48"/>
+              <circle class="ring-fill" id="score-ring" cx="59" cy="59" r="48"/>
+            </svg>
+            <div class="ring-inner">
+              <span class="ring-num" id="score-num">—</span>
+              <span class="ring-den">/ 15</span>
+            </div>
+          </div>
+          <div class="band-chip" id="band-chip"></div>
+          <div class="score-tag" id="score-tag"></div>
+        </div>
+
+        <div class="rc-div rv"></div>
+        <h3 class="rc-hl rv" id="rc-hl"></h3>
+        <p class="rc-bod rv" id="rc-bod"></p>
+        <div class="rc-div rv"></div>
+        <div class="dims rv" id="dims"></div>
+        <div class="rc-div rv"></div>
+        <div class="offer-block rv" id="offer-block"></div>
+
+        <div class="rc-footer rv">
+          <span>AI Navigator Framework · by Allan Sendagi</span>
+          <span><a href="https://allansendagi.gumroad.com/l/ainavigatorsystem" target="_blank" rel="noopener">Based on The AI Roadmap</a> · <span id="rc-date"></span></span>
+        </div>
+      </div>
+
+      <!-- WhatsApp CTA -->
+      <div class="result-ctas">
+        <button class="btn btn-wa full rv" onclick="openWA()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          <span id="wa-cta-text">Book a discovery call</span>
+        </button>
+
+        <!-- LinkedIn — real share dialog + clipboard caption -->
+        <div class="cta-row rv">
+          <button class="btn btn-li" onclick="shareLinkedIn()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+            Share on LinkedIn
+          </button>
+          <button class="btn btn-ghost" onclick="copyReport()">📋 Copy report</button>
+        </div>
+        <p class="li-hint rv" id="li-hint" style="display:none;">Caption copied to clipboard — paste it into your LinkedIn post.</p>
+      </div>
+
+      <p style="font-size:11px;color:var(--text-3);text-align:center;margin-top:6px;">
+        <a href="https://allansendagi.gumroad.com/l/ainavigatorsystem" target="_blank" rel="noopener" style="color:var(--text-3);text-decoration:underline;text-underline-offset:2px;">Get the full AI Roadmap book →</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  /* ─ State ─ */
+  const S = {
+    answers: [], cur: 0,
+    name: '', company: '', phone: '', email: '',
+    score: 0, band: '', contactMode: 'wa'
+  };
+
+  const SCREENS = ['s-hero','s-q1','s-q2','s-q3','s-q4','s-q5','s-gate','s-results'];
+
+  const DIM_KEYS   = ['Starting point','Decision complexity','Data readiness','Workflow volume','Team scale'];
+  const DIM_LABELS = [
+    ['Manual','Existing software','No system yet'],
+    ['High complexity','Medium complexity','Low / rule-based'],
+    ['Poor or none','Some data','Good, structured'],
+    ['Low volume','Medium volume','High / daily'],
+    ['1–5 people','6–20 people','20+ people']
+  ];
+
+  /* ─ Band data ─ */
+  const BANDS = {
+    foundation: {
+      label:'Foundation First', chip:'bc-found',
+      tag:'Score: {s}/15 · Build the base first',
+      hl:'{n}, your AI foundations need strengthening first.',
+      body:"You're earlier than most — and that's an advantage. Fewer habits to unlearn. The focus right now isn't AI tools; it's the process and data foundation that makes any AI investment stick. The AI Navigator Discovery is designed for this: one session, a clear starting point, an honest view of what to fix first.",
+      offerTitle:'AI Navigator Discovery', offerDesc:'One focused session to map your workflow, identify your biggest constraint, and give you a clear next step.',
+      price:'Free', priceNote:'discovery call', cta:'Book a discovery call'
+    },
+    getting: {
+      label:'Getting Ready', chip:'bc-get',
+      tag:"Score: {s}/15 · You're closer than you think",
+      hl:"{n}, you're closer to AI-ready than most businesses in your region.",
+      body:"You have the building blocks in place but haven't assembled them into a clear plan. That gap is costing you time every week. The AI Navigator Starter turns your current setup into a structured, actionable roadmap in two weeks.",
+      offerTitle:'AI Navigator Starter', offerDesc:'2 sessions over 2 weeks. Strategic vision, workflow mapping, and a focused AI action plan delivered to your team.',
+      price:'$997', priceNote:'flat fee · Starter', cta:'Book a discovery call'
+    },
+    good: {
+      label:'Good Candidate', chip:'bc-good',
+      tag:'Score: {s}/15 · Strong foundation, clear upside',
+      hl:"{n}, you're a strong AI candidate with a solid foundation.",
+      body:"Your setup is more mature than most. What you need now isn't more research — it's a structured roadmap that turns your readiness into real implementation. The AI Navigator gives you that in a defined engagement with clear deliverables.",
+      offerTitle:'AI Navigator Starter', offerDesc:'2 sessions over 2 weeks. Strategic vision, workflow mapping, and a focused AI action plan delivered to your team.',
+      price:'$997', priceNote:'flat fee · Starter', cta:'Book a discovery call'
+    },
+    ready: {
+      label:'Ready to Navigate', chip:'bc-ready',
+      tag:'Score: {s}/15 · Built for this',
+      hl:"{n}, you're ready to navigate AI transformation.",
+      body:"This is exactly what the AI Navigator Full Roadmap is built for. You have the scale, the data, and the workflow complexity to make a structured AI implementation genuinely transformative.",
+      offerTitle:'AI Navigator Full Roadmap', offerDesc:'4 sessions over 4 weeks. End-to-end AI strategy, implementation planning, vendor evaluation, and a 90-day execution roadmap.',
+      price:'$2,497', priceNote:'flat fee · Full Roadmap', cta:'Start your transformation'
+    }
+  };
+
+  /* ─ Navigation (robust: clears all screens after timeout) ─ */
+  function go(i) {
+    const from = document.getElementById(SCREENS[S.cur]);
+    from.classList.add('exiting');
+    setTimeout(() => {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active','exiting'));
+      S.cur = i;
+      document.getElementById(SCREENS[i]).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }, 270);
+  }
+
+  function startQuiz()  { go(1); }
+  function nextScreen() { go(S.cur + 1); }
+  function goBack()     { if (S.cur > 1) go(S.cur - 1); }
+
+  /* ─ Tab switcher (gate contact mode) ─ */
+  function switchTab(mode) {
+    S.contactMode = mode;
+    ['wa','email','both'].forEach(t => {
+      document.getElementById(`tab-${t}`).classList.toggle('active', t === mode);
+      document.getElementById(`tab-${t}`).setAttribute('aria-selected', t === mode);
+      document.getElementById(`panel-${t}`).classList.toggle('show', t === mode);
+    });
+  }
+
+  /* ─ Option selection ─ */
+  function pick(el, e) {
+    const q = +el.dataset.q, sc = +el.dataset.score;
+    document.querySelectorAll(`[data-q="${q}"]`).forEach(c => c.classList.remove('sel'));
+    el.classList.add('sel');
+    S.answers[q - 1] = sc;
+    const btn = document.getElementById(`q${q}-next`);
+    if (btn) btn.disabled = false;
+    // Ripple
+    const rect = el.getBoundingClientRect();
+    const rip  = document.createElement('span');
+    const x = e ? e.clientX - rect.left : rect.width / 2;
+    const y = e ? e.clientY - rect.top  : rect.height / 2;
+    rip.style.cssText = `position:absolute;border-radius:50%;background:rgba(59,130,246,0.13);
+      width:10px;height:10px;left:${x-5}px;top:${y-5}px;
+      transform:scale(0);pointer-events:none;animation:ripple 460ms ease-out forwards;`;
+    el.appendChild(rip);
+    rip.addEventListener('animationend', () => rip.remove());
+  }
+
+  /* ─ Validation helpers ─ */
+  function validName(v)  { return v.length >= 2 && v.length <= 60 && /^[A-Za-zÀ-ÖØ-öø-ÿ\s'\-]+$/.test(v); }
+  function validPhone(v) {
+    const d = v.replace(/\D/g,'');
+    if (d.length < 6 || d.length > 15) return false;
+    if (/^(.)\1+$/.test(d)) return false; // all same digit
+    return true;
+  }
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+
+  function setErr(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('show', show);
+  }
+  function setInvalid(id, invalid) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('invalid', invalid);
+  }
+
+  /* ─ Gate submission ─ */
+  function submitGate(e) {
+    e.preventDefault();
+
+    // Honeypot check — if filled, silently pretend to succeed
+    if (document.getElementById('hp').value) {
+      fakeSuccess(); return;
+    }
+
+    let ok = true;
+    const name    = document.getElementById('f-name').value.trim();
+    const company = document.getElementById('f-company').value.trim();
+
+    if (!validName(name)) {
+      setErr('e-name', true); setInvalid('f-name', true); ok = false;
+    } else { setErr('e-name', false); setInvalid('f-name', false); }
+
+    const mode = S.contactMode;
+
+    if (mode === 'wa' || mode === 'both') {
+      const phoneId  = mode === 'both' ? 'f-phone-b' : 'f-phone';
+      const prefixId = mode === 'both' ? 'f-prefix-b' : 'f-prefix';
+      const errId    = mode === 'both' ? 'e-phone-b' : 'e-phone';
+      const raw      = document.getElementById(phoneId).value.trim();
+      if (!validPhone(raw)) {
+        setErr(errId, true); setInvalid(phoneId, true); ok = false;
+      } else {
+        setErr(errId, false); setInvalid(phoneId, false);
+        S.phone = document.getElementById(prefixId).value + raw.replace(/\D/g,'');
+      }
+    }
+
+    if (mode === 'email' || mode === 'both') {
+      const emailId = mode === 'both' ? 'f-email-b' : 'f-email';
+      const errId   = mode === 'both' ? 'e-email-b' : 'e-email';
+      const raw     = document.getElementById(emailId).value.trim();
+      if (!validEmail(raw)) {
+        setErr(errId, true); setInvalid(emailId, true); ok = false;
+      } else {
+        setErr(errId, false); setInvalid(emailId, false);
+        S.email = raw;
+      }
+    }
+
+    if (!ok) return;
+
+    S.name    = name;
+    S.company = company;
+    S.score   = S.answers.reduce((a, v) => a + v, 0);
+    S.band    = getBand(S.score);
+
+    renderResults();
+    go(7);
+  }
+
+  function fakeSuccess() { renderResults(); go(7); }
+
+  /* ─ Scoring ─ */
+  function getBand(s) {
+    if (s <= 8)  return 'foundation';
+    if (s <= 11) return 'getting';
+    if (s <= 13) return 'good';
+    return 'ready';
+  }
+
+  /* ─ Render results ─ */
+  function renderResults() {
+    const b = S.band;
+    let d   = Object.assign({}, BANDS[b]);
+    const firstName = (S.name || 'You').split(' ')[0];
+
+    // Upgrade "good" to full roadmap for large teams
+    if (b === 'good' && S.answers[4] === 3) {
+      d.offerTitle = 'AI Navigator Full Roadmap';
+      d.offerDesc  = '4 sessions over 4 weeks. End-to-end AI strategy, implementation planning, vendor evaluation, and a 90-day execution roadmap.';
+      d.price      = '$2,497';
+      d.priceNote  = 'flat fee · Full Roadmap';
+      d.cta        = 'Start your transformation';
+    }
+
+    document.getElementById('score-num').textContent = S.score;
+    document.getElementById('band-chip').className   = `band-chip ${d.chip}`;
+    document.getElementById('band-chip').textContent = d.label;
+    document.getElementById('score-tag').textContent = d.tag.replace('{s}', S.score);
+    document.getElementById('rc-hl').textContent     = d.hl.replace('{n}', firstName);
+    document.getElementById('rc-bod').textContent    = d.body;
+    document.getElementById('wa-cta-text').textContent = d.cta;
+    document.getElementById('rc-date').textContent   =
+      new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+
+    document.getElementById('dims').innerHTML = DIM_KEYS.map((k, i) => {
+      const v = S.answers[i] ? DIM_LABELS[i][S.answers[i]-1] : '—';
+      return `<div class="dim-row"><span class="dim-k">${k}</span><span class="dim-v">${v}</span></div>`;
+    }).join('');
+
+    document.getElementById('offer-block').innerHTML = `
+      <div class="offer-eyebrow">Recommended next step</div>
+      <div class="offer-title">${d.offerTitle}</div>
+      <div class="offer-desc">${d.offerDesc}</div>
+      <div class="offer-price-row">
+        <span class="offer-price">${d.price}</span>
+        <span class="offer-note">${d.priceNote}</span>
+      </div>`;
+
+    // Stagger reveals
+    document.querySelectorAll('#s-results .rv').forEach((el, i) => {
+      el.classList.remove('in');
+      setTimeout(() => el.classList.add('in'), 160 + i * 90);
+    });
+
+    // Animate ring
+    setTimeout(() => {
+      document.getElementById('score-ring').style.strokeDashoffset =
+        301.6 * (1 - S.score / 15);
+    }, 300);
+
+    setTimeout(() => countUp('score-num', S.score, 1000), 300);
+    if (S.score >= 14) setTimeout(confetti, 800);
+  }
+
+  /* ─ Count-up ─ */
+  function countUp(id, target, ms) {
+    const el = document.getElementById(id), t0 = performance.now();
+    (function frame(now) {
+      const p = Math.min((now - t0) / ms, 1);
+      el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+      if (p < 1) requestAnimationFrame(frame); else el.textContent = target;
+    })(t0);
+  }
+
+  /* ─ WhatsApp ─ */
+  function openWA() {
+    const d = BANDS[S.band];
+    let offer = d.offerTitle;
+    if (S.band === 'good' && S.answers[4] === 3) offer = 'AI Navigator Full Roadmap ($2,497)';
+
+    const msg = encodeURIComponent(
+`Hi Allan, I just completed the AI Navigator Readiness Assessment.
+
+Name: ${S.name}${S.company ? '\nCompany: ' + S.company : ''}
+Score: ${S.score}/15 — ${d.label}
+
+I'm interested in: ${offer}
+
+When are you available for a discovery call?`
+    );
+
+    // TODO: Replace with your WhatsApp Business number (digits only, include country code, no + or spaces)
+    const waNum = '000000000000';
+    window.open(`https://wa.me/${waNum}?text=${msg}`, '_blank');
+  }
+
+  /* ─ LinkedIn share — real dialog + clipboard caption ─ */
+  function shareLinkedIn() {
+    const d    = BANDS[S.band];
+    const caption =
+`I just took the AI Navigator Readiness Assessment and scored ${S.score}/15 — "${d.label}".
+
+It's a free 3-minute quiz built on Allan Sendagi's AI Navigator framework from The AI Roadmap. Gives you an honest view of where your business actually stands on AI readiness — not hype, just a score across 5 real dimensions.
+
+If you're an SME founder wondering whether AI is right for your business right now, worth taking:
+👉 ${window.location.href}
+
+What's your score?
+
+#AIReadiness #AINavigator #SME #AIStrategy #TheAIRoadmap`;
+
+    // Copy caption to clipboard first, then open LinkedIn share dialog
+    const afterCopy = () => {
+      // Show hint
+      const hint = document.getElementById('li-hint');
+      hint.style.display = 'block';
+      hint.classList.add('in');
+      setTimeout(() => { hint.style.display = 'none'; }, 6000);
+      // Open LinkedIn share with the quiz URL
+      const url = encodeURIComponent(window.location.href);
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=600');
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(caption).then(afterCopy).catch(() => { fallbackCopy(caption); afterCopy(); });
+    } else {
+      fallbackCopy(caption); afterCopy();
+    }
+  }
+
+  /* ─ Copy report ─ */
+  function copyReport() {
+    const d    = BANDS[S.band];
+    const dims = DIM_KEYS.map((k, i) => `${k}: ${S.answers[i] ? DIM_LABELS[i][S.answers[i]-1] : '—'}`).join('\n');
+    const text =
+`AI Navigator — AI Readiness Report
+${S.name}${S.company ? ', ' + S.company : ''} · ${new Date().toLocaleDateString('en-GB')}
+
+Score: ${S.score}/15 — ${d.label}
+
+${dims}
+
+Recommended: ${d.offerTitle} (${d.price})
+ainavigator.co · Based on The AI Roadmap`;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => toast('Report copied!')).catch(() => fallbackCopy(text));
+    } else fallbackCopy(text);
+  }
+
+  function fallbackCopy(text) {
+    const ta = Object.assign(document.createElement('textarea'), { value: text });
+    ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); toast('Copied!'); }
+    catch { toast('Please screenshot your results'); }
+    document.body.removeChild(ta);
+  }
+
+  /* ─ Toast ─ */
+  function toast(msg, dur) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), dur || 2600);
+  }
+
+  /* ─ Confetti ─ */
+  function confetti() {
+    const c = document.getElementById('confetti');
+    c.style.display = 'block'; c.width = innerWidth; c.height = innerHeight;
+    const ctx  = c.getContext('2d');
+    const cols = ['#3B82F6','#6366F1','#F59E0B','#10B981','#F1F5F9','#EC4899'];
+    const pts  = Array.from({length:80}, () => ({
+      x:Math.random()*c.width, y:-20-Math.random()*60,
+      w:Math.random()*8+3, h:Math.random()*4+2,
+      col:cols[Math.floor(Math.random()*cols.length)],
+      spd:Math.random()*3+1.5, dx:(Math.random()-.5)*2,
+      rot:Math.random()*360, rs:(Math.random()-.5)*6
+    }));
+    const t0 = Date.now(); let raf;
+    const onr = () => { c.width = innerWidth; c.height = innerHeight; };
+    addEventListener('resize', onr);
+    (function draw() {
+      const el = Date.now() - t0;
+      ctx.clearRect(0, 0, c.width, c.height);
+      pts.forEach(p => {
+        p.y += p.spd; p.x += p.dx; p.rot += p.rs;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
+        ctx.globalAlpha = Math.max(0, 1 - el/3000);
+        ctx.fillStyle = p.col; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+      });
+      if (el < 3200) raf = requestAnimationFrame(draw);
+      else { cancelAnimationFrame(raf); c.style.display='none'; removeEventListener('resize',onr); }
+    })();
+  }
+
+  /* ─ Retake ─ */
+  function retake() {
+    S.answers = []; S.name = S.company = S.phone = S.email = ''; S.score = 0; S.band = ''; S.contactMode = 'wa';
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('sel'));
+    for (let i = 1; i <= 5; i++) { const b = document.getElementById(`q${i}-next`); if (b) b.disabled = true; }
+    document.getElementById('gate-form').reset();
+    switchTab('wa');
+    const ring = document.getElementById('score-ring');
+    if (ring) ring.style.strokeDashoffset = '301.6';
+    document.getElementById('score-num').textContent = '—';
+    document.querySelectorAll('.rv').forEach(el => el.classList.remove('in'));
+    document.getElementById('li-hint').style.display = 'none';
+    go(0);
+  }
+
+  /* ─ Init ─ */
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('s-hero').classList.add('active');
+  });
+</script>
+</body>
+</html>
