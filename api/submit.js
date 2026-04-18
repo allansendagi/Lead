@@ -1,5 +1,5 @@
 // api/submit.js — Lead capture endpoint
-// Uses native fetch (Node 18+) — no npm dependencies
+// Uses native fetch (Node 24+) — no npm dependencies
 
 const SUPA_URL = process.env.SUPABASE_URL;
 const SUPA_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
@@ -34,11 +34,15 @@ function isValidName(v) {
     && v.trim().length <= 60
     && /^[A-Za-zÀ-ÖØ-öø-ÿ\s'\-\.]+$/.test(v.trim());
 }
+function isValidCompany(v) {
+  if (!v) return true; // optional
+  return typeof v === 'string' && v.trim().length <= 80;
+}
 function isValidPhone(v) {
   if (!v || typeof v !== 'string') return false;
   const d = v.replace(/\D/g, '');
   if (d.length < 6 || d.length > 15) return false;
-  if (/^(.)\1+$/.test(d)) return false; // all same digit (e.g. 000000)
+  if (/^(.)\1+$/.test(d)) return false; // all same digit
   return true;
 }
 function isValidEmail(v) {
@@ -53,6 +57,13 @@ function isValidAnswers(v) {
 }
 function isValidContactMode(v) {
   return ['wa', 'email', 'both'].includes(v);
+}
+function isValidTiming(submittedAt) {
+  // Reject submissions that arrive less than 8 seconds after page load
+  // (bots typically submit instantly; real humans take ≥15s to read + answer 5 Qs)
+  if (!submittedAt || typeof submittedAt !== 'number') return true; // don't block if missing
+  const elapsed = Date.now() - submittedAt;
+  return elapsed >= 8000;
 }
 
 // ── Supabase helpers (native fetch) ────────────────────────────────────────
@@ -96,6 +107,10 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Content-Security-Policy', "default-src 'none'");
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')    return res.status(405).json({ error: 'Method not allowed' });
@@ -109,7 +124,14 @@ module.exports = async function handler(req, res) {
 
   // ── Honeypot: silent success for bots ──
   if (body.hp) {
+    console.warn('[honeypot] bot caught, ip:', (req.headers['x-forwarded-for'] || '').split(',')[0].trim());
     return res.status(200).json({ success: true });
+  }
+
+  // ── Timing check: reject suspiciously fast submissions ──
+  if (!isValidTiming(body.pageLoadedAt)) {
+    console.warn('[timing] submission too fast, likely bot');
+    return res.status(200).json({ success: true }); // silent — don't reveal the check
   }
 
   // ── Rate limiting: max 5 submissions per IP per minute ──
@@ -132,7 +154,8 @@ module.exports = async function handler(req, res) {
   // ── Validate all fields ──
   const errors = {};
 
-  if (!isValidName(body.name)) errors.name = 'Invalid name';
+  if (!isValidName(body.name))           errors.name    = 'Invalid name';
+  if (!isValidCompany(body.company))     errors.company = 'Invalid company name';
   if (!isValidContactMode(body.contactMode)) errors.contactMode = 'Invalid contact mode';
   if (!isValidAnswers(body.answers)) {
     errors.answers = 'Invalid answers';
@@ -155,6 +178,7 @@ module.exports = async function handler(req, res) {
   }
 
   if (Object.keys(errors).length > 0) {
+    console.warn('[validation] failed:', JSON.stringify(errors), 'ip:', ip);
     return res.status(400).json({ error: 'Validation failed', fields: errors });
   }
 
@@ -195,6 +219,10 @@ module.exports = async function handler(req, res) {
   // ── Build WhatsApp URL server-side (number never exposed to client) ──
   const waNum = (process.env.WHATSAPP_NUMBER || '').replace(/\D/g, '');
   let waUrl = null;
+
+  if (!waNum || waNum.length < 7) {
+    console.warn('[config] WHATSAPP_NUMBER not set or invalid — waUrl will be null for this submission');
+  }
 
   if (waNum.length >= 7) {
     const bandLabels = {
