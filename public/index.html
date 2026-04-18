@@ -945,6 +945,7 @@ async function submitGate(e) {
     if (res.ok) {
       const data = await res.json().catch(() => ({}));
       if (data.waUrl) S.waUrl = data.waUrl;
+      if (!data.leadSaved) console.warn('[submit] lead not saved to DB — check Vercel function logs');
     }
     // Non-429 errors: gracefully proceed (don't block user from seeing results)
   } catch (err) {

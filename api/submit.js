@@ -12,12 +12,21 @@ const BAND_RANGES = [
   { band: 'ready',      min: 14, max: 15 }
 ];
 
+// Exact option titles from the frontend — stored verbatim in the DB
 const DIM_LABELS = [
-  ['Manual', 'Existing software', 'No system yet'],
-  ['High complexity', 'Medium complexity', 'Low / rule-based'],
-  ['Poor or none', 'Some data', 'Good, structured'],
-  ['Low volume', 'Medium volume', 'High / daily'],
-  ['1–5 people', '6–20 people', '20+ people']
+  ['Manual process',         'Existing software',     'No system yet'              ],
+  ['High complexity',        'Medium complexity',      'Low complexity — rule-based'],
+  ['Poor or no data',        'Some data — needs work', 'Good structured data'       ],
+  ['Low volume',             'Medium volume',          'High volume — daily'        ],
+  ['1–5 people',             '6–20 people',            '20+ people'                 ]
+];
+
+const DIM_KEYS = [
+  'Starting point',
+  'Decision complexity',
+  'Data readiness',
+  'Workflow volume',
+  'Team scale'
 ];
 
 function computeScore(answers) {
@@ -59,11 +68,8 @@ function isValidContactMode(v) {
   return ['wa', 'email', 'both'].includes(v);
 }
 function isValidTiming(submittedAt) {
-  // Reject submissions that arrive less than 8 seconds after page load
-  // (bots typically submit instantly; real humans take ≥15s to read + answer 5 Qs)
-  if (!submittedAt || typeof submittedAt !== 'number') return true; // don't block if missing
-  const elapsed = Date.now() - submittedAt;
-  return elapsed >= 8000;
+  if (!submittedAt || typeof submittedAt !== 'number') return true;
+  return (Date.now() - submittedAt) >= 8000;
 }
 
 // ── Supabase helpers (native fetch) ────────────────────────────────────────
@@ -72,14 +78,16 @@ async function dbInsert(table, row) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'apikey': SUPA_KEY,
+      'apikey':        SUPA_KEY,
       'Authorization': `Bearer ${SUPA_KEY}`,
-      'Prefer': 'return=representation'
+      'Prefer':        'return=representation'
     },
     body: JSON.stringify(row)
   });
-  const body = await res.json();
-  if (!res.ok) throw new Error(JSON.stringify(body));
+  const text = await res.text();
+  let body;
+  try { body = JSON.parse(text); } catch { body = text; }
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${typeof body === 'string' ? body : JSON.stringify(body)}`);
   return Array.isArray(body) ? body[0] : body;
 }
 
@@ -89,10 +97,10 @@ async function dbCountRecentByIP(ip) {
     `${SUPA_URL}/rest/v1/leads?ip_address=eq.${encodeURIComponent(ip)}&is_honeypot=eq.false&created_at=gte.${since}&select=id`,
     {
       headers: {
-        'apikey': SUPA_KEY,
+        'apikey':        SUPA_KEY,
         'Authorization': `Bearer ${SUPA_KEY}`,
-        'Prefer': 'count=exact',
-        'Range': '0-0'
+        'Prefer':        'count=exact',
+        'Range':         '0-0'
       }
     }
   );
@@ -103,42 +111,43 @@ async function dbCountRecentByIP(ip) {
 // ── Main handler ───────────────────────────────────────────────────────────
 module.exports = async function handler(req, res) {
   const origin = process.env.ALLOWED_ORIGIN || '*';
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Content-Security-Policy', "default-src 'none'");
+  res.setHeader('Access-Control-Allow-Origin',   origin);
+  res.setHeader('Access-Control-Allow-Methods',  'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers',  'Content-Type');
+  res.setHeader('X-Content-Type-Options',        'nosniff');
+  res.setHeader('X-Frame-Options',               'DENY');
+  res.setHeader('X-XSS-Protection',              '1; mode=block');
+  res.setHeader('Referrer-Policy',               'strict-origin-when-cross-origin');
+  res.setHeader('Content-Security-Policy',       "default-src 'none'");
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')    return res.status(405).json({ error: 'Method not allowed' });
 
   if (!SUPA_URL || !SUPA_KEY) {
-    console.error('Missing SUPABASE_URL or SUPABASE_ANON_KEY env vars');
+    console.error('[config] Missing SUPABASE_URL or key. URL:', SUPA_URL ? 'set' : 'MISSING', 'KEY:', SUPA_KEY ? 'set' : 'MISSING');
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
   const body = req.body || {};
 
-  // ── Honeypot: silent success for bots ──
+  // ── Honeypot ──
   if (body.hp) {
-    console.warn('[honeypot] bot caught, ip:', (req.headers['x-forwarded-for'] || '').split(',')[0].trim());
+    console.warn('[honeypot] caught ip:', (req.headers['x-forwarded-for'] || '').split(',')[0].trim());
     return res.status(200).json({ success: true });
   }
 
-  // ── Timing check: reject suspiciously fast submissions ──
+  // ── Timing check ──
   if (!isValidTiming(body.pageLoadedAt)) {
-    console.warn('[timing] submission too fast, likely bot');
-    return res.status(200).json({ success: true }); // silent — don't reveal the check
+    console.warn('[timing] too fast — likely bot');
+    return res.status(200).json({ success: true });
   }
 
-  // ── Rate limiting: max 5 submissions per IP per minute ──
+  // ── IP ──
   const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
     || req.socket?.remoteAddress
     || 'unknown';
 
+  // ── Rate limit ──
   if (ip !== 'unknown') {
     try {
       const recent = await dbCountRecentByIP(ip);
@@ -146,44 +155,62 @@ module.exports = async function handler(req, res) {
         return res.status(429).json({ error: 'Too many submissions. Please wait a minute and try again.' });
       }
     } catch (e) {
-      // Rate limit check failed — don't block the user, just log
-      console.warn('Rate limit check failed:', e.message);
+      console.warn('[rate-limit] check failed (non-blocking):', e.message);
     }
   }
 
-  // ── Validate all fields ──
+  // ── Validate ──
   const errors = {};
-
-  if (!isValidName(body.name))           errors.name    = 'Invalid name';
-  if (!isValidCompany(body.company))     errors.company = 'Invalid company name';
+  if (!isValidName(body.name))               errors.name        = 'Invalid name';
+  if (!isValidCompany(body.company))         errors.company     = 'Invalid company name';
   if (!isValidContactMode(body.contactMode)) errors.contactMode = 'Invalid contact mode';
+
   if (!isValidAnswers(body.answers)) {
     errors.answers = 'Invalid answers';
   } else {
-    // Server-side scoring: verify client didn't tamper with score/band
-    const answers = body.answers.map(Number);
+    const answers       = body.answers.map(Number);
     const expectedScore = computeScore(answers);
     const expectedBand  = computeBand(expectedScore);
-
     if (body.score !== expectedScore) errors.score = 'Score mismatch';
     if (body.band  !== expectedBand)  errors.band  = 'Band mismatch';
   }
 
   const mode = body.contactMode;
-  if (mode === 'wa'   || mode === 'both') {
-    if (!isValidPhone(body.phone))  errors.phone = 'Invalid phone number';
-  }
-  if (mode === 'email' || mode === 'both') {
-    if (!isValidEmail(body.email))  errors.email = 'Invalid email address';
-  }
+  if (mode === 'wa'    || mode === 'both') { if (!isValidPhone(body.phone))  errors.phone = 'Invalid phone'; }
+  if (mode === 'email' || mode === 'both') { if (!isValidEmail(body.email))  errors.email = 'Invalid email'; }
 
   if (Object.keys(errors).length > 0) {
     console.warn('[validation] failed:', JSON.stringify(errors), 'ip:', ip);
     return res.status(400).json({ error: 'Validation failed', fields: errors });
   }
 
-  // ── Build dimension labels for readable reporting ──
-  const answers = body.answers.map(Number);
+  // ── Build waUrl FIRST — never blocked by DB outcome ──────────────────────
+  const waNum = (process.env.WHATSAPP_NUMBER || '').replace(/\D/g, '');
+  let waUrl   = null;
+
+  if (!waNum || waNum.length < 7) {
+    console.warn('[config] WHATSAPP_NUMBER not set or too short — waUrl will be null');
+  } else {
+    const bandLabels = { foundation:'Foundation First', getting:'Getting Ready', good:'Good Candidate', ready:'Ready to Navigate' };
+    const msgLines   = [
+      `Hi Allan, I just completed the AI Navigator Readiness Assessment.`,
+      ``,
+      `Name: ${body.name.trim()}`,
+      body.company?.trim() ? `Company: ${body.company.trim()}` : null,
+      `Score: ${body.score}/15 — ${bandLabels[body.band] || body.band}`,
+      ``,
+      `I'd love to discuss next steps. When are you available?`
+    ].filter(l => l !== null).join('\n');
+    waUrl = `https://wa.me/${waNum}?text=${encodeURIComponent(msgLines)}`;
+  }
+
+  // ── Build rich answer data (scores + exact labels) ────────────────────────
+  const answers      = body.answers.map(Number);
+  const answersRich  = answers.map((score, i) => ({
+    question: DIM_KEYS[i],
+    score,
+    choice: DIM_LABELS[i][score - 1]
+  }));
   const dims = {
     dim_starting:   DIM_LABELS[0][answers[0] - 1],
     dim_complexity: DIM_LABELS[1][answers[1] - 1],
@@ -192,57 +219,33 @@ module.exports = async function handler(req, res) {
     dim_team:       DIM_LABELS[4][answers[4] - 1]
   };
 
-  // ── Insert lead ──
-  let leadId;
+  // ── Insert lead — failure does NOT block waUrl return ─────────────────────
+  let leadId    = null;
+  let leadSaved = false;
   try {
     const row = await dbInsert('leads', {
       name:         body.name.trim(),
-      company:      body.company?.trim()        || null,
-      phone:        body.phone                  || null,
+      company:      body.company?.trim()             || null,
+      phone:        body.phone                       || null,
       email:        body.email?.toLowerCase().trim() || null,
       contact_mode: body.contactMode,
       score:        Number(body.score),
       band:         body.band,
-      answers:      answers,
+      answers:      answersRich,   // rich: [{question, score, choice}, ...]
       ...dims,
-      user_agent:   req.headers['user-agent']   || null,
-      referrer:     req.headers['referer'] || req.headers['referrer'] || null,
+      user_agent:   req.headers['user-agent']                          || null,
+      referrer:     req.headers['referer'] || req.headers['referrer']  || null,
       ip_address:   ip,
       is_honeypot:  false
     });
-    leadId = row?.id;
+    leadId    = row?.id;
+    leadSaved = true;
+    console.log('[lead] saved id:', leadId, 'band:', body.band, 'score:', body.score);
   } catch (err) {
-    console.error('DB insert error:', err.message);
-    return res.status(500).json({ error: 'Failed to save your submission. Please try again.' });
+    // Log the FULL error so Vercel logs reveal the real cause
+    console.error('[db] insert failed:', err.message, '| url:', SUPA_URL, '| key prefix:', (SUPA_KEY || '').slice(0, 12));
+    // Do NOT return 500 — still return waUrl so the user experience is unaffected
   }
 
-  // ── Build WhatsApp URL server-side (number never exposed to client) ──
-  const waNum = (process.env.WHATSAPP_NUMBER || '').replace(/\D/g, '');
-  let waUrl = null;
-
-  if (!waNum || waNum.length < 7) {
-    console.warn('[config] WHATSAPP_NUMBER not set or invalid — waUrl will be null for this submission');
-  }
-
-  if (waNum.length >= 7) {
-    const bandLabels = {
-      foundation: 'Foundation First',
-      getting:    'Getting Ready',
-      good:       'Good Candidate',
-      ready:      'Ready to Navigate'
-    };
-    const msg = [
-      `Hi Allan, I just completed the AI Navigator Readiness Assessment.`,
-      ``,
-      `Name: ${body.name.trim()}`,
-      body.company?.trim() ? `Company: ${body.company.trim()}` : null,
-      `Score: ${body.score}/15 — ${bandLabels[body.band]}`,
-      ``,
-      `I'd love to discuss next steps. When are you available?`
-    ].filter(l => l !== null).join('\n');
-
-    waUrl = `https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`;
-  }
-
-  return res.status(200).json({ success: true, id: leadId, waUrl });
+  return res.status(200).json({ success: true, id: leadId, waUrl, leadSaved });
 };
