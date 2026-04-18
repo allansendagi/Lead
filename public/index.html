@@ -8,6 +8,7 @@
   <meta property="og:description" content="5 questions. Instant results. Built on the AI Navigator framework from The AI Roadmap by Allan Sendagi.">
   <meta property="og:type" content="website">
   <title>AI Readiness Assessment — AI Navigator</title>
+  <script defer src="/_vercel/insights/script.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -826,8 +827,14 @@ function go(i) {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, 260);
 }
-function startQuiz()  { go(1); }
-function nextScreen() { go(S.cur + 1); }
+function track(name, data) { try { window.va?.('event', { name, ...(data && { data }) }); } catch {} }
+
+function startQuiz()  { track('quiz_started'); go(1); }
+function nextScreen() {
+  if (S.cur >= 1 && S.cur <= 5) track('question_completed', { q: S.cur, score: S.answers[S.cur - 1] });
+  if (S.cur === 5) track('gate_reached');
+  go(S.cur + 1);
+}
 function goBack()     { if (S.cur > 1) go(S.cur - 1); }
 
 /* ── Tab switcher ── */
@@ -956,7 +963,8 @@ async function submitGate(e) {
     // Network error or timeout — proceed anyway
     console.warn('API unavailable, proceeding:', err.name === 'AbortError' ? 'timeout' : err.message);
   }
-  S.submitted = true; // only set after 429 is handled — retries after rate-limit still work
+  S.submitted = true;
+  track('lead_submitted', { band: S.band, score: S.score, mode: S.contactMode });
 
   renderResults();
   go(7);
@@ -1028,6 +1036,7 @@ function countUp(id, target, ms) {
 
 /* ── WhatsApp — URL comes from server (number never in client code) ── */
 function openWA() {
+  track('wa_clicked', { band: S.band });
   if (S.waUrl) {
     window.open(S.waUrl, '_blank', 'noopener,noreferrer');
     return;
@@ -1042,6 +1051,7 @@ function openWA() {
 
 /* ── LinkedIn share — real dialog + clipboard caption ── */
 function shareLinkedIn() {
+  track('linkedin_shared', { band: S.band, score: S.score });
   const d = BANDS[S.band];
   const caption = [
     `I just took the AI Navigator Readiness Assessment and scored ${S.score}/15 — "${d.label}".`,
