@@ -22,48 +22,8 @@
     gtag('config', 'G-7414PDX4YS');
   </script>
 
-  <!-- Site Nav + WhatsApp button styles (scoped to #sn-* / #wa-float) -->
+  <!-- WhatsApp floating button styles -->
   <style>
-    #sn-nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 9000;
-      height: 56px;
-      background: rgba(12,14,20,0.96);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      font-family: 'Inter', -apple-system, sans-serif;
-    }
-    #sn-inner {
-      display: flex; align-items: center; justify-content: space-between;
-      height: 100%; padding: 0 24px; max-width: 1200px; margin: 0 auto;
-    }
-    #sn-logo {
-      color: #F1F5F9; font-weight: 700; font-size: 14px;
-      text-decoration: none; letter-spacing: 0.02em;
-    }
-    #sn-links {
-      display: flex; align-items: center; gap: 28px;
-    }
-    #sn-links a {
-      color: #94A3B8; font-size: 14px; text-decoration: none;
-      transition: color 150ms;
-    }
-    #sn-links a:hover { color: #F1F5F9; }
-    #sn-ham {
-      display: none; background: none; border: none;
-      color: #F1F5F9; cursor: pointer; padding: 4px; line-height: 1;
-    }
-    #sn-mobile {
-      display: none; position: fixed; top: 56px; left: 0; right: 0;
-      background: rgba(12,14,20,0.98); padding: 16px 24px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      flex-direction: column; gap: 16px; z-index: 8999;
-    }
-    #sn-mobile.open { display: flex; }
-    #sn-mobile a {
-      color: #94A3B8; font-size: 15px; text-decoration: none;
-      font-family: 'Inter', sans-serif;
-    }
     #wa-float {
       position: fixed; bottom: 24px; right: 24px; z-index: 9999;
       background: #25D366; color: #fff; border-radius: 50px;
@@ -75,8 +35,6 @@
     #wa-float:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(37,211,102,0.5); }
     #wa-text { white-space: nowrap; }
     @media (max-width: 640px) {
-      #sn-links { display: none; }
-      #sn-ham { display: block; }
       #wa-text { display: none; }
       #wa-float { border-radius: 50%; padding: 15px; }
     }
@@ -108,7 +66,6 @@
       min-height: 100vh; background: var(--bg); color: var(--text);
       font-family: var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden;
     }
-    body { padding-top: 56px; }
 
     /* ─ Screens ─ */
     .screen { display: none; min-height: 100vh; flex-direction: column; }
@@ -408,29 +365,6 @@
 </head>
 <body>
 
-<!-- ═══ SITE NAVIGATION ═══ -->
-<nav id="sn-nav" role="navigation" aria-label="Site navigation">
-  <div id="sn-inner">
-    <a id="sn-logo" href="/">AI Navigator</a>
-    <div id="sn-links">
-      <a href="/resources">Resources</a>
-      <a href="/industries">Industries</a>
-      <a href="/about">About</a>
-      <a href="/work-with-us">Work With Me</a>
-    </div>
-    <button id="sn-ham" aria-label="Open menu" onclick="snToggle()">
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-        <path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-      </svg>
-    </button>
-  </div>
-  <div id="sn-mobile" role="menu">
-    <a href="/resources">Resources</a>
-    <a href="/industries">Industries</a>
-    <a href="/about">About</a>
-    <a href="/work-with-us">Work With Me</a>
-  </div>
-</nav>
 
 <!-- ═══ WHATSAPP FLOATING BUTTON ═══ -->
 <a id="wa-float"
@@ -1276,17 +1210,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('s-hero').classList.add('active');
 });
 
-/* ── Site Nav hamburger ── */
-function snToggle() {
-  document.getElementById('sn-mobile').classList.toggle('open');
-}
-document.addEventListener('click', (e) => {
-  const menu = document.getElementById('sn-mobile');
-  const btn = document.getElementById('sn-ham');
-  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
-    menu.classList.remove('open');
-  }
-});
 </script>
 </body>
 </html>

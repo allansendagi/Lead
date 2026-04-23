@@ -17,14 +17,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <Script
-          id="org-schema"
+      <body className={inter.className}>
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema()) }}
         />
-      </head>
-      <body className={inter.className}>
         {/* GA4 */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`}
