@@ -2,10 +2,11 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/sitemap.xml/route": "app/sitemap.xml/route.js",
   "/robots.txt/route": "app/robots.txt/route.js",
-  "/(site)/resources/[slug]/page": "app/(site)/resources/[slug]/page.js",
-  "/(site)/industries/[industry]/[city]/page": "app/(site)/industries/[industry]/[city]/page.js",
+  "/route": "app/route.js",
+  "/(site)/resources/page": "app/(site)/resources/page.js",
   "/(site)/industries/page": "app/(site)/industries/page.js",
   "/(site)/about/page": "app/(site)/about/page.js",
   "/(site)/work-with-us/page": "app/(site)/work-with-us/page.js",
-  "/(site)/resources/page": "app/(site)/resources/page.js"
+  "/(site)/resources/[slug]/page": "app/(site)/resources/[slug]/page.js",
+  "/(site)/industries/[industry]/[city]/page": "app/(site)/industries/[industry]/[city]/page.js"
 }
