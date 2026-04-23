@@ -11,29 +11,24 @@ const amazonUrl = process.env.NEXT_PUBLIC_AMAZON_BOOK_URL || 'https://www.amazon
 
 const differentiators = [
   {
-    icon: '🏢',
-    title: 'Built for SMEs, not tech giants',
-    desc: 'Every example, checklist, and metric is sized for real-world budgets and teams.',
+    title: 'Built for SMEs',
+    desc: 'Every example, checklist, and metric is sized for real-world budgets and teams — not enterprise IT departments.',
   },
   {
-    icon: '🗺️',
     title: '10-Step Navigator System',
-    desc: 'A proven framework that moves you from vague ideas to a phased plan you can execute tomorrow.',
+    desc: 'A proven sequence that moves you from vague intent to a phased implementation plan you can execute tomorrow.',
   },
   {
-    icon: '⚙️',
     title: 'Workflows before widgets',
-    desc: 'Streamline processes first, then add AI where it delivers measurable ROI.',
+    desc: 'Streamline your processes first, then add AI exactly where it delivers measurable ROI.',
   },
   {
-    icon: '🔍',
     title: 'Tools without the hype',
-    desc: 'A 2×2 matrix shows exactly which AI software you need — and which shiny demos to ignore.',
+    desc: 'A 2×2 matrix cuts through the noise and shows exactly which category of AI software your situation calls for.',
   },
   {
-    icon: '📋',
     title: 'Action-ready templates',
-    desc: 'Strategic Vision Canvas, AI Task Canvas, Implementation Plan, and more — all in the companion app.',
+    desc: 'Strategic Vision Canvas, AI Task Canvas, Implementation Plan, and more — all in the 30-day companion app.',
   },
 ]
 
@@ -50,336 +45,236 @@ const learnings = [
 
 const audiences = [
   { title: 'CEOs, COOs & Founders', desc: 'Of small & mid-sized businesses ready to move beyond the hype.' },
-  { title: 'Functional Leaders', desc: 'Tasked with "figuring out the AI part" for your department or organisation.' },
+  { title: 'Functional Leaders', desc: 'Tasked with "figuring out the AI part" for your department.' },
   { title: 'Consultants & Advisors', desc: 'Who need a repeatable, client-ready AI implementation framework.' },
   { title: 'MBA & Executive Students', desc: 'Seeking a pragmatic playbook grounded in real business outcomes.' },
 ]
 
-export default function BookPage() {
-  const linkedInUrl = process.env.NEXT_PUBLIC_LINKEDIN_URL || 'https://www.linkedin.com/in/allansendagi/'
+const phases = [
+  {
+    label: 'Phase 1 — Readiness',
+    steps: ['Define your AI vision', 'Assess readiness across data, people & process', 'Choose your implementation strategy'],
+  },
+  {
+    label: 'Phase 2 — Design',
+    steps: ['Deconstruct your workflows', 'Score AI potential & prioritise', 'Map the optimised future-state process', 'Select the right AI tools'],
+  },
+  {
+    label: 'Phase 3 — Deploy',
+    steps: ['Build your phased implementation plan', 'Launch with budgets, metrics & risk controls', 'Monitor, iterate, and compound value over time'],
+  },
+]
 
+export default function BookPage() {
   return (
-    <div>
+    <div style={{ color: '#111827' }}>
+
       {/* ── Hero ── */}
-      <section style={{
-        maxWidth: 1100,
-        margin: '0 auto',
-        padding: '64px 24px 80px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 60,
-        flexWrap: 'wrap',
-      }}>
-        {/* Book cover */}
-        <div style={{
-          flex: '0 0 auto',
-          display: 'flex',
-          justifyContent: 'center',
-          width: '100%',
-          maxWidth: 320,
-        }} className="book-cover-col">
-          <div style={{
-            perspective: '800px',
-            display: 'inline-block',
-          }}>
+      <section style={{ maxWidth: 1060, margin: '0 auto', padding: '64px 24px 72px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 56, flexWrap: 'wrap' }}>
+
+          {/* Cover */}
+          <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: 300 }}>
             <img
               src="/book-cover.png"
               alt="The AI Roadmap book cover"
               style={{
-                width: 280,
+                width: 260,
                 maxWidth: '100%',
                 borderRadius: 6,
-                boxShadow: '0 30px 60px rgba(0,0,0,0.22), 0 8px 20px rgba(0,0,0,0.12)',
-                transform: 'rotateY(-8deg) rotateX(2deg)',
+                boxShadow: '0 24px 48px rgba(0,0,0,0.18), 0 6px 16px rgba(0,0,0,0.1)',
+                transform: 'rotateY(-6deg) rotateX(1deg)',
                 display: 'block',
               }}
             />
           </div>
-        </div>
 
-        {/* Right copy */}
-        <div style={{ flex: '1 1 320px' }}>
-          <span style={{
-            display: 'inline-block',
-            background: '#EFF6FF',
-            color: '#2563EB',
-            fontSize: 13,
-            fontWeight: 600,
-            padding: '5px 12px',
-            borderRadius: 20,
-            marginBottom: 18,
-            letterSpacing: '0.02em',
-          }}>
-            Now on Amazon
-          </span>
+          {/* Copy */}
+          <div style={{ flex: '1 1 300px' }}>
+            <span style={{
+              display: 'inline-block',
+              background: '#EFF6FF',
+              color: '#2563EB',
+              fontSize: 12,
+              fontWeight: 600,
+              padding: '4px 12px',
+              borderRadius: 20,
+              marginBottom: 20,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+            }}>
+              Now on Amazon
+            </span>
 
-          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, lineHeight: 1.1, margin: '0 0 12px', color: '#111827' }}>
-            The AI Roadmap
-          </h1>
-          <p style={{ fontSize: 18, fontWeight: 600, color: '#374151', margin: '0 0 6px' }}>
-            Implement AI Profitably in 10 Steps with the AI Navigator System
-          </p>
-          <p style={{ fontSize: 15, color: '#6b7280', margin: '0 0 24px' }}>
-            Practical Guidance for Small &amp; Mid-Sized Businesses
-          </p>
+            <h1 style={{ fontSize: 'clamp(2rem, 4.5vw, 2.8rem)', fontWeight: 800, lineHeight: 1.1, margin: '0 0 10px' }}>
+              The AI Roadmap
+            </h1>
+            <p style={{ fontSize: 17, fontWeight: 600, color: '#374151', margin: '0 0 6px' }}>
+              Implement AI Profitably in 10 Steps with the AI Navigator System
+            </p>
+            <p style={{ fontSize: 14, color: '#6b7280', margin: '0 0 28px' }}>
+              Practical Guidance for Small &amp; Mid-Sized Businesses
+            </p>
 
-          {/* Stars */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
-            <span style={{ color: '#F59E0B', fontSize: 20, letterSpacing: 2 }}>★★★★★</span>
-            <span style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>5.0</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32 }}>
+              <span style={{ color: '#F59E0B', fontSize: 18, letterSpacing: 2 }}>★★★★★</span>
+              <span style={{ fontWeight: 700, fontSize: 14 }}>5.0</span>
+              <a
+                href={amazonUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: 13, color: '#6b7280', textDecoration: 'underline' }}
+              >
+                (1 review on Amazon)
+              </a>
+            </div>
+
             <a
               href={amazonUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ fontSize: 13, color: '#6b7280', textDecoration: 'underline' }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                background: '#1C1714',
+                color: '#fff',
+                padding: '14px 28px',
+                borderRadius: 10,
+                fontSize: 15,
+                fontWeight: 700,
+                textDecoration: 'none',
+                marginBottom: 12,
+              }}
             >
-              (1 review on Amazon)
+              Buy on Amazon →
             </a>
+            <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>
+              Includes 30-day access to the AI Navigator companion app
+            </p>
           </div>
-
-          <a
-            href={amazonUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              background: '#1C1714',
-              color: '#fff',
-              padding: '15px 28px',
-              borderRadius: 10,
-              fontSize: 16,
-              fontWeight: 700,
-              textDecoration: 'none',
-              marginBottom: 14,
-            }}
-          >
-            Buy on Amazon →
-          </a>
-
-          <p style={{ fontSize: 13, color: '#9ca3af', margin: 0 }}>
-            Includes 30-day access to the AI Navigator app
-          </p>
         </div>
       </section>
 
       {/* ── Testimonial ── */}
-      <section style={{
-        background: '#F8FAFC',
-        borderTop: '1px solid #e5e7eb',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '52px 24px',
-      }}>
-        <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ fontSize: 64, lineHeight: 1, color: '#2563EB', marginBottom: 4, fontFamily: 'Georgia, serif' }}>"</div>
-          <p style={{
-            fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
-            lineHeight: 1.75,
-            color: '#374151',
-            fontStyle: 'italic',
-            margin: '0 0 24px',
-          }}>
+      <section style={{ borderTop: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', padding: '52px 24px', background: '#FAFAFA' }}>
+        <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ fontSize: 56, lineHeight: 1, color: '#2563EB', marginBottom: 2, fontFamily: 'Georgia, serif' }}>"</div>
+          <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: 1.8, color: '#374151', fontStyle: 'italic', margin: '0 0 20px' }}>
             Allan Sendagi delivers a clear, real-world framework for AI implementation that bridges
             the gap between strategy and execution. Highly recommended for leaders ready to move
             beyond the hype and deploy AI with precision.
           </p>
-          <p style={{ fontWeight: 700, fontSize: 15, color: '#111827', margin: '0 0 2px' }}>
-            Akmaral Shamenova
-          </p>
-          <p style={{ fontSize: 13, color: '#6b7280', margin: 0 }}>
-            Operations Leader (20 yrs) · M.Sc. Blockchain &amp; Digital Currencies
-          </p>
+          <p style={{ fontWeight: 700, fontSize: 14, margin: '0 0 2px' }}>Akmaral Shamenova</p>
+          <p style={{ fontSize: 13, color: '#6b7280', margin: 0 }}>Operations Leader (20 yrs) · M.Sc. Blockchain &amp; Digital Currencies</p>
         </div>
       </section>
 
       {/* ── What makes it different ── */}
-      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '72px 24px' }}>
-        <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 800, textAlign: 'center', marginBottom: 8, color: '#111827' }}>
+      <section style={{ maxWidth: 1060, margin: '0 auto', padding: '72px 24px' }}>
+        <h2 style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.9rem)', fontWeight: 800, textAlign: 'center', margin: '0 0 12px' }}>
           What makes it different
         </h2>
-        <p style={{ textAlign: 'center', color: '#6b7280', fontSize: 16, marginBottom: 48 }}>
+        <p style={{ textAlign: 'center', color: '#6b7280', fontSize: 15, margin: '0 0 48px' }}>
           Most AI books are written for enterprises with unlimited budgets. This one is not.
         </p>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: 24,
-        }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20 }}>
           {differentiators.map(d => (
-            <div key={d.title} style={{
-              background: '#fff',
-              border: '1px solid #e5e7eb',
-              borderRadius: 12,
-              padding: '28px 24px',
-            }}>
-              <div style={{ fontSize: 28, marginBottom: 12 }}>{d.icon}</div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>{d.title}</h3>
-              <p style={{ fontSize: 14, color: '#6b7280', margin: 0, lineHeight: 1.6 }}>{d.desc}</p>
+            <div key={d.title} style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '24px 20px' }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 8px' }}>{d.title}</h3>
+              <p style={{ fontSize: 14, color: '#6b7280', margin: 0, lineHeight: 1.65 }}>{d.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── What you'll learn ── */}
-      <section style={{ background: '#F8FAFC', borderTop: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', padding: '72px 24px' }}>
-        <div style={{ maxWidth: 880, margin: '0 auto' }}>
-          <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 800, textAlign: 'center', marginBottom: 48, color: '#111827' }}>
-            What you&apos;ll learn
+      {/* ── The 10-Step Framework ── */}
+      <section style={{ borderTop: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', padding: '72px 24px', background: '#FAFAFA' }}>
+        <div style={{ maxWidth: 1060, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.9rem)', fontWeight: 800, textAlign: 'center', margin: '0 0 12px' }}>
+            The 10-Step Navigator System
           </h2>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '16px 40px',
-          }}>
-            {learnings.map(item => (
-              <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                <span style={{
-                  flexShrink: 0,
-                  width: 22,
-                  height: 22,
-                  background: '#2563EB',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#fff',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  marginTop: 2,
-                }}>✓</span>
-                <p style={{ fontSize: 15, color: '#374151', margin: 0, lineHeight: 1.6 }}>{item}</p>
+          <p style={{ textAlign: 'center', color: '#6b7280', fontSize: 15, margin: '0 0 48px' }}>
+            A structured sequence from zero clarity to a live AI system — in three phases.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
+            {phases.map((phase, i) => (
+              <div key={phase.label} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '28px 24px', borderTop: `3px solid #2563EB` }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>
+                  Phase {i + 1}
+                </p>
+                <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 16px' }}>{phase.label.split('— ')[1]}</h3>
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {phase.steps.map(step => (
+                    <li key={step} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                      <span style={{ flexShrink: 0, width: 18, height: 18, background: '#EFF6FF', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB', fontSize: 10, fontWeight: 700, marginTop: 2 }}>✓</span>
+                      <span style={{ fontSize: 14, color: '#374151', lineHeight: 1.55 }}>{step}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Who it's for ── */}
-      <section style={{ maxWidth: 1100, margin: '0 auto', padding: '72px 24px' }}>
-        <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 800, textAlign: 'center', marginBottom: 48, color: '#111827' }}>
-          Who this book is for
+      {/* ── What you'll learn ── */}
+      <section style={{ maxWidth: 1060, margin: '0 auto', padding: '72px 24px' }}>
+        <h2 style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.9rem)', fontWeight: 800, textAlign: 'center', margin: '0 0 48px' }}>
+          What you&apos;ll learn
         </h2>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: 20,
-        }}>
-          {audiences.map(a => (
-            <div key={a.title} style={{
-              border: '1px solid #e5e7eb',
-              borderRadius: 12,
-              padding: '28px 24px',
-              borderTop: '3px solid #2563EB',
-            }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: '0 0 10px' }}>{a.title}</h3>
-              <p style={{ fontSize: 14, color: '#6b7280', margin: 0, lineHeight: 1.6 }}>{a.desc}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px 40px' }}>
+          {learnings.map(item => (
+            <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <span style={{ flexShrink: 0, width: 20, height: 20, background: '#1C1714', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 10, fontWeight: 700, marginTop: 3 }}>✓</span>
+              <p style={{ fontSize: 15, color: '#374151', margin: 0, lineHeight: 1.65 }}>{item}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Author bio ── */}
-      <section style={{
-        background: '#F8FAFC',
-        borderTop: '1px solid #e5e7eb',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '72px 24px',
-      }}>
-        <div style={{
-          maxWidth: 880,
-          margin: '0 auto',
-          display: 'flex',
-          gap: 48,
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-        }}>
-          <div style={{
-            flexShrink: 0,
-            width: 120,
-            height: 120,
-            borderRadius: '50%',
-            background: '#e5e7eb',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 13,
-            color: '#9ca3af',
-          }}>
-            Photo
-          </div>
-          <div style={{ flex: '1 1 280px' }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>About the author</p>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111827', margin: '0 0 16px' }}>Allan Sendagi</h2>
-            <p style={{ fontSize: 15, color: '#374151', lineHeight: 1.75, margin: '0 0 12px' }}>
-              Allan Sendagi is the founder of SafeHaven, an organisation dedicated to helping
-              businesses and society adapt effectively to the Intelligence Age. Through initiatives
-              like AI TownSquare, SafeHaven develops insights and tools focused on practical
-              readiness.
-            </p>
-            <p style={{ fontSize: 15, color: '#374151', lineHeight: 1.75, margin: '0 0 20px' }}>
-              Allan distils this work into actionable frameworks — including the AI Navigator System
-              detailed in this book — used by entrepreneurs, SMEs, and executives globally to
-              navigate AI disruption and implement solutions with clarity, confidence, and impact.
-            </p>
-            <a
-              href={linkedInUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontSize: 14, color: '#1C1714', fontWeight: 600, textDecoration: 'none' }}
-            >
-              Connect on LinkedIn →
-            </a>
+      {/* ── Who it's for ── */}
+      <section style={{ borderTop: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb', padding: '72px 24px', background: '#FAFAFA' }}>
+        <div style={{ maxWidth: 1060, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.9rem)', fontWeight: 800, textAlign: 'center', margin: '0 0 48px' }}>
+            Who this book is for
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20 }}>
+            {audiences.map(a => (
+              <div key={a.title} style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '24px 20px', background: '#fff' }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 8px' }}>{a.title}</h3>
+                <p style={{ fontSize: 14, color: '#6b7280', margin: 0, lineHeight: 1.65 }}>{a.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── Final CTA ── */}
-      <section style={{
-        background: '#1C1714',
-        padding: '72px 24px',
-        textAlign: 'center',
-      }}>
-        <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 800, color: '#fff', margin: '0 0 12px' }}>
+      <section style={{ background: '#1C1714', padding: '72px 24px', textAlign: 'center' }}>
+        <h2 style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.9rem)', fontWeight: 800, color: '#fff', margin: '0 0 10px' }}>
           Ready to build your AI roadmap?
         </h2>
-        <p style={{ color: '#9ca3af', fontSize: 16, margin: '0 0 36px' }}>
+        <p style={{ color: '#9ca3af', fontSize: 15, margin: '0 0 36px' }}>
           If you can follow a roadmap, you can lead your business into the future — profitably.
         </p>
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a
             href={amazonUrl}
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              background: '#fff',
-              color: '#1C1714',
-              padding: '15px 28px',
-              borderRadius: 10,
-              fontSize: 16,
-              fontWeight: 700,
-              textDecoration: 'none',
-            }}
+            style={{ background: '#fff', color: '#1C1714', padding: '14px 28px', borderRadius: 10, fontSize: 15, fontWeight: 700, textDecoration: 'none' }}
           >
             Buy on Amazon →
           </a>
           <a
             href="/"
-            style={{
-              background: 'transparent',
-              color: '#fff',
-              padding: '15px 28px',
-              borderRadius: 10,
-              fontSize: 16,
-              fontWeight: 600,
-              textDecoration: 'none',
-              border: '1.5px solid rgba(255,255,255,0.3)',
-            }}
+            style={{ background: 'transparent', color: '#fff', padding: '14px 28px', borderRadius: 10, fontSize: 15, fontWeight: 600, textDecoration: 'none', border: '1.5px solid rgba(255,255,255,0.25)' }}
           >
             Take the free AI Readiness Assessment →
           </a>
         </div>
       </section>
+
     </div>
   )
 }
