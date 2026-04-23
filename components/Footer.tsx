@@ -20,7 +20,7 @@ export default function Footer() {
           <Link href="/" style={footerLink}>Take the Assessment</Link>
           <Link href="/resources" style={footerLink}>Resources</Link>
           <Link href="/industries" style={footerLink}>Industries</Link>
-          <Link href="/about" style={footerLink}>About</Link>
+          <Link href="/book" style={footerLink}>Book</Link>
           <Link href="/work-with-us" style={footerLink}>Work With Me</Link>
         </nav>
         <p style={{fontSize:13,color:'#9ca3af',margin:0}}>

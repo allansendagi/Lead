@@ -83,7 +83,7 @@ export default function Navigation() {
               )}
             </div>
 
-            <Link href="/about" style={navLinkStyle}>About</Link>
+            <Link href="/book" style={navLinkStyle}>Book</Link>
             <Link href="/work-with-us" style={navLinkStyle}>Work With Me</Link>
           </nav>
 
@@ -128,7 +128,7 @@ export default function Navigation() {
             ))}
             <MobileLink href="/industries" onClick={() => setMobileOpen(false)}>View all industries →</MobileLink>
           </MobileGroup>
-          <MobileLink href="/about" onClick={() => setMobileOpen(false)}>About</MobileLink>
+          <MobileLink href="/book" onClick={() => setMobileOpen(false)}>Book</MobileLink>
           <MobileLink href="/work-with-us" onClick={() => setMobileOpen(false)}>Work With Me</MobileLink>
           <Link href="/" onClick={() => setMobileOpen(false)}
             style={{background:'#1C1714',color:'#fff',padding:'13px 20px',borderRadius:8,fontSize:15,fontWeight:600,textDecoration:'none',textAlign:'center',marginTop:8}}>

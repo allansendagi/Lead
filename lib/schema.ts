@@ -34,7 +34,7 @@ export function articleAuthorSchema(title: string, url: string) {
     author: {
       '@type': 'Person',
       name: 'Allan Sendagi',
-      url: 'https://www.ainavsystem.com/about/',
+      url: 'https://www.ainavsystem.com/book/',
       sameAs: [
         'https://www.linkedin.com/in/allansendagi/',
         'https://allansendagi.gumroad.com/l/ainavigatorsystem',
