@@ -1,0 +1,1 @@
+self.__SSG_MANIFEST=new Set(["\u002Findustries\u002F[industry]\u002F[city]","\u002Fresources\u002F[slug]"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()
