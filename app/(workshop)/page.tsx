@@ -163,6 +163,12 @@ const navLinks = [
   { label: 'FAQ', href: '#faq' },
 ]
 
+const testimonial = {
+  quote: "Allan Sendagi delivers a clear, real-world framework for AI implementation that bridges the gap between strategy and execution. Highly recommended for leaders ready to move beyond the hype and deploy AI with precision.",
+  name: 'Akmaral Shamenova',
+  role: 'Operations Leader (20 yrs); M.Sc. Blockchain & Digital Currencies',
+}
+
 export default function WorkshopPage() {
   const faqJsonLd = faqSchema(faqs)
 
@@ -624,6 +630,35 @@ export default function WorkshopPage() {
             </div>
           </div>
           </div>
+        </section>
+
+        {/* ── Testimonial ── */}
+        <section style={{ padding: '100px 24px', textAlign: 'center', borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.16em', margin: '0 0 40px' }}>
+            WHAT OTHERS SEE IN THE FRAMEWORK
+          </p>
+
+          <p style={{
+            fontSize: 'clamp(2.2rem, 6vw, 4.4rem)', fontWeight: 700, fontStyle: 'italic',
+            lineHeight: 1.15, color: C.white, maxWidth: 900, margin: '0 auto 32px',
+          }}>
+            &ldquo;A clear, real-world framework that bridges strategy and execution.&rdquo;
+          </p>
+
+          <p style={{ fontSize: 15, fontWeight: 700, color: C.white, margin: '0 0 2px', fontFamily: bodyFont }}>{testimonial.name}</p>
+          <p style={{ fontSize: 13, color: C.muted, margin: '0 0 40px', fontFamily: bodyFont }}>{testimonial.role}</p>
+
+          <div style={{ width: 48, height: 2, background: C.border, margin: '0 auto 40px' }} />
+
+          <p style={{
+            fontSize: 15, lineHeight: 1.8, color: C.muted, fontStyle: 'italic',
+            maxWidth: 560, margin: '0 auto', fontFamily: bodyFont,
+          }}>
+            &ldquo;{testimonial.quote}&rdquo;
+          </p>
+          <p style={{ fontSize: 13, color: C.muted, margin: '20px 0 0', fontFamily: bodyFont, fontStyle: 'normal' }}>
+            On <em>The AI Roadmap</em> — the book behind this workshop&apos;s framework.
+          </p>
         </section>
 
         {/* ── The Promise + FAQ ── */}
