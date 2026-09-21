@@ -11,11 +11,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "@paddle/paddle-js": "^1.6.5",
     "next": "^15.3.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "resend": "^6.28.1"
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/node": "^24",

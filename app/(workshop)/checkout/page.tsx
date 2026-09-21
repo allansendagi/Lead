@@ -7,10 +7,6 @@ export const metadata: Metadata = {
 }
 
 const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '97450176561'
-const WA_MSG = encodeURIComponent(
-  "Hi Allan, I'd like to reserve a seat for the AI Value Sandbox workshop."
-)
-const WA_URL = `https://wa.me/${WA_NUMBER}?text=${WA_MSG}`
 
 export default function CheckoutPage() {
   return (
@@ -20,7 +16,7 @@ export default function CheckoutPage() {
           &larr; Back to the workshop
         </a>
       </div>
-      <CheckoutContents waUrl={WA_URL} />
+      <CheckoutContents waNumber={WA_NUMBER} />
     </div>
   )
 }

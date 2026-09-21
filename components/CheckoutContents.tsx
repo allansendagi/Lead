@@ -1,6 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
-import { initializePaddle, type Paddle } from '@paddle/paddle-js'
+import { useState } from 'react'
 import Countdown from './Countdown'
 
 const C = { bg: '#080808', card: '#161513', border: 'rgba(245,241,234,0.12)', accent: '#C2410C', white: '#F5F1EA', muted: '#A39C90' }
@@ -19,60 +18,44 @@ const included = [
   { lead: 'A clear next step', rest: 'identify what needs to be tested, what data is required, and what happens after the workshop.' },
 ]
 
-export default function CheckoutContents({ waUrl }: { waUrl: string }) {
-  const [paddle, setPaddle] = useState<Paddle | null>(null)
-  const [status, setStatus] = useState<'loading' | 'ready' | 'unconfigured' | 'error'>('loading')
+const bankDetails = [
+  { label: 'Bank', value: 'Commercial Bank of Qatar' },
+  { label: 'Account name', value: 'SAFEHAVEN LLC' },
+  { label: 'Account number', value: '401031480031001' },
+  { label: 'IBAN', value: 'QA31CBQA000000401031480031001' },
+  { label: 'SWIFT / BIC', value: 'CBQAQAQA' },
+  { label: 'Currency', value: 'QAR' },
+]
+
+export default function CheckoutContents({ waNumber }: { waNumber: string }) {
   const [seats, setSeats] = useState(1)
-  const updateThrottle = useRef<{ timer: ReturnType<typeof setTimeout> | null; pending: number | null }>({ timer: null, pending: null })
+  const [method, setMethod] = useState<'whatsapp' | 'bank'>('whatsapp')
+  const [copiedField, setCopiedField] = useState<string | null>(null)
+  const total = seats * PRICE_PER_SEAT
 
-  const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN
-  const env = process.env.NEXT_PUBLIC_PADDLE_ENV as 'sandbox' | 'production' | undefined
-  const priceId = process.env.NEXT_PUBLIC_PADDLE_WORKSHOP_PRICE_ID
+  function copy(label: string, value: string) {
+    navigator.clipboard?.writeText(value).then(() => {
+      setCopiedField(label)
+      setTimeout(() => setCopiedField(f => (f === label ? null : f)), 1500)
+    })
+  }
 
-  useEffect(() => {
-    if (paddle?.Initialized) return
-    if (!token || !env || !priceId) {
-      setStatus('unconfigured')
-      return
-    }
-
-    initializePaddle({
-      token,
-      environment: env,
-      checkout: {
-        settings: {
-          variant: 'one-page',
-          displayMode: 'inline',
-          theme: 'dark',
-          frameTarget: 'paddle-checkout-frame',
-          frameInitialHeight: 450,
-          frameStyle: 'width: 100%; background-color: transparent; border: none',
-          successUrl: '/checkout/success',
-        },
-      },
-    }).then(p => {
-      if (p) {
-        setPaddle(p)
-        p.Checkout.open({ items: [{ priceId, quantity: seats }] })
-        setStatus('ready')
-      } else {
-        setStatus('error')
-      }
-    }).catch(() => setStatus('error'))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paddle?.Initialized, token, env, priceId])
-
-  // Throttled quantity sync — Paddle re-renders the checkout on every updateItems call.
-  useEffect(() => {
-    if (!paddle?.Initialized || !priceId) return
-    const t = updateThrottle.current
-    t.pending = seats
-    if (t.timer) return
-    t.timer = setTimeout(() => {
-      if (t.pending !== null) paddle.Checkout.updateItems([{ priceId, quantity: t.pending }])
-      t.timer = null
-    }, 1000)
-  }, [seats, paddle, priceId])
+  const reserveMsg = encodeURIComponent(
+    [
+      `Hi Allan, I'd like to reserve ${seats} seat${seats > 1 ? 's' : ''} for the AI Value Sandbox workshop.`,
+      ``,
+      `Total: QAR ${total}`,
+    ].join('\n')
+  )
+  const paidMsg = encodeURIComponent(
+    [
+      `Hi Allan, I've just made a bank transfer of QAR ${total} for ${seats} seat${seats > 1 ? 's' : ''} in the AI Value Sandbox workshop.`,
+      ``,
+      `Sending proof of payment now.`,
+    ].join('\n')
+  )
+  const reserveUrl = `https://wa.me/${waNumber}?text=${reserveMsg}`
+  const paidUrl = `https://wa.me/${waNumber}?text=${paidMsg}`
 
   return (
     <div className="checkout-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '56px 24px 96px', display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: 56 }}>
@@ -152,51 +135,115 @@ export default function CheckoutContents({ waUrl }: { waUrl: string }) {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0 0', borderTop: `1px solid ${C.border}` }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: C.white }}>Total</span>
-            <span style={{ fontSize: 20, fontWeight: 800, color: C.white }}>QAR {seats * PRICE_PER_SEAT}</span>
+            <span style={{ fontSize: 20, fontWeight: 800, color: C.white }}>QAR {total}</span>
           </div>
         </div>
 
         <p style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 16px' }}>
-          Secure Your Seats
+          Reserve Your Seats
         </p>
 
-        {status === 'unconfigured' && (
-          <div style={{ border: `1.5px dashed ${C.border}`, borderRadius: 14, padding: '32px 24px', textAlign: 'center' }}>
-            <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7, margin: '0 0 20px' }}>
-              Card checkout is being finalized. In the meantime, reserve your seat directly with Allan.
-            </p>
+        {/* Method switch */}
+        <div style={{ display: 'flex', gap: 6, padding: 4, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 20 }}>
+          <button
+            onClick={() => setMethod('whatsapp')}
+            style={{
+              flex: 1, padding: '10px 12px', borderRadius: 9, border: 'none', cursor: 'pointer',
+              background: method === 'whatsapp' ? C.accent : 'transparent',
+              color: method === 'whatsapp' ? C.white : C.muted,
+              fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
+            }}
+          >
+            WhatsApp
+          </button>
+          <button
+            onClick={() => setMethod('bank')}
+            style={{
+              flex: 1, padding: '10px 12px', borderRadius: 9, border: 'none', cursor: 'pointer',
+              background: method === 'bank' ? C.accent : 'transparent',
+              color: method === 'bank' ? C.white : C.muted,
+              fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
+            }}
+          >
+            Bank Transfer
+          </button>
+        </div>
+
+        {method === 'whatsapp' && (
+          <>
             <a
-              href={waUrl}
+              href={reserveUrl}
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
-                padding: '14px 28px', borderRadius: 12, fontSize: 14, fontWeight: 800,
-                textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
+                fontSize: 14, fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
               }}
             >
               Reserve via WhatsApp
             </a>
-          </div>
+            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '16px 0 0' }}>
+              No payment is taken on this page. Message Allan directly on WhatsApp to confirm your seat{seats > 1 ? 's' : ''} and arrange payment.
+            </p>
+          </>
         )}
 
-        {status === 'error' && (
-          <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7 }}>
-            Checkout couldn&apos;t load. Please refresh, or{' '}
-            <a href={waUrl} target="_blank" rel="noopener noreferrer" style={{ color: C.accent }}>reserve via WhatsApp</a>.
-          </p>
+        {method === 'bank' && (
+          <>
+            <div style={{ border: `1px solid ${C.border}`, borderRadius: 14, background: C.card, overflow: 'hidden' }}>
+              {bankDetails.map((row, i) => (
+                <div
+                  key={row.label}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                    padding: '14px 18px', borderTop: i === 0 ? 'none' : `1px solid ${C.border}`,
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 2px' }}>
+                      {row.label}
+                    </p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: C.white, margin: 0, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', wordBreak: 'break-all' }}>
+                      {row.value}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => copy(row.label, row.value)}
+                    style={{
+                      flexShrink: 0, padding: '7px 12px', borderRadius: 8, border: `1px solid ${C.border}`,
+                      background: 'none', color: copiedField === row.label ? C.accent : C.muted,
+                      fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    }}
+                  >
+                    {copiedField === row.label ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '16px 0 20px' }}>
+              Transfer <strong style={{ color: C.white }}>QAR {total}</strong> using the details above.
+              Bank transfers can take 1&ndash;2 business days to reflect. Once you&apos;ve paid, confirm your
+              seat{seats > 1 ? 's' : ''} by sending proof of payment on WhatsApp.
+            </p>
+
+            <a
+              href={paidUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
+                fontSize: 14, fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
+              }}
+            >
+              I&apos;ve Paid &mdash; Confirm via WhatsApp
+            </a>
+          </>
         )}
 
-        {(status === 'loading' || status === 'ready') && (
-          <div className="paddle-checkout-frame" style={{ minHeight: status === 'loading' ? 200 : undefined }} />
-        )}
-
-        <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 32, paddingTop: 24 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: C.white, margin: '0 0 4px' }}>Secure payment</p>
-          <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 8px' }}>One payment. No subscription.</p>
-          <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 8px' }}>
-            Your card details are securely handled by Paddle.
-          </p>
+        <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 24, paddingTop: 24 }}>
           <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: 0 }}>
             By registering, you agree to our{' '}
             <a href="/terms" style={{ color: C.accent }}>Terms of Service</a> and{' '}
