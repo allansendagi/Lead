@@ -29,7 +29,7 @@ const bankDetails = [
 
 export default function CheckoutContents({ waNumber }: { waNumber: string }) {
   const [seats, setSeats] = useState(1)
-  const [method, setMethod] = useState<'whatsapp' | 'bank'>('whatsapp')
+  const [method, setMethod] = useState<'whatsapp' | 'bank'>('bank')
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const total = seats * PRICE_PER_SEAT
 
