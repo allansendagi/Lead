@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { Fraunces, Inter } from 'next/font/google'
-import EarlyBirdCard from '@/components/EarlyBirdCard'
+import Countdown from '@/components/Countdown'
 import ScrollScaleVideo from '@/components/ScrollScaleVideo'
 import MobileNav from '@/components/MobileNav'
 import { faqSchema } from '@/lib/schema'
@@ -18,13 +18,9 @@ export const metadata: Metadata = {
 }
 
 // ── Editable event details — fill these in once confirmed ──────────────────
-const WORKSHOP_DATE = 'October 1, 2026'
+const WORKSHOP_DATE = 'October 3, 2026'
 const WORKSHOP_TIME = '[TIME — TBC]'
-const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '97450176561'
-const WA_MSG = encodeURIComponent(
-  "Hi Allan, I'd like to reserve a seat for the AI Value Creation Sandbox workshop."
-)
-const WA_URL = `https://wa.me/${WA_NUMBER}?text=${WA_MSG}`
+const WORKSHOP_DEADLINE = '2026-10-03T00:00:00'
 
 // ── Editorial Authority palette — black kept, one deliberate accent ────────
 const C = {
@@ -39,9 +35,8 @@ const C = {
 }
 
 const tickerItems = [
-  'IDENTIFY HIGH-VALUE TASKS', "DEFINE AI'S ROLE", 'MAP HUMAN JUDGMENT',
-  'IDENTIFY REQUIRED DATA', 'DESIGN FEEDBACK LOOPS', 'MEASURE BUSINESS OUTCOMES',
-  '7-ELEMENT CANVAS', 'LIVE APPLICATION', 'SMALL GROUP', 'DIRECT ACCESS TO ALLAN',
+  'REAL BUSINESS TASK', "AI'S ROLE", 'HUMAN JUDGMENT',
+  'REQUIRED DATA', 'FEEDBACK', 'MEASURABLE OUTCOME',
 ]
 
 const stats = [
@@ -98,7 +93,7 @@ const outputExample = [
   { n: '02', title: 'Prediction', question: 'What does AI need to predict?', answer: 'Predict the likelihood that a patient will leave feedback without a reminder.' },
   { n: '03', title: 'Judgment', question: 'How does the prediction change the decision?', answer: 'Send a reminder if predicted feedback likelihood is below 40%.' },
   { n: '04', title: 'Input', question: 'What does AI need at the moment of prediction?', answer: 'Patient ID · Last appointment date · Service type · Prior feedback history' },
-  { n: '05', title: 'Training', question: 'What does AI need to learn from?', answer: 'Past appointments · Feedback outcomes · Reminder history' },
+  { n: '05', title: 'Training Data', question: 'What does AI need to learn from?', answer: 'Past appointments · Feedback outcomes · Reminder history' },
   { n: '06', title: 'Feedback', question: 'How does the system learn from what actually happened?', answer: 'Track whether patients who received reminders subsequently left feedback.' },
   { n: '07', title: 'Outcome', question: 'How will we know it worked?', answer: 'Increase feedback completion while reducing unnecessary reminders.' },
 ]
@@ -111,23 +106,14 @@ const sessionRows = [
   { week: 'Part 03', tag: 'Pressure-Test · 30 min', title: 'Stress-Test Before You Build', desc: 'Pressure-test your Judgment rule, Input list, and Outcome before you build, brief a vendor, or commit resources.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
 ]
 
-// Placeholder — set to the real cutoff once confirmed. Must stay in the future for the countdown to run.
-const EARLY_BIRD_DEADLINE = '2026-09-27T00:00:00'
-
 const seatIncludes = [
-  '1 live 2.5-hour workshop|work through one real business task from beginning to end',
-  'The AI Task Canvas|the seven-element framework for specifying AI-enabled work',
-  'Your completed Canvas|a documented AI intervention for a real task',
-  'Live guidance from Allan Sendagi|work through the decisions, not just the theory',
-  'Pressure-testing|challenge your judgment rule, inputs, data requirements, and outcome before you build',
-  'A reusable framework|apply the Canvas to future AI tasks across your organisation',
-  'A session recording|revisit the framework and your work after the session',
-  'VIP only: 15-minute 1:1 follow-up|with Allan to pressure-test your completed Canvas',
-]
-
-const priceTiers = [
-  { label: 'Early Bird Pricing', price: '[PRICE 1]', window: '[DATE] – [DATE]', opens: '[DATE]' },
-  { label: 'General Admission', price: '[PRICE 2]', window: `[DATE] – ${WORKSHOP_DATE}`, opens: '[DATE]' },
+  'Live 2.5-hour workshop',
+  'AI Task Canvas',
+  'Defined AI intervention',
+  'Measurable value hypothesis',
+  'Direct working feedback',
+  'Completed Canvas',
+  'Clear next step',
 ]
 
 
@@ -184,7 +170,7 @@ export default function WorkshopPage() {
 
         {/* ── Announcement bar ── */}
         <div style={{ background: C.accent, color: C.white, textAlign: 'center', padding: '10px 16px', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', fontFamily: bodyFont }}>
-          COHORT 1 · 10 SEATS AVAILABLE · {WORKSHOP_DATE} · DON&apos;T MISS THIS COHORT →
+          LAUNCH COHORT &middot; 10 PARTICIPANTS
         </div>
 
         {/* ── Nav ── */}
@@ -248,7 +234,7 @@ export default function WorkshopPage() {
         {/* ── Hero ── */}
         <section style={{ maxWidth: 1000, margin: '0 auto', padding: '72px 24px 40px', textAlign: 'center' }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: C.muted, letterSpacing: '0.12em', margin: '0 0 24px', fontFamily: bodyFont }}>
-            LIVE WORKSHOP · HOSTED BY <span style={{ color: C.white }}>ALLAN SENDAGI</span>
+            <span className="live-dot" aria-hidden="true" /><span style={{ color: C.accent }}>LIVE</span> WORKSHOP · HOSTED BY <span style={{ color: C.white }}>ALLAN SENDAGI</span>
           </p>
           <h1 style={{ fontSize: 'clamp(2.8rem, 8vw, 5.5rem)', fontWeight: 900, lineHeight: 1.04, margin: '0 0 20px', textTransform: 'uppercase' }}>
             Make AI <span style={{ color: C.accent }}>Work</span>
@@ -264,16 +250,14 @@ export default function WorkshopPage() {
           </p>
 
           <a
-            href={WA_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/checkout"
             style={{
               display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
               padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
               textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
             }}
           >
-            Reserve Your Seat
+            Join The Launch Cohort
           </a>
         </section>
 
@@ -368,9 +352,7 @@ export default function WorkshopPage() {
 
           <div style={{ textAlign: 'center', marginTop: 48 }}>
             <a
-              href={WA_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/checkout"
               style={{
                 display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
                 padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
@@ -395,7 +377,7 @@ export default function WorkshopPage() {
               7 elements.<br /><span style={{ color: C.accent }}>One session.</span>
             </h2>
             <p style={{ flex: '1 1 280px', color: C.muted, fontSize: 15, lineHeight: 1.75, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
-              Every element forces one more decision you can&apos;t skip — what AI should predict, what
+              Every element forces one more decision you can&apos;t leave undefined — what AI should predict, what
               data it needs, where human judgment remains, and how you&apos;ll know it worked. You leave with
               all seven answered for your own task.
             </p>
@@ -424,7 +406,7 @@ export default function WorkshopPage() {
               One task. Seven decisions.
             </h2>
             <p style={{ color: C.muted, fontSize: 16, margin: '0 auto 14px', maxWidth: 600, lineHeight: 1.7, fontFamily: bodyFont, textTransform: 'none' }}>
-              The AI Task Canvas turns a vague AI opportunity into a clear specification for how the intervention should actually work.
+              The AI Task Canvas turns a vague AI opportunity into a clear specification for how the intervention should work.
             </p>
             <p style={{ fontSize: 16, fontWeight: 700, color: C.white, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
               This is the artifact you leave with.
@@ -511,38 +493,62 @@ export default function WorkshopPage() {
         </section>
 
         {/* ── Pricing ── */}
-        <section id="enrollment" style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px', scrollMarginTop: 24 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', textAlign: 'center', margin: '0 0 20px' }}>
-            EARLY SEAT PRICING
+        <section id="enrollment" style={{ maxWidth: 640, margin: '0 auto', padding: '80px 24px', scrollMarginTop: 24 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', textAlign: 'center', margin: '0 0 12px' }}>
+            LAUNCH COHORT PRICING
           </p>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, textAlign: 'center', margin: '0 0 16px', textTransform: 'none' }}>
-            The earlier you join, the lower the price.
+          <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.8rem)', fontWeight: 700, fontStyle: 'italic', color: C.white, textAlign: 'center', margin: '0 0 32px', textTransform: 'none' }}>
+            The first live cohort of AI Value / Sandbox
           </h2>
-          <p style={{ textAlign: 'center', color: C.muted, fontSize: 15, fontStyle: 'italic', margin: '0 0 56px', fontFamily: bodyFont, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
-            Reserve your seat early and save. Bring a colleague or teammate and work through the Canvas together.
-          </p>
 
-          <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 24, alignItems: 'start' }}>
-            <EarlyBirdCard waNumber={WA_NUMBER} deadline={EARLY_BIRD_DEADLINE} includes={seatIncludes} />
+          <div style={{
+            border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '40px 36px',
+            background: '#0c0c0c', boxShadow: '0 0 40px rgba(194,65,12,0.1)', textAlign: 'center',
+          }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 24px', fontFamily: bodyFont }}>
+              10 Participants &middot; 1 Working Session
+            </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              {priceTiers.map(tier => (
-                <div key={tier.label} style={{ border: `1px solid ${C.border}`, borderRadius: 14, padding: '28px 28px' }}>
-                  <p style={{ fontSize: 14, color: C.muted, margin: '0 0 8px', fontFamily: bodyFont, textTransform: 'none' }}>{tier.label}</p>
-                  <p style={{ fontSize: 32, fontWeight: 800, color: C.white, margin: '0 0 8px' }}>{tier.price}</p>
-                  <p style={{ fontSize: 13, color: C.muted, margin: '0 0 20px', fontFamily: bodyFont, textTransform: 'none' }}>{tier.window}</p>
-                  <div style={{
-                    textAlign: 'center', border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px',
-                    fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', color: C.muted,
-                  }}>
-                    OPENS {tier.opens}
-                  </div>
-                </div>
+            <Countdown target={WORKSHOP_DEADLINE} accent={C.accent} label="Cohort begins in" closedLabel="The cohort has begun" />
+
+            <div style={{ borderTop: `1px solid ${C.border}`, margin: '24px 0' }} />
+
+            <p style={{ fontSize: 'clamp(2.4rem, 6vw, 3.2rem)', fontWeight: 900, color: C.white, margin: '0 0 8px' }}>
+              QAR 550
+            </p>
+            <p style={{ fontSize: 14, color: C.muted, margin: '0 0 24px', fontFamily: bodyFont }}>
+              One workshop seat &middot; 2.5 hours &middot; Live online
+            </p>
+            <p style={{ fontSize: 15, color: C.body, lineHeight: 1.7, margin: '0 0 32px', fontFamily: bodyFont, textAlign: 'left' }}>
+              This launch cohort is limited to <strong style={{ color: C.white }}>10 participants</strong> so
+              the session remains a working environment rather than a lecture.
+            </p>
+
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
+              {seatIncludes.map(item => (
+                <li key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 14, lineHeight: 1.6, fontFamily: bodyFont }}>
+                  <span style={{ color: C.accent, flexShrink: 0, fontWeight: 700 }}>&rarr;</span>
+                  <span style={{ color: C.body }}>{item}</span>
+                </li>
               ))}
-            </div>
+            </ul>
+
+            <a
+              href="/checkout"
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
+                fontSize: 14, fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
+              }}
+            >
+              Secure Your Seat
+            </a>
+            <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', fontStyle: 'italic', margin: '14px 0 0' }}>
+              10 participants maximum. Launch cohort pricing applies to this cohort.
+            </p>
           </div>
 
-          <p style={{ textAlign: 'center', color: C.muted, fontSize: 13, margin: '32px 0 0', fontFamily: bodyFont, textTransform: 'none', maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
+          <p style={{ textAlign: 'center', color: C.muted, fontSize: 13, margin: '32px 0 0', fontFamily: bodyFont, textTransform: 'none' }}>
             <strong style={{ color: C.white }}>What you&apos;ll need:</strong> One real business task to work on. No technical background required.
           </p>
         </section>
@@ -567,41 +573,38 @@ export default function WorkshopPage() {
                   Allan Sendagi
                 </h2>
                 <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.08em', margin: '0 0 28px', fontFamily: bodyFont }}>
-                  AUTHOR, THE AI ROADMAP &middot; FOUNDER, SAFEHAVEN AI &middot; CREATOR, THE AI NAVIGATOR FRAMEWORK
+                  AUTHOR, THE AI ROADMAP &middot; FOUNDER, SAFEHAVEN AI &amp; AI TOWNSQUARE &middot; BUILDER, NOMOS PROTOCOL
                 </p>
                 <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.8, margin: '0 0 20px', fontFamily: bodyFont, textTransform: 'none' }}>
-                  Allan is the author of <strong style={{ color: C.white, fontStyle: 'normal' }}><em>The AI Roadmap</em></strong> and
-                  founder of SafeHaven AI. He created the <strong style={{ color: C.white }}>AI Navigator framework</strong> used
-                  throughout this workshop, including the AI Task Canvas.
+                  Allan Sendagi is the author of <em>The AI Roadmap: Implement AI Profitably in 10 Steps</em> and
+                  creator of the <strong style={{ color: C.white }}>AI Navigator System</strong>, the methodology
+                  behind the AI Task Canvas used in this workshop.
                 </p>
                 <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.8, margin: '0 0 20px', fontFamily: bodyFont, textTransform: 'none' }}>
-                  He has spent years <strong style={{ color: C.white }}>helping SMEs across the GCC move from vague AI intent to
-                  phased, working implementation plans</strong> — turning ambition into specifications teams can
-                  actually build from.
+                  He founded <strong style={{ color: C.white }}>SafeHaven AI</strong> and{' '}
+                  <strong style={{ color: C.white }}>AI TownSquare</strong>, and built{' '}
+                  <strong style={{ color: C.white }}>NOMOS Protocol</strong>, an infrastructure specification for
+                  machine-verifiable institutional authority. He also developed{' '}
+                  <strong style={{ color: C.white }}>Computable Authority</strong>, a proposed runtime architecture
+                  for binding institutional authority to machine-executed action, and put the approach forward
+                  through the OECD&apos;s 2026 public consultation on Law as Code.
                 </p>
                 <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.8, margin: '0 0 28px', fontFamily: bodyFont, textTransform: 'none' }}>
-                  He runs this session <strong style={{ color: C.white }}>live</strong> — no pre-recorded slides, no generic
-                  templates filled in for you.
+                  His work focuses on turning <strong style={{ color: C.white }}>AI opportunities into specific,
+                  buildable interventions</strong> — and developing the frameworks and infrastructure required to
+                  implement AI with greater precision.
                 </p>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
                 <a
                   href="https://a.co/d/0fUXBdCD"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="The AI Roadmap on Amazon"
-                  style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}
+                  aria-label="The AI Roadmap — available at Amazon"
+                  style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 0 }}
                 >
-                  <img src="/ai-roadmap-cover.png" alt="The AI Roadmap book cover" style={{ height: 64, width: 'auto', display: 'block' }} />
-                </a>
-                <a
-                  href="https://a.co/d/0fUXBdCD"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Available at Amazon"
-                  style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}
-                >
-                  <img src="/amazon-badge-white.png" alt="Available at Amazon" style={{ height: 64, width: 'auto', display: 'block' }} />
+                  <img src="/ai-roadmap-cover.png" alt="The AI Roadmap book cover" style={{ height: 72, width: 'auto', display: 'block' }} />
+                  <img src="/amazon-badge-white.png" alt="Available at Amazon" style={{ height: 40, width: 'auto', display: 'block' }} />
                 </a>
                 <a
                   href="https://www.linkedin.com/in/allansendagi/"
@@ -617,14 +620,15 @@ export default function WorkshopPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: -28 }}>
               <img
                 src="/allan-headshot.jpeg"
                 alt="Allan Sendagi"
                 style={{
-                  width: '100%', maxWidth: 320, aspectRatio: '1 / 1', borderRadius: '50%',
-                  objectFit: 'cover', border: '2px solid rgba(255,255,255,0.15)',
-                  boxShadow: '0 0 50px 8px rgba(255,255,255,0.12), 0 0 110px 26px rgba(255,255,255,0.06)',
+                  width: '100%', maxWidth: 460, aspectRatio: '1 / 1', objectFit: 'cover',
+                  filter: 'brightness(1.18) contrast(1.04)',
+                  WebkitMaskImage: 'radial-gradient(circle closest-side, black 65%, transparent 100%)',
+                  maskImage: 'radial-gradient(circle closest-side, black 65%, transparent 100%)',
                 }}
               />
             </div>
@@ -721,9 +725,7 @@ export default function WorkshopPage() {
           </p>
 
           <a
-            href={WA_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/checkout"
             style={{
               display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
               padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
@@ -733,17 +735,17 @@ export default function WorkshopPage() {
             Secure Your Seat
           </a>
           <p style={{ fontSize: 13, color: C.muted, fontStyle: 'italic', margin: '18px 0 0', fontFamily: bodyFont, textTransform: 'none' }}>
-            Seats limited · Enrollment is first come, first served
+            10 seats · Enrollment is first come, first served
           </p>
         </section>
 
         {/* ── Meta / event details recap ── */}
         <div style={{ borderTop: `1px solid ${C.border}`, padding: '20px 24px', textAlign: 'center', fontFamily: bodyFont, textTransform: 'none' }}>
           <p style={{ fontSize: 12, color: C.muted, margin: '0 0 10px' }}>
-            <span style={{ color: C.accent }}>{WORKSHOP_DATE}</span> · Online · Limited seats · Enrollment first come, first served
+            <span style={{ color: C.accent }}>{WORKSHOP_DATE}</span> · Online · 10 seats · Enrollment first come, first served
           </p>
           <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
-            &copy; {new Date().getFullYear()} SafeHaven LLC &middot; QFC Number 03084 &middot; Qatar Financial Centre, Doha, Qatar. All rights reserved.
+            &copy; {new Date().getFullYear()} SafeHaven LLC &middot; Doha, Qatar. All rights reserved.
           </p>
         </div>
 
@@ -751,6 +753,15 @@ export default function WorkshopPage() {
           @keyframes tickerScroll {
             from { transform: translateX(0); }
             to { transform: translateX(-33.333%); }
+          }
+          @keyframes livePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.25; }
+          }
+          .live-dot {
+            display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+            background: ${C.accent}; margin-right: 7px; vertical-align: middle;
+            animation: livePulse 1.4s ease-in-out infinite;
           }
           .ticker-track {
             animation: tickerScroll 30s linear infinite;
@@ -772,7 +783,6 @@ export default function WorkshopPage() {
             .walkaway-grid { grid-template-columns: 1fr !important; }
             .walkaway-grid > div { border-right: none !important; }
             .promise-faq-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
-            .pricing-grid { grid-template-columns: 1fr !important; }
             .about-grid { grid-template-columns: 1fr !important; }
             .about-grid > div:last-child { order: -1; }
             .hero-oneline { white-space: normal !important; }
