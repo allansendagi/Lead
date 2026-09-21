@@ -22,6 +22,8 @@ export default function Footer() {
           <Link href="/industries" style={footerLink}>Industries</Link>
           <Link href="/book" style={footerLink}>Book</Link>
           <Link href="/work-with-us" style={footerLink}>Work With Me</Link>
+          <Link href="/terms" style={footerLink}>Terms</Link>
+          <Link href="/privacy" style={footerLink}>Privacy</Link>
         </nav>
         <div style={{textAlign:'right'}}>
           <p style={{fontSize:13,color:'#9ca3af',margin:0}}>

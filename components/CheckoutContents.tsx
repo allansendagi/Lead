@@ -198,7 +198,9 @@ export default function CheckoutContents({ waUrl }: { waUrl: string }) {
             Your card details are securely handled by Paddle.
           </p>
           <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: 0 }}>
-            By registering, you agree to the workshop terms and policies.
+            By registering, you agree to our{' '}
+            <a href="/terms" style={{ color: C.accent }}>Terms of Service</a> and{' '}
+            <a href="/privacy" style={{ color: C.accent }}>Privacy Notice</a>.
           </p>
         </div>
 

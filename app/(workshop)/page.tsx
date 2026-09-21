@@ -595,40 +595,59 @@ export default function WorkshopPage() {
                   implement AI with greater precision.
                 </p>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 22, flexWrap: 'wrap' }}>
                 <a
                   href="https://a.co/d/0fUXBdCD"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="The AI Roadmap — available at Amazon"
-                  style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 0 }}
+                  aria-label="The AI Roadmap book cover — available at Amazon"
+                  style={{ display: 'block', width: 64, height: 96, borderRadius: 5, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.5)', flexShrink: 0 }}
                 >
-                  <img src="/ai-roadmap-cover.png" alt="The AI Roadmap book cover" style={{ height: 72, width: 'auto', display: 'block' }} />
-                  <img src="/amazon-badge-white.png" alt="Available at Amazon" style={{ height: 40, width: 'auto', display: 'block' }} />
+                  <img src="/ai-roadmap-cover.png" alt="The AI Roadmap book cover" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </a>
+
+                <a
+                  href="https://a.co/d/0fUXBdCD"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10, height: 48, padding: '0 20px',
+                    borderRadius: 8, border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)',
+                    textDecoration: 'none', flexShrink: 0,
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                    <path d="M4 15.5c3.5 2.5 12.5 2.5 16 0" stroke={C.accent} strokeWidth="1.8" strokeLinecap="round" />
+                    <path d="M6 12V6.5C6 5 7 4 8.5 4h7C17 4 18 5 18 6.5V12" stroke={C.muted} strokeWidth="1.6" />
+                  </svg>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: C.white, whiteSpace: 'nowrap', fontFamily: bodyFont }}>Available on Amazon</span>
+                </a>
+
                 <a
                   href="https://www.linkedin.com/in/allansendagi/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Allan Sendagi on LinkedIn"
-                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 6, border: `1px solid ${C.border}`, color: C.white, flexShrink: 0 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: 8, border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', color: C.white, flexShrink: 0 }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                   </svg>
                 </a>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: -28 }}>
+            <div style={{
+              position: 'relative', width: '100%', maxWidth: 420, aspectRatio: '1 / 1',
+              margin: '32px auto 0', background: '#0c0c0c',
+            }}>
               <img
                 src="/allan-headshot.jpeg"
                 alt="Allan Sendagi"
                 style={{
-                  width: '100%', maxWidth: 460, aspectRatio: '1 / 1', objectFit: 'cover',
-                  filter: 'brightness(1.18) contrast(1.04)',
-                  WebkitMaskImage: 'radial-gradient(circle closest-side, black 65%, transparent 100%)',
-                  maskImage: 'radial-gradient(circle closest-side, black 65%, transparent 100%)',
+                  width: '100%', height: '100%', objectFit: 'cover',
+                  WebkitMaskImage: 'radial-gradient(ellipse 46% 40% at 50% 42%, black 35%, transparent 100%)',
+                  maskImage: 'radial-gradient(ellipse 46% 40% at 50% 42%, black 35%, transparent 100%)',
                 }}
               />
             </div>
@@ -741,11 +760,12 @@ export default function WorkshopPage() {
 
         {/* ── Meta / event details recap ── */}
         <div style={{ borderTop: `1px solid ${C.border}`, padding: '20px 24px', textAlign: 'center', fontFamily: bodyFont, textTransform: 'none' }}>
-          <p style={{ fontSize: 12, color: C.muted, margin: '0 0 10px' }}>
-            <span style={{ color: C.accent }}>{WORKSHOP_DATE}</span> · Online · 10 seats · Enrollment first come, first served
-          </p>
           <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
-            &copy; {new Date().getFullYear()} SafeHaven LLC &middot; Doha, Qatar. All rights reserved.
+            &copy; {new Date().getFullYear()} SafeHaven LLC &middot; Lusail Boulevard. All rights reserved.
+            {' '}&middot;{' '}
+            <a href="/terms" style={{ color: C.muted, textDecoration: 'underline' }}>Terms</a>
+            {' '}&middot;{' '}
+            <a href="/privacy" style={{ color: C.muted, textDecoration: 'underline' }}>Privacy</a>
           </p>
         </div>
 
