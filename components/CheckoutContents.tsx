@@ -146,17 +146,6 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
         {/* Method switch */}
         <div style={{ display: 'flex', gap: 6, padding: 4, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 20 }}>
           <button
-            onClick={() => setMethod('whatsapp')}
-            style={{
-              flex: 1, padding: '10px 12px', borderRadius: 9, border: 'none', cursor: 'pointer',
-              background: method === 'whatsapp' ? C.accent : 'transparent',
-              color: method === 'whatsapp' ? C.white : C.muted,
-              fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
-            }}
-          >
-            WhatsApp
-          </button>
-          <button
             onClick={() => setMethod('bank')}
             style={{
               flex: 1, padding: '10px 12px', borderRadius: 9, border: 'none', cursor: 'pointer',
@@ -166,6 +155,17 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
             }}
           >
             Bank Transfer
+          </button>
+          <button
+            onClick={() => setMethod('whatsapp')}
+            style={{
+              flex: 1, padding: '10px 12px', borderRadius: 9, border: 'none', cursor: 'pointer',
+              background: method === 'whatsapp' ? C.accent : 'transparent',
+              color: method === 'whatsapp' ? C.white : C.muted,
+              fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
+            }}
+          >
+            WhatsApp
           </button>
         </div>
 
