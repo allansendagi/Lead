@@ -766,6 +766,15 @@ export default function WorkshopPage() {
             <a href="/terms" style={{ color: C.muted, textDecoration: 'underline' }}>Terms</a>
             {' '}&middot;{' '}
             <a href="/privacy" style={{ color: C.muted, textDecoration: 'underline' }}>Privacy</a>
+            {' '}&middot;{' '}
+            <a
+              href={`https://wa.me/97450176561?text=${encodeURIComponent("Hi Allan, we're interested in team training using the AI Value Sandbox workshop")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: C.muted, textDecoration: 'underline' }}
+            >
+              Training for Teams
+            </a>
           </p>
         </div>
 
