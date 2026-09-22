@@ -7,6 +7,9 @@ export const metadata: Metadata = {
 }
 
 const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '97450176561'
+// PayPal Client IDs are meant to be public (same trust model as a Stripe
+// publishable key) — safe to read server-side and pass to the client.
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || ''
 
 export default function CheckoutPage() {
   return (
@@ -16,7 +19,7 @@ export default function CheckoutPage() {
           &larr; Back to the workshop
         </a>
       </div>
-      <CheckoutContents waNumber={WA_NUMBER} />
+      <CheckoutContents waNumber={WA_NUMBER} paypalClientId={PAYPAL_CLIENT_ID} />
     </div>
   )
 }

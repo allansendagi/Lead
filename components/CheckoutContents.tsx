@@ -1,11 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Countdown from './Countdown'
 
 const C = { bg: '#080808', card: '#161513', border: 'rgba(245,241,234,0.12)', accent: '#C2410C', white: '#F5F1EA', muted: '#A39C90' }
 
 const WORKSHOP_DEADLINE = '2026-10-03T00:00:00'
-const PRICE_PER_SEAT = 550
+const PRICE_PER_SEAT_QAR = 550
+const PRICE_PER_SEAT_USD = 151
 const MAX_SEATS = 10
 
 const included = [
@@ -31,15 +32,17 @@ function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
 }
 
-export default function CheckoutContents({ waNumber }: { waNumber: string }) {
+export default function CheckoutContents({ waNumber, paypalClientId }: { waNumber: string; paypalClientId: string }) {
   const [seats, setSeats] = useState(1)
-  const [method, setMethod] = useState<'whatsapp' | 'bank'>('bank')
+  const [method, setMethod] = useState<'whatsapp' | 'bank' | 'paypal'>('bank')
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [touched, setTouched] = useState(false)
   const [sendState, setSendState] = useState<'idle' | 'sending' | 'sent'>('idle')
-  const total = seats * PRICE_PER_SEAT
+  const [paypalError, setPaypalError] = useState<string | null>(null)
+  const totalQar = seats * PRICE_PER_SEAT_QAR
+  const totalUsd = seats * PRICE_PER_SEAT_USD
 
   const nameValid = name.trim().length >= 2
   const emailValid = isValidEmail(email)
@@ -57,12 +60,12 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
       `Hi Allan, I'd like to reserve ${seats} seat${seats > 1 ? 's' : ''} for the AI Value Sandbox workshop.`,
       ``,
       `Name: ${name.trim()}`,
-      `Total: QAR ${total}`,
+      `Total: QAR ${totalQar}`,
     ].join('\n')
   )
   const paidMsg = encodeURIComponent(
     [
-      `Hi Allan, I've just made a bank transfer of QAR ${total} for ${seats} seat${seats > 1 ? 's' : ''} in the AI Value Sandbox workshop.`,
+      `Hi Allan, I've just made a bank transfer of QAR ${totalQar} for ${seats} seat${seats > 1 ? 's' : ''} in the AI Value Sandbox workshop.`,
       ``,
       `Name: ${name.trim()}`,
       `Sending proof of payment now.`,
@@ -99,6 +102,87 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
 
     if (!win) window.location.href = waUrl
   }
+
+  // ── PayPal ──────────────────────────────────────────────────────────
+  // Buttons are rendered once the SDK loads and details are valid; a ref
+  // keeps the latest seats/name/email so the callbacks (created once)
+  // never read stale values from an earlier render.
+  const paypalContainerRef = useRef<HTMLDivElement>(null)
+  const paypalRenderedRef = useRef(false)
+  const formStateRef = useRef({ seats, name, email, waUrl: reserveUrl })
+  useEffect(() => {
+    formStateRef.current = { seats, name, email, waUrl: reserveUrl }
+  }, [seats, name, email, reserveUrl])
+
+  useEffect(() => {
+    if (method !== 'paypal' || !detailsValid || !paypalClientId || paypalRenderedRef.current) return
+
+    function renderButtons() {
+      const paypal = (window as any).paypal
+      if (!paypal || !paypalContainerRef.current) return
+      paypalRenderedRef.current = true
+      paypal.Buttons({
+        style: { color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
+        createOrder: async () => {
+          setPaypalError(null)
+          const res = await fetch('/api/paypal/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ seats: formStateRef.current.seats }),
+          })
+          const data = await res.json()
+          if (!res.ok || !data.id) throw new Error(data.error || 'Could not start PayPal checkout')
+          return data.id
+        },
+        onApprove: async (data: { orderID: string }) => {
+          setSendState('sending')
+          try {
+            const res = await fetch('/api/paypal/capture-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderID: data.orderID,
+                name: formStateRef.current.name.trim(),
+                email: formStateRef.current.email.trim(),
+                seats: formStateRef.current.seats,
+                waUrl: formStateRef.current.waUrl,
+              }),
+            })
+            const result = await res.json()
+            if (result.success) {
+              setSendState('sent')
+            } else {
+              setSendState('idle')
+              setPaypalError('Payment could not be confirmed. Please contact Allan on WhatsApp with your PayPal receipt.')
+            }
+          } catch {
+            setSendState('idle')
+            setPaypalError('Payment could not be confirmed. Please contact Allan on WhatsApp with your PayPal receipt.')
+          }
+        },
+        onError: () => {
+          setPaypalError('PayPal ran into a problem. Please try again, or use bank transfer / WhatsApp instead.')
+        },
+      }).render(paypalContainerRef.current)
+    }
+
+    if ((window as any).paypal) {
+      renderButtons()
+      return
+    }
+
+    const scriptId = 'paypal-sdk'
+    let script = document.getElementById(scriptId) as HTMLScriptElement | null
+    if (!script) {
+      script = document.createElement('script')
+      script.id = scriptId
+      script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypalClientId)}&currency=USD`
+      script.addEventListener('load', renderButtons)
+      document.body.appendChild(script)
+    } else {
+      script.addEventListener('load', renderButtons, { once: true })
+    }
+  }, [method, detailsValid, paypalClientId])
 
   return (
     <div className="checkout-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '56px 24px 96px', display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: 56 }}>
@@ -150,7 +234,7 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
 
           <p style={{ fontSize: 13, color: C.muted, margin: '0 0 6px' }}>AI Value / Sandbox</p>
           <p style={{ fontSize: 28, fontWeight: 800, color: C.white, margin: '0 0 20px' }}>
-            QAR {PRICE_PER_SEAT} <span style={{ fontSize: 14, fontWeight: 500, color: C.muted }}>/ seat</span>
+            QAR {PRICE_PER_SEAT_QAR} <span style={{ fontSize: 14, fontWeight: 500, color: C.muted }}>/ seat</span>
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderTop: `1px solid ${C.border}` }}>
@@ -178,7 +262,9 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0 0', borderTop: `1px solid ${C.border}` }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: C.white }}>Total</span>
-            <span style={{ fontSize: 20, fontWeight: 800, color: C.white }}>QAR {total}</span>
+            <span style={{ fontSize: 20, fontWeight: 800, color: C.white }}>
+              {method === 'paypal' ? `$${totalUsd}` : `QAR ${totalQar}`}
+            </span>
           </div>
         </div>
 
@@ -231,7 +317,7 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
           <button
             onClick={() => setMethod('bank')}
             style={{
-              flex: 1, padding: '10px 12px', borderRadius: 9, border: 'none', cursor: 'pointer',
+              flex: 1, padding: '10px 10px', borderRadius: 9, border: 'none', cursor: 'pointer',
               background: method === 'bank' ? C.accent : 'transparent',
               color: method === 'bank' ? C.white : C.muted,
               fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
@@ -240,9 +326,20 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
             Bank Transfer
           </button>
           <button
+            onClick={() => setMethod('paypal')}
+            style={{
+              flex: 1, padding: '10px 10px', borderRadius: 9, border: 'none', cursor: 'pointer',
+              background: method === 'paypal' ? C.accent : 'transparent',
+              color: method === 'paypal' ? C.white : C.muted,
+              fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
+            }}
+          >
+            PayPal
+          </button>
+          <button
             onClick={() => setMethod('whatsapp')}
             style={{
-              flex: 1, padding: '10px 12px', borderRadius: 9, border: 'none', cursor: 'pointer',
+              flex: 1, padding: '10px 10px', borderRadius: 9, border: 'none', cursor: 'pointer',
               background: method === 'whatsapp' ? C.accent : 'transparent',
               color: method === 'whatsapp' ? C.white : C.muted,
               fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
@@ -305,7 +402,7 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
             </div>
 
             <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '16px 0 20px' }}>
-              Transfer <strong style={{ color: C.white }}>QAR {total}</strong> using the details above.
+              Transfer <strong style={{ color: C.white }}>QAR {totalQar}</strong> using the details above.
               Bank transfers can take 1&ndash;2 business days to reflect. Once you&apos;ve paid, confirm your
               seat{seats > 1 ? 's' : ''} by sending proof of payment on WhatsApp.
             </p>
@@ -321,6 +418,31 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
             >
               I&apos;ve Paid &mdash; Confirm via WhatsApp
             </button>
+          </>
+        )}
+
+        {method === 'paypal' && (
+          <>
+            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 16px' }}>
+              PayPal charges in US dollars &mdash; <strong style={{ color: C.white }}>${totalUsd}</strong> for{' '}
+              {seats} seat{seats > 1 ? 's' : ''} (QAR {totalQar} at a fixed rate). Payment is confirmed instantly.
+            </p>
+            {!detailsValid ? (
+              <button
+                onClick={() => setTouched(true)}
+                style={{
+                  width: '100%', padding: '16px 24px', borderRadius: 12, border: `1px solid ${C.border}`,
+                  background: 'none', color: C.muted, fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                Enter your name and email above to pay with PayPal
+              </button>
+            ) : (
+              <div ref={paypalContainerRef} style={{ minHeight: 45 }} />
+            )}
+            {paypalError && (
+              <p style={{ fontSize: 13, color: C.accent, lineHeight: 1.7, margin: '12px 0 0' }}>{paypalError}</p>
+            )}
           </>
         )}
 
