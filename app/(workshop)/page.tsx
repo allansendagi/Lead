@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 // ── Editable event details — fill these in once confirmed ──────────────────
 const WORKSHOP_DATE = 'October 3, 2026'
-const WORKSHOP_TIME = '10:00 AM Doha (GMT+3)'
+const WORKSHOP_TIME = '10:00 AM Doha (GMT+3) / 11:00 AM Dubai (GMT+4)'
 const WORKSHOP_DEADLINE = '2026-10-03T10:00:00+03:00'
 
 // ── Editorial Authority palette — black kept, one deliberate accent ────────
@@ -358,7 +358,7 @@ export default function WorkshopPage() {
               <span style={{ color: C.accent }}>away with.</span>
             </h2>
             <p style={{ flex: '1 1 320px', maxWidth: 460, color: C.muted, fontSize: 16, lineHeight: 1.7, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
-              Not another list of AI ideas. A defined starting point for <em>putting AI to work.</em>
+              Not another list of AI ideas. A defined starting point for <strong style={{ color: C.white }}>putting AI to work.</strong>
             </p>
           </div>
 
@@ -433,7 +433,7 @@ export default function WorkshopPage() {
                 </p>
                 <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', textTransform: 'none' }}>{el.title}</h3>
                 <p style={{ fontSize: 14, color: C.body, margin: '0 0 10px', lineHeight: 1.6, fontFamily: bodyFont, textTransform: 'none' }}>{el.def}</p>
-                <p style={{ fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.5, fontStyle: 'italic', fontFamily: bodyFont, textTransform: 'none' }}>{el.example}</p>
+                <p style={{ fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.5, fontFamily: bodyFont, textTransform: 'none' }}>{el.example}</p>
               </div>
             ))}
           </div>
@@ -550,7 +550,7 @@ export default function WorkshopPage() {
                 </div>
                 <div>
                   <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 4px', textTransform: 'none' }}>{r.host}</p>
-                  <p style={{ fontSize: 12, color: C.muted, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>Author, <em>The AI Roadmap</em></p>
+                  <p style={{ fontSize: 12, color: C.muted, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>Author, <em style={{ fontStyle: 'normal' }}>The AI Roadmap</em></p>
                 </div>
               </div>
             ))}
@@ -562,7 +562,7 @@ export default function WorkshopPage() {
           <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', textAlign: 'center', margin: '0 0 12px' }}>
             LAUNCH COHORT PRICING
           </p>
-          <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.8rem)', fontWeight: 700, fontStyle: 'italic', color: C.white, textAlign: 'center', margin: '0 0 32px', textTransform: 'none' }}>
+          <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.8rem)', fontWeight: 700, color: C.white, textAlign: 'center', margin: '0 0 32px', textTransform: 'none' }}>
             The first live cohort of AI Value / Sandbox
           </h2>
 
@@ -608,7 +608,7 @@ export default function WorkshopPage() {
             >
               Reserve Your Seat
             </a>
-            <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', fontStyle: 'italic', margin: '14px 0 0' }}>
+            <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', margin: '14px 0 0' }}>
               10 participants maximum. Launch cohort pricing applies to this cohort.
             </p>
           </div>
@@ -631,7 +631,7 @@ export default function WorkshopPage() {
             <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: 48, alignItems: 'center' }}>
               <div>
                 <h2 style={{
-                  fontSize: 'clamp(2.6rem, 5.5vw, 4rem)', fontWeight: 700, fontStyle: 'italic', color: C.white,
+                  fontSize: 'clamp(2.6rem, 5.5vw, 4rem)', fontWeight: 700, color: C.white,
                   display: 'inline-block', margin: '0 0 20px',
                   textTransform: 'none', letterSpacing: '-0.01em', lineHeight: 1,
                 }}>
@@ -641,7 +641,7 @@ export default function WorkshopPage() {
                   AUTHOR, THE AI ROADMAP &middot; FOUNDER, SAFEHAVEN AI &amp; AI TOWNSQUARE &middot; BUILDER, NOMOS PROTOCOL
                 </p>
                 <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.8, margin: '0 0 20px', fontFamily: bodyFont, textTransform: 'none' }}>
-                  Allan Sendagi is the author of <em>The AI Roadmap: Implement AI Profitably in 10 Steps</em> and
+                  Allan Sendagi is the author of <em style={{ fontStyle: 'normal' }}>The AI Roadmap: Implement AI Profitably in 10 Steps</em> and
                   creator of the <strong style={{ color: C.white }}>AI Navigator System</strong>, the methodology
                   behind the AI Task Canvas used in this workshop.
                 </p>
@@ -727,7 +727,7 @@ export default function WorkshopPage() {
           </p>
 
           <p style={{
-            fontSize: 'clamp(2.2rem, 6vw, 4.4rem)', fontWeight: 700, fontStyle: 'italic',
+            fontSize: 'clamp(2.2rem, 6vw, 4.4rem)', fontWeight: 700,
             lineHeight: 1.15, color: C.white, maxWidth: 900, margin: '0 auto 32px',
           }}>
             &ldquo;A clear, real-world framework that bridges strategy and execution.&rdquo;
@@ -739,13 +739,13 @@ export default function WorkshopPage() {
           <div style={{ width: 48, height: 2, background: C.border, margin: '0 auto 40px' }} />
 
           <p style={{
-            fontSize: 15, lineHeight: 1.8, color: C.muted, fontStyle: 'italic',
+            fontSize: 15, lineHeight: 1.8, color: C.muted,
             maxWidth: 560, margin: '0 auto', fontFamily: bodyFont,
           }}>
             &ldquo;{testimonial.quote}&rdquo;
           </p>
           <p style={{ fontSize: 13, color: C.muted, margin: '20px 0 0', fontFamily: bodyFont, fontStyle: 'normal' }}>
-            On <em>The AI Roadmap</em> — the book behind this workshop&apos;s framework.
+            On <em style={{ fontStyle: 'normal' }}>The AI Roadmap</em> — the book behind this workshop&apos;s framework.
           </p>
         </section>
 
@@ -759,10 +759,10 @@ export default function WorkshopPage() {
               <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', margin: '0 0 24px' }}>
                 THE PROMISE
               </p>
-              <h2 style={{ fontSize: 'clamp(1.6rem, 3.2vw, 2.2rem)', fontWeight: 900, fontStyle: 'italic', color: '#f2f0ea', margin: '0 0 20px', textTransform: 'none', lineHeight: 1.25 }}>
+              <h2 style={{ fontSize: 'clamp(1.6rem, 3.2vw, 2.2rem)', fontWeight: 900, color: '#f2f0ea', margin: '0 0 20px', textTransform: 'none', lineHeight: 1.25 }}>
                 You are not buying 2.5 hours.
               </h2>
-              <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.75, fontStyle: 'italic', margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
+              <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.75, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
                 You&apos;re buying a completed specification for one real AI task — and a method you can use on the next one.
               </p>
             </div>
@@ -804,7 +804,7 @@ export default function WorkshopPage() {
           <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 900, margin: '0 0 14px', lineHeight: 1.15, textTransform: 'none' }}>
             You walked in with an AI idea.
           </h2>
-          <p style={{ fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', fontWeight: 700, fontStyle: 'italic', color: C.accent, margin: '0 0 14px' }}>
+          <p style={{ fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', fontWeight: 700, color: C.accent, margin: '0 0 14px' }}>
             Leave with an AI intervention you can actually specify.
           </p>
           <p style={{ fontSize: 15, color: C.muted, margin: '0 auto 36px', maxWidth: 520, lineHeight: 1.7, fontFamily: bodyFont, textTransform: 'none' }}>
@@ -821,7 +821,7 @@ export default function WorkshopPage() {
           >
             I Want to Make AI Work
           </a>
-          <p style={{ fontSize: 13, color: C.muted, fontStyle: 'italic', margin: '18px 0 0', fontFamily: bodyFont, textTransform: 'none' }}>
+          <p style={{ fontSize: 13, color: C.muted, margin: '18px 0 0', fontFamily: bodyFont, textTransform: 'none' }}>
             10 seats · Enrollment is first come, first served
           </p>
         </section>

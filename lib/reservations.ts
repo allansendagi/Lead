@@ -9,7 +9,7 @@ const ADMIN_EMAIL = process.env.RESERVATION_NOTIFY_EMAIL || 'allan@safehavenai.w
 export const PRICE_PER_SEAT_QAR = 550
 export const PRICE_PER_SEAT_USD = 151 // QAR is pegged at ~3.64/USD — fixed price, not a live conversion
 export const WORKSHOP_DATE = 'October 3, 2026'
-export const WORKSHOP_TIME = '10:00 AM Doha (GMT+3)'
+export const WORKSHOP_TIME = '10:00 AM Doha (GMT+3) / 11:00 AM Dubai (GMT+4)'
 
 export const BANK = {
   bank: 'Commercial Bank of Qatar',
