@@ -27,11 +27,23 @@ const bankDetails = [
   { label: 'Currency', value: 'QAR' },
 ]
 
+function isValidEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
+}
+
 export default function CheckoutContents({ waNumber }: { waNumber: string }) {
   const [seats, setSeats] = useState(1)
   const [method, setMethod] = useState<'whatsapp' | 'bank'>('bank')
   const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [touched, setTouched] = useState(false)
+  const [sendState, setSendState] = useState<'idle' | 'sending' | 'sent'>('idle')
   const total = seats * PRICE_PER_SEAT
+
+  const nameValid = name.trim().length >= 2
+  const emailValid = isValidEmail(email)
+  const detailsValid = nameValid && emailValid
 
   function copy(label: string, value: string) {
     navigator.clipboard?.writeText(value).then(() => {
@@ -44,6 +56,7 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
     [
       `Hi Allan, I'd like to reserve ${seats} seat${seats > 1 ? 's' : ''} for the AI Value Sandbox workshop.`,
       ``,
+      `Name: ${name.trim()}`,
       `Total: QAR ${total}`,
     ].join('\n')
   )
@@ -51,11 +64,41 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
     [
       `Hi Allan, I've just made a bank transfer of QAR ${total} for ${seats} seat${seats > 1 ? 's' : ''} in the AI Value Sandbox workshop.`,
       ``,
+      `Name: ${name.trim()}`,
       `Sending proof of payment now.`,
     ].join('\n')
   )
   const reserveUrl = `https://wa.me/${waNumber}?text=${reserveMsg}`
   const paidUrl = `https://wa.me/${waNumber}?text=${paidMsg}`
+
+  async function handleAction(action: 'reserve' | 'paid') {
+    setTouched(true)
+    if (!detailsValid) return
+
+    const waUrl = action === 'paid' ? paidUrl : reserveUrl
+    const win = window.open(waUrl, '_blank', 'noopener,noreferrer')
+
+    setSendState('sending')
+    try {
+      await fetch('/api/reserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          seats,
+          method: method === 'bank' ? 'bank_transfer' : 'whatsapp',
+          waUrl,
+        }),
+      })
+    } catch {
+      // Non-blocking — the WhatsApp tab is already open regardless.
+    } finally {
+      setSendState('sent')
+    }
+
+    if (!win) window.location.href = waUrl
+  }
 
   return (
     <div className="checkout-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '56px 24px 96px', display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: 56 }}>
@@ -140,6 +183,46 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
         </div>
 
         <p style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 16px' }}>
+          Your details
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+          <div>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Full name"
+              aria-label="Full name"
+              style={{
+                width: '100%', padding: '13px 16px', borderRadius: 10, background: C.card,
+                border: `1px solid ${touched && !nameValid ? C.accent : C.border}`,
+                color: C.white, fontSize: 14, fontFamily: 'inherit', outline: 'none',
+              }}
+            />
+            {touched && !nameValid && (
+              <p style={{ fontSize: 12, color: C.accent, margin: '6px 0 0' }}>Enter your name.</p>
+            )}
+          </div>
+          <div>
+            <input
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="Email address"
+              aria-label="Email address"
+              type="email"
+              style={{
+                width: '100%', padding: '13px 16px', borderRadius: 10, background: C.card,
+                border: `1px solid ${touched && !emailValid ? C.accent : C.border}`,
+                color: C.white, fontSize: 14, fontFamily: 'inherit', outline: 'none',
+              }}
+            />
+            {touched && !emailValid && (
+              <p style={{ fontSize: 12, color: C.accent, margin: '6px 0 0' }}>Enter a valid email &mdash; we&apos;ll send your confirmation here.</p>
+            )}
+          </div>
+        </div>
+
+        <p style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 16px' }}>
           Reserve Your Seats
         </p>
 
@@ -171,18 +254,17 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
 
         {method === 'whatsapp' && (
           <>
-            <a
-              href={reserveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => handleAction('reserve')}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%',
                 background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
-                fontSize: 14, fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
+                fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer',
+                textTransform: 'uppercase', letterSpacing: '0.04em', opacity: touched && !detailsValid ? 0.6 : 1,
               }}
             >
               Reserve via WhatsApp
-            </a>
+            </button>
             <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '16px 0 0' }}>
               No payment is taken on this page. Message Allan directly on WhatsApp to confirm your seat{seats > 1 ? 's' : ''} and arrange payment.
             </p>
@@ -228,19 +310,24 @@ export default function CheckoutContents({ waNumber }: { waNumber: string }) {
               seat{seats > 1 ? 's' : ''} by sending proof of payment on WhatsApp.
             </p>
 
-            <a
-              href={paidUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => handleAction('paid')}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%',
                 background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
-                fontSize: 14, fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
+                fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer',
+                textTransform: 'uppercase', letterSpacing: '0.04em', opacity: touched && !detailsValid ? 0.6 : 1,
               }}
             >
               I&apos;ve Paid &mdash; Confirm via WhatsApp
-            </a>
+            </button>
           </>
+        )}
+
+        {sendState === 'sent' && (
+          <p style={{ fontSize: 13, color: C.accent, margin: '14px 0 0' }}>
+            &#10003; A confirmation email is on its way to {email}.
+          </p>
         )}
 
         <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 24, paddingTop: 24 }}>

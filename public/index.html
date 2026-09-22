@@ -11,7 +11,7 @@
   <script defer src="/_vercel/insights/script.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;0,900;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-7414PDX4YS"></script>
@@ -24,8 +24,16 @@
 
   <!-- Site nav + WhatsApp floating button styles -->
   <style>
+    #sn-banner {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9001;
+      height: 36px; background: #C2410C; color: #F5F1EA;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-align: center;
+      padding: 0 16px;
+    }
     #sn-nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 9000;
+      position: fixed; top: 36px; left: 0; right: 0; z-index: 9000;
       height: 56px; background: rgba(12,14,20,0.96);
       border-bottom: 1px solid rgba(255,255,255,0.08);
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -41,7 +49,7 @@
     #sn-links a:hover { color: #F1F5F9; }
     #sn-ham { display: none; background: none; border: none; color: #F1F5F9; cursor: pointer; padding: 4px; line-height: 1; }
     #sn-mobile {
-      display: none; position: fixed; top: 56px; left: 0; right: 0;
+      display: none; position: fixed; top: 92px; left: 0; right: 0;
       background: rgba(12,14,20,0.98); padding: 16px 24px;
       border-bottom: 1px solid rgba(255,255,255,0.08);
       flex-direction: column; gap: 16px; z-index: 8999;
@@ -71,6 +79,7 @@
       --text-2:    #94A3B8;
       --text-3:    #64748B;
       --font:      'Inter', -apple-system, sans-serif;
+      --font-display: 'Fraunces', Georgia, serif;
       --mono:      'JetBrains Mono', monospace;
       --r:         12px;
       --ease:      cubic-bezier(0.16, 1, 0.3, 1);
@@ -80,7 +89,7 @@
       min-height: 100vh; background: var(--bg); color: var(--text);
       font-family: var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden;
     }
-    body { padding-top: 56px; }
+    body { padding-top: 92px; }
 
     /* ─ Screens ─ */
     .screen { display: none; min-height: 100vh; flex-direction: column; }
@@ -155,7 +164,7 @@
     .cred-link:hover { color: var(--text-2); }
 
     .eyebrow { font-size: 11px; font-family: var(--mono); color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
-    h1 { font-size: clamp(28px, 6vw, 48px); font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; margin-bottom: 15px; }
+    h1 { font-family: var(--font-display); font-size: clamp(28px, 6vw, 48px); font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; margin-bottom: 15px; }
     h1 em { font-style: normal; color: #60A5FA; }
     .lead { font-size: 15px; color: var(--text-2); line-height: 1.65; margin-bottom: 24px; }
     .hero-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 24px; }
@@ -295,7 +304,7 @@
       position: absolute; inset: 0; display: flex; flex-direction: column;
       align-items: center; justify-content: center; font-family: var(--mono);
     }
-    .ring-n { font-size: 34px; font-weight: 700; line-height: 1; }
+    .ring-n { font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1; }
     .ring-d { font-size: 11px; color: var(--text-3); margin-top: 2px; }
 
     .band-chip {
@@ -311,7 +320,7 @@
     .score-tag { font-size: 12px; color: var(--text-3); font-family: var(--mono); margin-top: 5px; }
 
     .div { height: 1px; background: var(--border); margin: 15px 0; }
-    .rc-hl  { font-size: clamp(16px, 3vw, 19px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; margin-bottom: 8px; }
+    .rc-hl  { font-family: var(--font-display); font-size: clamp(17px, 3vw, 20px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; margin-bottom: 8px; }
     .rc-bod { font-size: 14px; color: var(--text-2); line-height: 1.65; }
 
     /* Dimensions */
@@ -356,6 +365,9 @@
 </head>
 <body>
 
+<!-- ═══ ANNOUNCEMENT BAR ═══ -->
+<div id="sn-banner">LAUNCH COHORT &middot; 10 PARTICIPANTS</div>
+
 <!-- ═══ SITE NAVIGATION ═══ -->
 <nav id="sn-nav" role="navigation" aria-label="Site navigation">
   <div id="sn-inner">
@@ -386,7 +398,7 @@
         </svg>
       </button>
 
-      <p class="hero-disclaimer">🔒 <strong>Your results are private.</strong> We only ask for your contact details at the end — to send you your personalised report.</p>
+      <p class="hero-disclaimer">🔒 <strong>Your results are private.</strong> No name or email required — see your score instantly.</p>
     </div>
   </div>
 </div>
@@ -629,11 +641,14 @@
     </div>
 
     <div class="rctas">
-      <button class="btn btn-wa full rv" id="btn-wa" onclick="openWA()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        <span id="wa-cta">Book a discovery call</span>
-      </button>
+      <a href="/checkout" class="btn full rv" style="background:#C2410C;color:#fff;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;text-decoration:none;width:100%;">
+        Reserve Your Seat in AI Value Sandbox →
+      </a>
     </div>
+
+    <p style="font-size:12px;color:var(--text-3);text-align:center;margin-top:12px;">
+      <button onclick="openWA()" style="background:none;border:none;padding:0;font:inherit;cursor:pointer;color:var(--text-3);text-decoration:underline;text-underline-offset:2px;">Have a question first? Ask on WhatsApp</button>
+    </p>
 
     <p style="font-size:11px;color:var(--text-3);text-align:center;margin-top:4px;">
       <a href="https://allansendagi.gumroad.com/l/ainavigatorsystem" target="_blank" rel="noopener" style="color:var(--text-3);text-decoration:underline;text-underline-offset:2px;">Get the full AI Roadmap book →</a>
@@ -678,38 +693,26 @@ const BANDS = {
   foundation: {
     label:'Foundation First', chip:'bc-f',
     tag:'Score: {s}/15 · Build the base first',
-    hl:'{n}, your AI foundations need strengthening first.',
-    body:"You're earlier than most businesses at this stage — and that's genuinely an advantage. Fewer bad habits to unlearn. The focus right now isn't AI tools; it's the process and data foundation that makes any AI investment stick. The AI Navigator Discovery is designed for exactly this: one session, a clear starting point, an honest view of what to fix first.",
-    offerTitle:'AI Navigator Discovery',
-    offerDesc:'One focused session to map your workflow, identify your biggest constraint, and give you a clear, prioritised next step.',
-    price:'Free', priceNote:'discovery call', cta:'Book a discovery call'
+    hl:'Your AI foundations need strengthening first.',
+    body:"You're earlier than most businesses at this stage — and that's genuinely an advantage. Fewer bad habits to unlearn. The focus right now isn't AI tools; it's the process and data foundation that makes any AI investment stick. AI Value Sandbox is designed for exactly this: bring one real task, and leave with a clear, honest view of what to fix first."
   },
   getting: {
     label:'Getting Ready', chip:'bc-g',
     tag:"Score: {s}/15 · You're closer than you think",
-    hl:"{n}, you're closer to AI-ready than most businesses in your region.",
-    body:"You have the building blocks in place but haven't assembled them into a clear plan yet. That gap is costing you time every week. The AI Navigator Starter is designed exactly for this stage — turning your current setup into a structured, actionable roadmap in two weeks.",
-    offerTitle:'AI Navigator Starter',
-    offerDesc:'2 sessions over 2 weeks. Strategic vision, workflow mapping, and a focused AI action plan delivered to your team.',
-    price:'$997', priceNote:'flat fee · Starter', cta:'Book a discovery call'
+    hl:"You're closer to AI-ready than most businesses in your region.",
+    body:"You have the building blocks in place but haven't assembled them into a clear plan yet. That gap is costing you time every week. AI Value Sandbox turns one real business task into a structured, actionable AI specification in a single 2.5-hour session."
   },
   good: {
     label:'Good Candidate', chip:'bc-c',
     tag:'Score: {s}/15 · Strong foundation, clear upside',
-    hl:"{n}, you're a strong AI candidate with a solid foundation.",
-    body:"Your setup is more mature than most. What you need now isn't more research — it's a structured roadmap that turns your readiness into real implementation. The AI Navigator gives you that in a defined engagement with clear deliverables and measurable outcomes.",
-    offerTitle:'AI Navigator Starter',
-    offerDesc:'2 sessions over 2 weeks. Strategic vision, workflow mapping, and a focused AI action plan delivered to your team.',
-    price:'$997', priceNote:'flat fee · Starter', cta:'Book a discovery call'
+    hl:"You're a strong AI candidate with a solid foundation.",
+    body:"Your setup is more mature than most. What you need now isn't more research — it's a structured specification that turns your readiness into real implementation. AI Value Sandbox gives you that in one focused working session."
   },
   ready: {
     label:'Ready to Navigate', chip:'bc-r',
     tag:'Score: {s}/15 · Built for this',
-    hl:"{n}, you're ready to navigate AI transformation.",
-    body:"This is exactly what the AI Navigator Full Roadmap is built for. You have the scale, the data, and the workflow complexity to make a structured AI implementation genuinely transformative. Let's build your roadmap and move.",
-    offerTitle:'AI Navigator Full Roadmap',
-    offerDesc:'4 sessions over 4 weeks. End-to-end AI strategy, implementation planning, vendor evaluation, and a 90-day execution roadmap.',
-    price:'$2,497', priceNote:'flat fee · Full Roadmap', cta:'Start your transformation'
+    hl:"You're ready to navigate AI transformation.",
+    body:"This is exactly what AI Value Sandbox is built for. You have the scale, the data, and the workflow complexity to make a structured AI implementation genuinely transformative. Bring your highest-value task, and let's build the specification."
   }
 };
 
@@ -768,20 +771,10 @@ function renderResults() {
   const b = S.band;
   let d   = Object.assign({}, BANDS[b]);
 
-  // Q5 = 20+ on "good" band → upgrade to Full Roadmap
-  if (b === 'good' && S.answers[4] === 3) {
-    d.offerTitle = 'AI Navigator Full Roadmap';
-    d.offerDesc  = '4 sessions over 4 weeks. End-to-end AI strategy, implementation planning, vendor evaluation, and a 90-day execution roadmap.';
-    d.price      = '$2,497';
-    d.priceNote  = 'flat fee · Full Roadmap';
-    d.cta        = 'Start your transformation';
-  }
-
   document.getElementById('score-num').textContent  = S.score;
   document.getElementById('score-tag').textContent  = d.tag.replace('{s}', S.score);
-  document.getElementById('rc-hl').textContent      = d.hl.replace('{n}', 'You');
+  document.getElementById('rc-hl').textContent      = d.hl;
   document.getElementById('rc-bod').textContent     = d.body;
-  document.getElementById('wa-cta').textContent     = d.cta;
   document.getElementById('rc-date').textContent    = new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
 
   const chip = document.getElementById('band-chip');
@@ -794,9 +787,9 @@ function renderResults() {
 
   document.getElementById('offer').innerHTML = `
     <div class="offer-ey">Recommended next step</div>
-    <div class="offer-title">${d.offerTitle}</div>
-    <div class="offer-desc">${d.offerDesc}</div>
-    <div class="offer-price-row"><span class="offer-price">${d.price}</span><span class="offer-note">${d.priceNote}</span></div>`;
+    <div class="offer-title">AI Value Sandbox</div>
+    <div class="offer-desc">A 2.5-hour live workshop with Allan Sendagi. Bring one real business task and leave with a defined, measurable AI intervention.</div>
+    <div class="offer-price-row"><span class="offer-price">QAR 550</span><span class="offer-note">per seat</span></div>`;
 
   // Stagger reveals
   document.querySelectorAll('#s-results .rv').forEach((el,i) => {
