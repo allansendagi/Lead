@@ -74,6 +74,7 @@ const walkAwayItems = [
   { title: 'A defined role for AI', desc: 'What AI should do, what it should not do, and where human judgment remains.' },
   { title: 'A measurable outcome', desc: 'How you will know whether the intervention actually improves the work.' },
   { title: 'A next step', desc: 'What to test, with what data, and what to measure.' },
+  { title: 'A clean handoff', desc: 'Precise enough to brief a developer, vendor, or AI coding agent — without losing the business intent between strategy and build.' },
 ]
 
 const canvasElements = [
@@ -117,7 +118,7 @@ const seatIncludes = [
 ]
 
 
-const faqs = [
+const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   {
     q: 'Do I need to be technical to do this?',
     a: 'No. This is not a coding workshop and you do not need to know how to build AI systems. You bring a real business task and work through the AI Task Canvas with guided instruction. The goal is to define the work clearly enough that the technical implementation becomes easier to understand, evaluate, and build.',
@@ -132,11 +133,52 @@ const faqs = [
   },
   {
     q: 'How is this different from asking ChatGPT to plan my AI project?',
-    a: 'ChatGPT can generate ideas. The Canvas forces the decisions that determine whether an idea can actually become an intervention: what AI must predict, what information it needs, where human judgment remains, how the system receives feedback, and what measurable outcome defines success.',
+    a: "ChatGPT can generate strategies, ideas, and recommendations. But a generated strategy is not the same as a defined AI intervention — and the answer depends on the context and assumptions you give it. The AI Task Canvas forces your organisation to make the decisions that matter: what task is being changed, what AI must predict, what judgment follows, what information and training data are required, how the system receives feedback, and what business outcome defines success. The result is specific to your task, your workflow, your decisions, your data, and your definition of value — not a generic AI strategy that could be handed to another organisation. ChatGPT can help generate the ideas. The Canvas makes the organisation specify what it actually intends to build.",
+    aRich: (
+      <>
+        ChatGPT can generate strategies, ideas, and recommendations. But a generated strategy is not the
+        same as a defined AI intervention — and the answer depends on the context and assumptions you
+        give it.
+        <br /><br />
+        The AI Task Canvas forces your organisation to make the decisions that matter:{' '}
+        <strong style={{ color: '#F5F1EA' }}>
+          what task is being changed, what AI must predict, what judgment follows, what information and
+          training data are required, how the system receives feedback, and what business outcome
+          defines success.
+        </strong>
+        <br /><br />
+        The result is specific to{' '}
+        <strong style={{ color: '#F5F1EA' }}>
+          your task, your workflow, your decisions, your data, and your definition of value
+        </strong>
+        {' '}— not a generic AI strategy that could be handed to another organisation.
+        <br /><br />
+        <strong style={{ color: '#F5F1EA' }}>
+          ChatGPT can help generate the ideas. The Canvas makes the organisation specify what it actually
+          intends to build.
+        </strong>
+      </>
+    ),
   },
   {
     q: 'What should I bring?',
     a: 'Bring one real business task you are responsible for — something repetitive, analytical, decision-heavy, or difficult to scale. Bring whatever you already know about how that task works. You do not need to prepare a technical specification beforehand.',
+  },
+  {
+    q: 'Is the Canvas a strategy tool or a technical specification?',
+    a: 'Both. The AI Task Canvas combines the strategic and development decisions needed to define an AI intervention. It connects the business task and the value it should create with the prediction, judgment, inputs, training data, feedback, and outcomes needed to develop and evaluate it. You are not creating a strategy document and then translating it into a technical specification. The Canvas does both in one framework.',
+    aRich: (
+      <>
+        <strong style={{ color: '#F5F1EA' }}>Both.</strong>
+        <br /><br />
+        The AI Task Canvas combines the strategic and development decisions needed to define an AI
+        intervention. It connects the business task and the value it should create with the prediction,
+        judgment, inputs, training data, feedback, and outcomes needed to develop and evaluate it.
+        <br /><br />
+        You are not creating a strategy document and then translating it into a technical specification.{' '}
+        <strong style={{ color: '#F5F1EA' }}>The Canvas does both in one framework.</strong>
+      </>
+    ),
   },
 ]
 
@@ -203,7 +245,7 @@ export default function WorkshopPage() {
                   key={item.href}
                   href={item.href}
                   style={{
-                    color: C.muted, fontSize: 13, fontWeight: 700, letterSpacing: '0.04em',
+                    color: C.muted, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em',
                     textDecoration: 'none', whiteSpace: 'nowrap',
                   }}
                 >
@@ -441,9 +483,19 @@ export default function WorkshopPage() {
             <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', margin: '0 0 20px' }}>
               FROM HIGH POTENTIAL TO HIGH CLARITY
             </p>
-            <p style={{ color: C.muted, fontSize: 15, margin: '0 auto 32px', maxWidth: 560, lineHeight: 1.75, fontFamily: bodyFont, textTransform: 'none' }}>
+            <p style={{ color: C.muted, fontSize: 15, margin: '0 auto 16px', maxWidth: 560, lineHeight: 1.75, fontFamily: bodyFont, textTransform: 'none' }}>
               You start with a business task. The Canvas forces the decisions that turn it into something
               that can actually be built, tested, and measured.
+            </p>
+            <p style={{ color: C.white, fontSize: 15, fontWeight: 700, margin: '0 auto 18px', maxWidth: 560, lineHeight: 1.6, fontFamily: bodyFont, textTransform: 'none' }}>
+              STRATEGY <span style={{ color: C.accentSoft }}>&harr;</span> AI TASK CANVAS <span style={{ color: C.accentSoft }}>&harr;</span> DEVELOPMENT
+            </p>
+            <p style={{ color: C.muted, fontSize: 15, margin: '0 auto 32px', maxWidth: 560, lineHeight: 1.75, fontFamily: bodyFont, textTransform: 'none' }}>
+              Not three sequential steps — one document. Action and Outcome are strategy: what you're
+              improving, and how you'll know it worked. Prediction, Input, Training Data, and Feedback are
+              what a developer, vendor, or AI coding agent needs to build it. Judgment carries both — the
+              value tradeoff and the decision rule. If you're the business owner, this is how you hand off
+              the work — without writing a second document first.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               {outputFlow.map((step, i) => (
@@ -704,14 +756,14 @@ export default function WorkshopPage() {
 
             <div>
               <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', margin: '0 0 28px' }}>
-                FIVE QUESTIONS YOU MAY BE ASKING
+                SIX QUESTIONS YOU MAY BE ASKING
               </p>
               {faqs.map((f, i) => (
                 <div key={f.q} style={{ display: 'grid', gridTemplateColumns: '36px 1fr', gap: 16, padding: '20px 0', borderTop: i !== 0 ? `1px solid ${C.border}` : 'none' }}>
                   <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, margin: 0 }}>{String(i + 1).padStart(2, '0')}</p>
                   <div>
                     <p style={{ fontSize: 16, fontWeight: 700, color: C.white, margin: '0 0 8px', textTransform: 'none' }}>{f.q}</p>
-                    <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>{f.a}</p>
+                    <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>{f.aRich ?? f.a}</p>
                   </div>
                 </div>
               ))}
