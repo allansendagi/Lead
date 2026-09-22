@@ -1,5 +1,8 @@
 import Link from 'next/link'
 
+const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '97450176561'
+const TEAM_TRAINING_WA = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent("Hi Allan, we're interested in team training using the AI Value Sandbox workshop")}`
+
 export default function Footer() {
   return (
     <footer style={{
@@ -22,6 +25,7 @@ export default function Footer() {
           <Link href="/industries" style={footerLink}>Industries</Link>
           <Link href="/book" style={footerLink}>Book</Link>
           <Link href="/work-with-us" style={footerLink}>Work With Me</Link>
+          <a href={TEAM_TRAINING_WA} target="_blank" rel="noopener noreferrer" style={footerLink}>Training for Teams</a>
           <Link href="/terms" style={footerLink}>Terms</Link>
           <Link href="/privacy" style={footerLink}>Privacy</Link>
         </nav>
