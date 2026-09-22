@@ -74,7 +74,7 @@ const walkAwayItems = [
   { title: 'A defined role for AI', desc: 'What AI should do, what it should not do, and where human judgment remains.' },
   { title: 'A measurable outcome', desc: 'How you will know whether the intervention actually improves the work.' },
   { title: 'A next step', desc: 'What to test, with what data, and what to measure.' },
-  { title: 'A clean handoff', desc: 'Precise enough to brief a developer, vendor, or AI coding agent — without losing the business intent between strategy and build.' },
+  { title: 'A build-ready specification', desc: 'Precise enough to brief a developer, vendor, or AI coding agent — without losing the business intent between strategy and build.' },
 ]
 
 const canvasElements = [
@@ -133,12 +133,11 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'How is this different from asking ChatGPT to plan my AI project?',
-    a: "ChatGPT can generate strategies, ideas, and recommendations. But a generated strategy is not the same as a defined AI intervention — and the answer depends on the context and assumptions you give it. The AI Task Canvas forces your organisation to make the decisions that matter: what task is being changed, what AI must predict, what judgment follows, what information and training data are required, how the system receives feedback, and what business outcome defines success. The result is specific to your task, your workflow, your decisions, your data, and your definition of value — not a generic AI strategy that could be handed to another organisation. ChatGPT can help generate the ideas. The Canvas makes the organisation specify what it actually intends to build.",
+    a: "ChatGPT can generate strategies, ideas, and recommendations. But a generated answer is not a specification of what your organisation intends to change. The AI Task Canvas forces your organisation to make the decisions that matter: what task is being changed, what AI must predict, what judgment follows, what information and training data are required, how the system receives feedback, and what business outcome defines success. The result is specific to your task, your workflow, your decisions, your data, and your definition of value — not a generic answer that could be given to another organisation. ChatGPT can help generate the ideas. The Canvas makes the organisation specify what it actually intends to build.",
     aRich: (
       <>
-        ChatGPT can generate strategies, ideas, and recommendations. But a generated strategy is not the
-        same as a defined AI intervention — and the answer depends on the context and assumptions you
-        give it.
+        ChatGPT can generate strategies, ideas, and recommendations. But a generated answer is not a
+        specification of what your organisation intends to change.
         <br /><br />
         The AI Task Canvas forces your organisation to make the decisions that matter:{' '}
         <strong style={{ color: '#F5F1EA' }}>
@@ -151,7 +150,7 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
         <strong style={{ color: '#F5F1EA' }}>
           your task, your workflow, your decisions, your data, and your definition of value
         </strong>
-        {' '}— not a generic AI strategy that could be handed to another organisation.
+        {' '}— not a generic answer that could be given to another organisation.
         <br /><br />
         <strong style={{ color: '#F5F1EA' }}>
           ChatGPT can help generate the ideas. The Canvas makes the organisation specify what it actually
@@ -288,7 +287,7 @@ export default function WorkshopPage() {
             Take one real business task and define exactly how AI can improve it — and how you&apos;ll measure the result.
           </p>
           <p style={{ fontSize: 18, color: C.white, fontWeight: 700, lineHeight: 1.6, margin: '0 auto 36px', maxWidth: 680, fontFamily: bodyFont }}>
-            Bring one task. Leave with a clear plan for using AI on it.
+            Bring one task. Leave with a defined AI intervention.
           </p>
 
           <a
@@ -401,7 +400,7 @@ export default function WorkshopPage() {
                 textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
               }}
             >
-              Reserve Your Seat
+              I Want a Defined AI Intervention
             </a>
           </div>
         </section>
@@ -422,6 +421,8 @@ export default function WorkshopPage() {
               Every element forces one more decision you can&apos;t leave undefined — what AI should predict, what
               data it needs, where human judgment remains, and how you&apos;ll know it worked. You leave with
               all seven answered for your own task.
+              <br /><br />
+              The Canvas combines the strategic and development decisions needed to define an AI intervention.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
@@ -448,7 +449,7 @@ export default function WorkshopPage() {
               One task. Seven decisions.
             </h2>
             <p style={{ color: C.muted, fontSize: 16, margin: '0 auto 14px', maxWidth: 600, lineHeight: 1.7, fontFamily: bodyFont, textTransform: 'none' }}>
-              The AI Task Canvas turns a vague AI opportunity into a clear specification for how the intervention should work.
+              The AI Task Canvas turns a vague AI opportunity into a specification for what the intervention should do, what it requires, and how its value will be measured.
             </p>
             <p style={{ fontSize: 16, fontWeight: 700, color: C.white, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
               This is the artifact you leave with.
@@ -510,6 +511,18 @@ export default function WorkshopPage() {
                   {i < outputFlow.length - 1 && <span style={{ color: C.muted, fontSize: 13 }}>→</span>}
                 </span>
               ))}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: 48 }}>
+              <a
+                href="/checkout"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
+                  padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
+                  textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
+                }}
+              >
+                Turn My Task Into an AI Specification
+              </a>
             </div>
           </div>
         </section>
@@ -593,7 +606,7 @@ export default function WorkshopPage() {
                 fontSize: 14, fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
               }}
             >
-              Secure Your Seat
+              Reserve Your Seat
             </a>
             <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', fontStyle: 'italic', margin: '14px 0 0' }}>
               10 participants maximum. Launch cohort pricing applies to this cohort.
@@ -791,8 +804,11 @@ export default function WorkshopPage() {
           <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 900, margin: '0 0 14px', lineHeight: 1.15, textTransform: 'none' }}>
             You walked in with an AI idea.
           </h2>
-          <p style={{ fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', fontWeight: 700, fontStyle: 'italic', color: C.accent, margin: '0 0 36px' }}>
+          <p style={{ fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', fontWeight: 700, fontStyle: 'italic', color: C.accent, margin: '0 0 14px' }}>
             Leave with an AI intervention you can actually specify.
+          </p>
+          <p style={{ fontSize: 15, color: C.muted, margin: '0 auto 36px', maxWidth: 520, lineHeight: 1.7, fontFamily: bodyFont, textTransform: 'none' }}>
+            From there, you can test it, brief development, engage a vendor, or take it into your wider AI roadmap.
           </p>
 
           <a
@@ -803,7 +819,7 @@ export default function WorkshopPage() {
               textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
             }}
           >
-            Secure Your Seat
+            I Want to Make AI Work
           </a>
           <p style={{ fontSize: 13, color: C.muted, fontStyle: 'italic', margin: '18px 0 0', fontFamily: bodyFont, textTransform: 'none' }}>
             10 seats · Enrollment is first come, first served
