@@ -9,6 +9,7 @@ const ADMIN_EMAIL = process.env.RESERVATION_NOTIFY_EMAIL || 'allan@safehavenai.w
 export const PRICE_PER_SEAT_QAR = 550
 export const PRICE_PER_SEAT_USD = 151 // QAR is pegged at ~3.64/USD — fixed price, not a live conversion
 export const WORKSHOP_DATE = 'October 3, 2026'
+export const WORKSHOP_TIME = '10:00 AM Doha (GMT+3)'
 
 export const BANK = {
   bank: 'Commercial Bank of Qatar',
@@ -120,7 +121,7 @@ function buildEmailHtml(opts: { name: string; seats: number; total: number; curr
           Hi ${firstName}, your seat is ${method === 'paypal' ? 'confirmed' : 'reserved'}.
         </h1>
         <p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#D8D2C6;margin:0 0 24px;">
-          ${seats} ${seatWord} &middot; <strong style="color:#F5F1EA;">${WORKSHOP_DATE}</strong> &middot; 2.5 hours &middot; Live online
+          ${seats} ${seatWord} &middot; <strong style="color:#F5F1EA;">${WORKSHOP_DATE} &middot; ${WORKSHOP_TIME}</strong> &middot; 2.5 hours &middot; Live online
         </p>
         ${paymentBlock}
         <a href="${waUrl}" style="display:inline-block;background:#C2410C;color:#F5F1EA;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;padding:14px 24px;border-radius:10px;">

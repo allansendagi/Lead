@@ -19,8 +19,8 @@ export const metadata: Metadata = {
 
 // ── Editable event details — fill these in once confirmed ──────────────────
 const WORKSHOP_DATE = 'October 3, 2026'
-const WORKSHOP_TIME = '[TIME — TBC]'
-const WORKSHOP_DEADLINE = '2026-10-03T00:00:00'
+const WORKSHOP_TIME = '10:00 AM Doha (GMT+3)'
+const WORKSHOP_DEADLINE = '2026-10-03T10:00:00+03:00'
 
 // ── Editorial Authority palette — black kept, one deliberate accent ────────
 const C = {
@@ -582,7 +582,7 @@ export default function WorkshopPage() {
               QAR 550
             </p>
             <p style={{ fontSize: 14, color: C.muted, margin: '0 0 24px', fontFamily: bodyFont }}>
-              One workshop seat &middot; 2.5 hours &middot; Live online
+              Saturday, {WORKSHOP_DATE.replace(', 2026', '')} &middot; {WORKSHOP_TIME} &middot; 2.5 hours &middot; Live online
             </p>
             <p style={{ fontSize: 15, color: C.body, lineHeight: 1.7, margin: '0 0 32px', fontFamily: bodyFont, textAlign: 'left' }}>
               This launch cohort is limited to <strong style={{ color: C.white }}>10 participants</strong> so
