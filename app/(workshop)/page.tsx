@@ -488,15 +488,8 @@ export default function WorkshopPage() {
               You start with a business task. The Canvas forces the decisions that turn it into something
               that can actually be built, tested, and measured.
             </p>
-            <p style={{ color: C.white, fontSize: 15, fontWeight: 700, margin: '0 auto 18px', maxWidth: 560, lineHeight: 1.6, fontFamily: bodyFont, textTransform: 'none' }}>
+            <p style={{ color: C.white, fontSize: 15, fontWeight: 700, margin: '0 auto 32px', maxWidth: 560, lineHeight: 1.6, fontFamily: bodyFont, textTransform: 'none' }}>
               STRATEGY <span style={{ color: C.accentSoft }}>&harr;</span> AI TASK CANVAS <span style={{ color: C.accentSoft }}>&harr;</span> DEVELOPMENT
-            </p>
-            <p style={{ color: C.muted, fontSize: 15, margin: '0 auto 32px', maxWidth: 560, lineHeight: 1.75, fontFamily: bodyFont, textTransform: 'none' }}>
-              Not three sequential steps — one document. Action and Outcome are strategy: what you're
-              improving, and how you'll know it worked. Prediction, Input, Training Data, and Feedback are
-              what a developer, vendor, or AI coding agent needs to build it. Judgment carries both — the
-              value tradeoff and the decision rule. If you're the business owner, this is how you hand off
-              the work — without writing a second document first.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               {outputFlow.map((step, i) => (
