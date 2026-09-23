@@ -646,7 +646,7 @@ export default function WorkshopPage() {
                   Allan Sendagi
                 </h2>
                 <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.08em', margin: '0 0 28px', fontFamily: bodyFont }}>
-                  AUTHOR, THE AI ROADMAP &middot; FOUNDER, SAFEHAVEN AI &amp; AI TOWNSQUARE &middot; BUILDER, NOMOS PROTOCOL
+                  AUTHOR, THE AI ROADMAP &middot; FOUNDER, SAFEHAVEN AI &middot; BUILDER, NOMOS PROTOCOL
                 </p>
                 <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.8, margin: '0 0 20px', fontFamily: bodyFont, textTransform: 'none' }}>
                   Allan Sendagi is the author of <em style={{ fontStyle: 'normal' }}>The AI Roadmap: Implement AI Profitably in 10 Steps</em> and
@@ -654,8 +654,7 @@ export default function WorkshopPage() {
                   behind the AI Task Canvas used in this workshop.
                 </p>
                 <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.8, margin: '0 0 20px', fontFamily: bodyFont, textTransform: 'none' }}>
-                  He founded <strong style={{ color: C.white }}>SafeHaven AI</strong> and{' '}
-                  <strong style={{ color: C.white }}>AI TownSquare</strong>, co-founded{' '}
+                  He founded <strong style={{ color: C.white }}>SafeHaven AI</strong>, co-founded{' '}
                   <strong style={{ color: C.white }}>Shapr</strong> — an applied AI agency based in Dubai — and built{' '}
                   <strong style={{ color: C.white }}>NOMOS Protocol</strong>, an infrastructure specification for
                   machine-verifiable institutional authority. He also developed{' '}
