@@ -4,9 +4,10 @@ import Countdown from './Countdown'
 
 const C = { bg: '#080808', card: '#161513', border: 'rgba(245,241,234,0.12)', accent: '#C2410C', white: '#F5F1EA', muted: '#A39C90' }
 
-const WORKSHOP_DEADLINE = '2026-10-03T00:00:00'
+const WORKSHOP_DEADLINE = '2026-10-03T10:00:00+03:00'
 const PRICE_PER_SEAT_QAR = 550
 const PRICE_PER_SEAT_USD = 151
+const PRICE_PER_SEAT_AED = 555
 const MAX_SEATS = 10
 
 const included = [
@@ -233,8 +234,11 @@ export default function CheckoutContents({ waNumber, paypalClientId }: { waNumbe
           <div style={{ borderTop: `1px solid ${C.border}`, margin: '20px 0' }} />
 
           <p style={{ fontSize: 13, color: C.muted, margin: '0 0 6px' }}>AI Value / Sandbox</p>
-          <p style={{ fontSize: 28, fontWeight: 800, color: C.white, margin: '0 0 20px' }}>
+          <p style={{ fontSize: 28, fontWeight: 800, color: C.white, margin: '0 0 4px' }}>
             QAR {PRICE_PER_SEAT_QAR} <span style={{ fontSize: 14, fontWeight: 500, color: C.muted }}>/ seat</span>
+          </p>
+          <p style={{ fontSize: 13, color: C.muted, margin: '0 0 20px' }}>
+            &asymp; AED {PRICE_PER_SEAT_AED} / seat
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderTop: `1px solid ${C.border}` }}>
