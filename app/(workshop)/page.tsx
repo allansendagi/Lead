@@ -655,7 +655,8 @@ export default function WorkshopPage() {
                 </p>
                 <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.8, margin: '0 0 20px', fontFamily: bodyFont, textTransform: 'none' }}>
                   He founded <strong style={{ color: C.white }}>SafeHaven AI</strong> and{' '}
-                  <strong style={{ color: C.white }}>AI TownSquare</strong>, and built{' '}
+                  <strong style={{ color: C.white }}>AI TownSquare</strong>, co-founded{' '}
+                  <strong style={{ color: C.white }}>Shapr</strong> — an applied AI agency based in Dubai — and built{' '}
                   <strong style={{ color: C.white }}>NOMOS Protocol</strong>, an infrastructure specification for
                   machine-verifiable institutional authority. He also developed{' '}
                   <strong style={{ color: C.white }}>Computable Authority</strong>, a proposed runtime architecture
