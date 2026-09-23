@@ -101,9 +101,11 @@ const outputExample = [
 
 const outputFlow = ['Action', 'Prediction', 'Judgment', 'Input', 'Training', 'Feedback', 'Outcome']
 
-const sessionRows = [
-  { week: 'Part 01', tag: 'The Framework · 45 min', title: 'All 7 Elements, With Real Examples', desc: 'Walk through the complete AI Task Canvas using examples from real business tasks across industries.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
-  { week: 'Part 02', tag: 'Build Your Canvas · 75 min', title: 'Your Canvas, Live', desc: 'Apply the canvas to your own priority AI task, element by element, with live guidance from Allan.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+const sessionRows: { type?: 'break'; week: string; tag: string; title: string; desc: string; host: string; role: string }[] = [
+  { week: 'Part 01', tag: 'The Framework · 40 min', title: 'All 7 Elements, With Real Examples', desc: 'Walk through the complete AI Task Canvas using examples from real business tasks across industries.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { type: 'break', week: '', tag: '', title: 'Break', desc: '5 minutes — stretch, refill your coffee.', host: '', role: '' },
+  { week: 'Part 02', tag: 'Build Your Canvas · 70 min', title: 'Your Canvas, Live', desc: 'Apply the canvas to your own priority AI task, element by element, with live guidance from Allan.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { type: 'break', week: '', tag: '', title: 'Break', desc: '5 minutes — stretch, refill your coffee.', host: '', role: '' },
   { week: 'Part 03', tag: 'Pressure-Test · 30 min', title: 'Stress-Test Before You Build', desc: 'Pressure-test your Judgment rule, Input list, and Outcome before you build, brief a vendor, or commit resources.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
 ]
 
@@ -530,22 +532,35 @@ export default function WorkshopPage() {
           </div>
           <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden' }}>
             {sessionRows.map((r, i) => (
-              <div key={r.week} className="session-row" style={{
-                display: 'grid', gridTemplateColumns: '140px 1fr 200px', gap: 24,
-                padding: '28px 24px', borderTop: i > 0 ? `1px solid ${C.border}` : 'none',
-                background: i % 2 === 0 ? C.card : 'transparent',
-              }}>
-                <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, letterSpacing: '0.08em', margin: 0 }}>{r.week.toUpperCase()}</p>
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, letterSpacing: '0.06em', margin: '0 0 8px', fontFamily: bodyFont }}>{r.tag.toUpperCase()}</p>
-                  <h3 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 8px', textTransform: 'none' }}>{r.title}</h3>
-                  <p style={{ fontSize: 14, color: C.muted, margin: 0, lineHeight: 1.65, fontFamily: bodyFont, textTransform: 'none' }}>{r.desc}</p>
+              r.type === 'break' ? (
+                <div key={`break-${i}`} style={{
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  padding: '14px 24px', borderTop: `1px solid ${C.border}`,
+                  background: 'transparent',
+                }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: bodyFont }}>
+                    {r.title}
+                  </span>
+                  <span style={{ fontSize: 13, color: C.muted, fontFamily: bodyFont, textTransform: 'none' }}>{r.desc}</span>
                 </div>
-                <div>
-                  <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 4px', textTransform: 'none' }}>{r.host}</p>
-                  <p style={{ fontSize: 12, color: C.muted, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>Author, <em style={{ fontStyle: 'normal' }}>The AI Roadmap</em></p>
+              ) : (
+                <div key={r.week} className="session-row" style={{
+                  display: 'grid', gridTemplateColumns: '140px 1fr 200px', gap: 24,
+                  padding: '28px 24px', borderTop: i > 0 ? `1px solid ${C.border}` : 'none',
+                  background: i % 2 === 0 ? C.card : 'transparent',
+                }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, letterSpacing: '0.08em', margin: 0 }}>{r.week.toUpperCase()}</p>
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, letterSpacing: '0.06em', margin: '0 0 8px', fontFamily: bodyFont }}>{r.tag.toUpperCase()}</p>
+                    <h3 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 8px', textTransform: 'none' }}>{r.title}</h3>
+                    <p style={{ fontSize: 14, color: C.muted, margin: 0, lineHeight: 1.65, fontFamily: bodyFont, textTransform: 'none' }}>{r.desc}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 4px', textTransform: 'none' }}>{r.host}</p>
+                    <p style={{ fontSize: 12, color: C.muted, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>Author, <em style={{ fontStyle: 'normal' }}>The AI Roadmap</em></p>
+                  </div>
                 </div>
-              </div>
+              )
             ))}
           </div>
         </section>
