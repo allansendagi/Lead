@@ -51,13 +51,13 @@ const personas = [
   {
     num: '01',
     tag: 'The AI Experimenter',
-    title: "Your organisation is using AI, but you're not sure where it's creating value.",
+    title: "Your team uses AI every day. You still can't point to a result it moved.",
     desc: 'Your teams are using ChatGPT, Copilot, agents and other AI tools. But usage is growing faster than your ability to identify which work should actually change.',
   },
   {
     num: '02',
     tag: 'The Strategy Leader',
-    title: 'You need to move from AI ideas to specific organisational priorities.',
+    title: "You're expected to have an AI plan. You're still figuring out where AI actually belongs.",
     desc: 'You hear AI use cases everywhere. What you need is a way to identify the actual tasks worth changing — and determine what success should look like.',
   },
   {
@@ -283,7 +283,7 @@ export default function WorkshopPage() {
             Make AI <span style={{ color: C.accent }}>Work</span>
           </h1>
           <p style={{ fontSize: 'clamp(1.2rem, 2.4vw, 1.6rem)', fontWeight: 700, color: C.white, lineHeight: 1.35, margin: '0 auto 20px', maxWidth: 720, textTransform: 'uppercase' }}>
-            From AI Adoption To AI Value
+            Your Company Is Using AI. Do You Know What It&apos;s Actually Changing?
           </p>
           <p className="hero-oneline" style={{ fontSize: 18, color: C.muted, lineHeight: 1.75, margin: '0 auto 20px', maxWidth: 'none', whiteSpace: 'nowrap', fontFamily: bodyFont }}>
             Take one real business task and define exactly how AI can improve it — and how you&apos;ll measure the result.
@@ -604,8 +604,8 @@ export default function WorkshopPage() {
               Saturday, {WORKSHOP_DATE.replace(', 2026', '')} &middot; {WORKSHOP_TIME} &middot; 2.5 hours &middot; Live online
             </p>
             <p style={{ fontSize: 15, color: C.body, lineHeight: 1.7, margin: '0 0 32px', fontFamily: bodyFont, textAlign: 'left' }}>
-              This launch cohort is limited to <strong style={{ color: C.white }}>10 participants</strong> so
-              the session remains a working environment rather than a lecture.
+              Limited to <strong style={{ color: C.white }}>10 seats</strong> so I can work on your actual task
+              with you, not a hypothetical one. This is a working session, not a webinar.
             </p>
 
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
@@ -629,6 +629,16 @@ export default function WorkshopPage() {
             </a>
             <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', margin: '14px 0 0' }}>
               10 participants maximum. Launch cohort pricing applies to this cohort.
+            </p>
+            <p style={{ fontSize: 13, color: C.muted, textAlign: 'center', margin: '10px 0 0', fontFamily: bodyFont }}>
+              Not sure your task is a fit?{' '}
+              <a
+                href={`https://wa.me/97450176561?text=${encodeURIComponent("Hi Allan, I want to check if my task is a good fit for the AI Value Sandbox workshop")}`}
+                style={{ color: C.accent, fontWeight: 700, textDecoration: 'none' }}
+              >
+                Message me on WhatsApp
+              </a>{' '}
+              and I&apos;ll tell you.
             </p>
           </div>
 
@@ -782,7 +792,7 @@ export default function WorkshopPage() {
                 You are not buying 2.5 hours.
               </h2>
               <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.75, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
-                You&apos;re buying a completed specification for one real AI task — and a method you can use on the next one.
+                You leave knowing exactly where AI belongs in one real piece of work — what it should do, and how you&apos;ll know it worked.
               </p>
             </div>
 
