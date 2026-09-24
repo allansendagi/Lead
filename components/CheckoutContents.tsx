@@ -7,7 +7,7 @@ const C = { bg: '#080808', card: '#161513', border: 'rgba(245,241,234,0.12)', ac
 const WORKSHOP_DEADLINE = '2026-10-03T10:00:00+03:00'
 const PRICE_PER_SEAT_QAR = 550
 const PRICE_PER_SEAT_USD = 151
-const PRICE_PER_SEAT_AED = 555
+const PRICE_PER_SEAT_AED = 554
 const MAX_SEATS = 10
 
 const included = [

@@ -590,7 +590,7 @@ export default function WorkshopPage() {
               QAR 550
             </p>
             <p style={{ fontSize: 14, color: C.muted, margin: '0 0 8px', fontFamily: bodyFont }}>
-              &asymp; AED 555
+              &asymp; AED 554
             </p>
             <p style={{ fontSize: 14, color: C.muted, margin: '0 0 24px', fontFamily: bodyFont }}>
               Saturday, {WORKSHOP_DATE.replace(', 2026', '')} &middot; {WORKSHOP_TIME} &middot; 2.5 hours &middot; Live online
