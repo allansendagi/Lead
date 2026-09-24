@@ -26,3 +26,17 @@ CREATE TABLE IF NOT EXISTS task_picker_leads (
 
 CREATE INDEX IF NOT EXISTS task_picker_leads_created_at_idx ON task_picker_leads (created_at DESC);
 CREATE INDEX IF NOT EXISTS task_picker_leads_email_idx ON task_picker_leads (email);
+
+-- Row Level Security
+ALTER TABLE task_picker_leads ENABLE ROW LEVEL SECURITY;
+
+-- Anon (our API serverless function, if SUPABASE_SERVICE_KEY isn't set) can insert
+CREATE POLICY "anon_insert" ON task_picker_leads
+  FOR INSERT TO anon
+  WITH CHECK (true);
+
+-- Service role has full access (admin, reading leads)
+CREATE POLICY "service_full" ON task_picker_leads
+  FOR ALL TO service_role
+  USING (true)
+  WITH CHECK (true);
