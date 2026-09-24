@@ -218,9 +218,12 @@ export default function CheckoutContents({ waNumber, paypalClientId }: { waNumbe
         <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: '0 0 4px' }}>
           One real business task you want to improve with AI.
         </p>
-        <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: 0 }}>
+        <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: '0 0 12px' }}>
           No technical background required. No coding required.
         </p>
+        <a href="/pick-your-task" style={{ color: C.muted, fontSize: 13.5, textDecoration: 'underline' }}>
+          Don&apos;t have one yet? Find one in 5 minutes &rarr;
+        </a>
       </div>
 
       <div>
