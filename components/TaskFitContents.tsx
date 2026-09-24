@@ -82,6 +82,9 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
 
   return (
     <div style={{ background: C.bg, minHeight: '100vh', fontFamily: 'var(--font)' }}>
+      <div style={{ background: C.accent, color: C.white, textAlign: 'center', padding: '10px 16px', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em' }}>
+        LAUNCH COHORT &middot; 10 PARTICIPANTS
+      </div>
       <div style={{ padding: '20px 24px' }}>
         <a href="/" style={{ color: C.white, fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>&larr; Back to the workshop</a>
       </div>
