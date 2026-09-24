@@ -518,6 +518,14 @@ export default function WorkshopPage() {
               >
                 Turn My Task Into an AI Specification
               </a>
+              <p style={{ margin: '16px 0 0' }}>
+                <a
+                  href="/pick-your-task"
+                  style={{ color: C.muted, fontSize: 13.5, textDecoration: 'underline', fontFamily: bodyFont }}
+                >
+                  Not sure your task is ready? Try the 5-minute task picker &rarr;
+                </a>
+              </p>
             </div>
           </div>
         </section>
