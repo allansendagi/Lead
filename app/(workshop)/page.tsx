@@ -122,18 +122,6 @@ const seatIncludes = [
 
 const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   {
-    q: 'Do I need to be technical to do this?',
-    a: 'No. This is not a coding workshop and you do not need to know how to build AI systems. You bring a real business task and work through the AI Task Canvas with guided instruction. The goal is to define the work clearly enough that the technical implementation becomes easier to understand, evaluate, and build.',
-  },
-  {
-    q: 'What will I actually have at the end?',
-    a: 'You will have one completed AI Task Canvas for a real task from your work. You will have defined the action, prediction, judgment, input, training data, feedback, and outcome — along with a clear AI intervention and measurable value hypothesis.',
-  },
-  {
-    q: "What if I don't have a specific AI idea yet?",
-    a: "That's fine. You do not need to arrive with a fully formed AI use case. You need a real business task that could be improved. We will help you identify and sharpen the task before working through the Canvas.",
-  },
-  {
     q: 'How is this different from asking ChatGPT to plan my AI project?',
     a: "ChatGPT can generate strategies, ideas, and recommendations. But a generated answer is not a specification of what your organisation intends to change. The AI Task Canvas forces your organisation to make the decisions that matter: what task is being changed, what AI must predict, what judgment follows, what information and training data are required, how the system receives feedback, and what business outcome defines success. The result is specific to your task, your workflow, your decisions, your data, and your definition of value — not a generic answer that could be given to another organisation. ChatGPT can help generate the ideas. The Canvas makes the organisation specify what it actually intends to build.",
     aRich: (
@@ -160,6 +148,18 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
         </strong>
       </>
     ),
+  },
+  {
+    q: 'Do I need to be technical to do this?',
+    a: 'No. This is not a coding workshop and you do not need to know how to build AI systems. You bring a real business task and work through the AI Task Canvas with guided instruction. The goal is to define the work clearly enough that the technical implementation becomes easier to understand, evaluate, and build.',
+  },
+  {
+    q: 'What will I actually have at the end?',
+    a: 'You will have one completed AI Task Canvas for a real task from your work. You will have defined the action, prediction, judgment, input, training data, feedback, and outcome — along with a clear AI intervention and measurable value hypothesis.',
+  },
+  {
+    q: "What if I don't have a specific AI idea yet?",
+    a: "That's fine. You do not need to arrive with a fully formed AI use case. You need a real business task that could be improved. We will help you identify and sharpen the task before working through the Canvas.",
   },
   {
     q: 'What should I bring?',
