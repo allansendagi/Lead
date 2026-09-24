@@ -283,13 +283,13 @@ export default function WorkshopPage() {
             Make AI <span style={{ color: C.accent }}>Work</span>
           </h1>
           <p style={{ fontSize: 'clamp(1.2rem, 2.4vw, 1.6rem)', fontWeight: 700, color: C.white, lineHeight: 1.35, margin: '0 auto 20px', maxWidth: 720, textTransform: 'uppercase' }}>
-            Your Company Is Using AI. Do You Know What It&apos;s Actually Changing?
+            Your Company Is Using AI. Do You Actually Know What&apos;s Changing?
           </p>
           <p className="hero-oneline" style={{ fontSize: 18, color: C.muted, lineHeight: 1.75, margin: '0 auto 20px', maxWidth: 'none', whiteSpace: 'nowrap', fontFamily: bodyFont }}>
-            Take one real business task and define exactly how AI can improve it — and how you&apos;ll measure the result.
+            Bring one real business task.
           </p>
           <p style={{ fontSize: 18, color: C.white, fontWeight: 700, lineHeight: 1.6, margin: '0 auto 36px', maxWidth: 680, fontFamily: bodyFont }}>
-            Bring one task. Leave with a defined AI intervention.
+            Leave with a defined AI intervention and the metrics to prove it works.
           </p>
 
           <a
