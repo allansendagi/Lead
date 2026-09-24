@@ -677,10 +677,11 @@ export default function WorkshopPage() {
                 <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.8, margin: '0 0 20px', fontFamily: bodyFont, textTransform: 'none' }}>
                   He founded <strong style={{ color: C.white }}>SafeHaven AI</strong> and co-founded{' '}
                   <strong style={{ color: C.white }}>Shapr</strong>, an applied AI agency based in Dubai. At SafeHaven,
-                  he built <strong style={{ color: C.white }}>NOMOS Protocol</strong>, an infrastructure specification
+                  he built{' '}
+                  <a href="https://www.nomosprotocol.com/" target="_blank" rel="noopener noreferrer" style={{ color: C.white, fontWeight: 700, textDecoration: 'none' }}>NOMOS Protocol</a>, an infrastructure specification
                   for machine-verifiable institutional authority (how an organisation can prove an AI acted within
                   the authority it was given), and developed{' '}
-                  <strong style={{ color: C.white }}>Computable Authority</strong>, a proposed runtime architecture
+                  <a href="https://www.computableauthority.com/" target="_blank" rel="noopener noreferrer" style={{ color: C.white, fontWeight: 700, textDecoration: 'none' }}>Computable Authority</a>, a proposed runtime architecture
                   for binding institutional authority to machine-executed action, put forward through the
                   OECD&apos;s 2026 public consultation on Law as Code.
                 </p>
