@@ -37,6 +37,9 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [scores, setScores] = useState<Criteria>({ predictability: 3, data: 3, complexity: 3, frequency: 3 })
   const [classification, setClassification] = useState<'fixed' | 'estimate' | null>(null)
+  const [captureName, setCaptureName] = useState('')
+  const [captureEmail, setCaptureEmail] = useState('')
+  const [captureState, setCaptureState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
 
   const effectiveWorkflow = workflow === 'Something else' ? customWorkflow : workflow
   const keptTasks = tasks.filter(t => t.keep && t.text.trim())
@@ -69,6 +72,35 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
     setStep('intro'); setWorkflow(''); setCustomWorkflow('')
     setTasks([{ id: uid(), text: '', keep: true }]); setSelectedTaskId(null)
     setScores({ predictability: 3, data: 3, complexity: 3, frequency: 3 }); setClassification(null)
+    setCaptureName(''); setCaptureEmail(''); setCaptureState('idle')
+  }
+
+  async function submitCapture() {
+    if (!selectedTask || !classification || captureState === 'sending') return
+    setCaptureState('sending')
+    try {
+      const res = await fetch('/api/task-picker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: captureEmail,
+          name: captureName || undefined,
+          workflow: effectiveWorkflow,
+          taskText: selectedTask.text,
+          predictability: scores.predictability,
+          dataAvailability: scores.data,
+          complexity: scores.complexity,
+          frequency: scores.frequency,
+          classification,
+          automationFit,
+          aiPotential,
+        }),
+      })
+      if (!res.ok) throw new Error('request failed')
+      setCaptureState('sent')
+    } catch {
+      setCaptureState('error')
+    }
   }
 
   const steps: { key: typeof step; label: string }[] = [
@@ -385,6 +417,61 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
               }}>
                 Try another task
               </button>
+            </div>
+
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '20px 22px', marginBottom: 28 }}>
+              {captureState === 'sent' ? (
+                <p style={{ fontSize: 14, color: C.white, margin: 0 }}>
+                  Saved — we&apos;ll follow up before 3 October if it&apos;s useful.
+                </p>
+              ) : (
+                <>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: C.white, margin: '0 0 4px' }}>
+                    Want us to save this and follow up before 3 October?
+                  </p>
+                  <p style={{ fontSize: 12.5, color: C.muted, margin: '0 0 14px' }}>
+                    Optional — the button above already works without this.
+                  </p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <input
+                      value={captureName}
+                      onChange={e => setCaptureName(e.target.value)}
+                      placeholder="Name (optional)"
+                      style={{
+                        flex: '1 1 140px', padding: '11px 12px', borderRadius: 8,
+                        background: C.sunk, border: `1px solid ${C.border}`, color: C.white, fontSize: 13.5,
+                      }}
+                    />
+                    <input
+                      value={captureEmail}
+                      onChange={e => setCaptureEmail(e.target.value)}
+                      placeholder="you@company.com"
+                      type="email"
+                      style={{
+                        flex: '2 1 200px', padding: '11px 12px', borderRadius: 8,
+                        background: C.sunk, border: `1px solid ${C.border}`, color: C.white, fontSize: 13.5,
+                      }}
+                    />
+                    <button
+                      onClick={submitCapture}
+                      disabled={!captureEmail.trim() || captureState === 'sending'}
+                      style={{
+                        background: C.accent, color: C.white, border: 'none', borderRadius: 8,
+                        padding: '11px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                        opacity: !captureEmail.trim() || captureState === 'sending' ? 0.5 : 1,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {captureState === 'sending' ? 'Saving…' : 'Save it'}
+                    </button>
+                  </div>
+                  {captureState === 'error' && (
+                    <p style={{ fontSize: 12.5, color: C.accentSoft, margin: '10px 0 0' }}>
+                      Something went wrong — try again, or just register directly above.
+                    </p>
+                  )}
+                </>
+              )}
             </div>
 
             <button onClick={reset} style={{ background: 'none', border: 'none', color: C.muted, fontSize: 13, textDecoration: 'underline', cursor: 'pointer', padding: 0 }}>
