@@ -283,7 +283,7 @@ export default function WorkshopPage() {
             Make AI <span style={{ color: C.accent }}>Work</span>
           </h1>
           <p style={{ fontSize: 'clamp(1.2rem, 2.4vw, 1.6rem)', fontWeight: 700, color: C.white, lineHeight: 1.35, margin: '0 auto 20px', maxWidth: 720, textTransform: 'uppercase' }}>
-            Your Company Is Using AI. Do You Actually Know What&apos;s Changing?
+            You Are Using AI. Do You Actually Know What&apos;s Changing?
           </p>
           <p className="hero-oneline" style={{ fontSize: 18, color: C.muted, lineHeight: 1.75, margin: '0 auto 20px', maxWidth: 'none', whiteSpace: 'nowrap', fontFamily: bodyFont }}>
             Bring one real business task.
