@@ -70,20 +70,26 @@ const personas = [
 
 const walkAwayItems = [
   { title: 'One real business task', desc: 'Clearly scoped and ready to work on.' },
-  { title: 'One completed AI Task Canvas', desc: "Mapping the action, AI's job, judgment, inputs, training data & context, feedback, and outcome." },
+  { title: 'One completed AI Task Canvas', desc: "Mapping the action, AI's job, judgment & authority, inputs, training data & context, feedback & record, and outcome." },
   { title: 'A defined role for AI', desc: 'What AI should do, what it should not do, and where human judgment remains.' },
   { title: 'A measurable outcome', desc: 'How you will know whether the intervention actually improves the work.' },
   { title: 'A next step', desc: 'What to test, with what data, and what to measure.' },
   { title: 'A build-ready specification', desc: 'Precise enough to brief a developer, vendor, or AI coding agent — without losing the business intent between strategy and build.' },
 ]
 
+const canvasHeader = [
+  { title: 'Owner', def: 'Who owns the task and uses the output?' },
+  { title: 'Baseline', def: 'How does the task perform today?' },
+  { title: 'Target', def: 'What needs to change?' },
+]
+
 const canvasElements = [
   { n: '1', title: 'Action', def: 'What business activity are you improving?', example: 'e.g. "Send personalized follow-up messages after appointments."' },
   { n: '2', title: "AI's Job", def: 'What should AI predict, classify, generate, or act on?', example: 'e.g. "Predict the likelihood a customer leaves feedback without a reminder."' },
-  { n: '3', title: 'Judgment', def: 'What decision follows? What does the human decide? What can AI decide?', example: 'e.g. "Send a reminder if predicted feedback likelihood is under 40%."', extra: 'Authority boundary: AI acts · AI recommends · Human decides · Escalate' },
-  { n: '4', title: 'Input', def: 'What information is available when the AI acts?', example: 'e.g. "Customer ID, last visit date, service type, feedback history."' },
-  { n: '5', title: 'Training Data & Context', def: 'What past examples, documents, instructions, or context does the system need?', example: 'e.g. "Past appointments, whether feedback was left, reminders sent."' },
-  { n: '6', title: 'Feedback', def: 'What happens after the AI acts? What gets recorded and fed back?', example: 'e.g. "Track whether reminder recipients actually left feedback."' },
+  { n: '3', title: 'Judgment & Authority', def: 'What decision follows, and who or what is authorised to make it?', example: 'e.g. "Send a reminder if predicted feedback likelihood is under 40%."', extra: 'Every condition falls into one of four classes: machine can check · machine can check with proof · needs a person’s judgment · needs more authority' },
+  { n: '4', title: 'Input', def: 'What does AI need to see at the moment it acts?', example: 'e.g. "Customer ID, last visit date, service type, feedback history."' },
+  { n: '5', title: 'Training Data & Context', def: 'What examples, documents, instructions, or context does AI need?', example: 'e.g. "Past appointments, whether feedback was left, reminders sent."' },
+  { n: '6', title: 'Feedback & Record', def: 'How does the system learn what happened, and what record is kept?', example: 'e.g. "Track whether reminder recipients actually left feedback."' },
   { n: '7', title: 'Outcome', def: 'What measurable change tells you the intervention created value?', example: 'e.g. "Increase feedback completion rate without increasing reminder volume."' },
 ]
 
@@ -92,14 +98,14 @@ const OUTPUT_TASK = 'Send personalized follow-up messages to patients after appo
 const outputExample = [
   { n: '01', title: 'Action', question: 'What are we trying to accomplish?', answer: 'Send personalized follow-up messages to patients after appointments.' },
   { n: '02', title: "AI's Job", question: 'What should AI predict, classify, generate, or act on?', answer: 'Predict the likelihood that a patient will leave feedback without a reminder.' },
-  { n: '03', title: 'Judgment', question: 'How does the prediction change the decision?', answer: 'Send a reminder if predicted feedback likelihood is below 40%. Authority boundary: AI recommends, a staff member approves before it sends.' },
+  { n: '03', title: 'Judgment & Authority', question: 'How does the prediction change the decision, and who is authorised to act on it?', answer: 'Send a reminder if predicted feedback likelihood is below 40%. AI recommends; a staff member approves before it sends.' },
   { n: '04', title: 'Input', question: 'What does AI need at the moment of prediction?', answer: 'Patient ID · Last appointment date · Service type · Prior feedback history' },
   { n: '05', title: 'Training Data & Context', question: 'What does AI need to learn from?', answer: 'Past appointments · Feedback outcomes · Reminder history' },
-  { n: '06', title: 'Feedback', question: 'How does the system learn from what actually happened?', answer: 'Track whether patients who received reminders subsequently left feedback.' },
+  { n: '06', title: 'Feedback & Record', question: 'How does the system learn from what actually happened?', answer: 'Track whether patients who received reminders subsequently left feedback.' },
   { n: '07', title: 'Outcome', question: 'How will we know it worked?', answer: 'Increase feedback completion while reducing unnecessary reminders.' },
 ]
 
-const outputFlow = ['Action', "AI's Job", 'Judgment', 'Input', 'Training', 'Feedback', 'Outcome']
+const outputFlow = ['Action', "AI's Job", 'Judgment & Authority', 'Input', 'Training', 'Feedback & Record', 'Outcome']
 
 const sessionRows: { type?: 'break'; week: string; tag: string; title: string; desc: string; host: string; role: string }[] = [
   { week: 'Part 01', tag: 'The Framework · 40 min', title: 'All 7 Elements, With Real Examples', desc: 'Walk through the complete AI Task Canvas using examples from real business tasks across industries.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
@@ -155,7 +161,7 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'What will I actually have at the end?',
-    a: "You will have one completed AI Task Canvas for a real task from your work. You will have defined the action, AI's job, judgment, input, training data & context, feedback, and outcome — along with a clear AI intervention and measurable value hypothesis.",
+    a: "You will have one completed AI Task Canvas for a real task from your work. You will have defined the action, AI's job, judgment & authority, input, training data & context, feedback & record, and outcome — along with a clear AI intervention and measurable value hypothesis.",
   },
   {
     q: "What if I don't have a specific AI idea yet?",
@@ -167,14 +173,14 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'Is the Canvas a strategy tool or a technical specification?',
-    a: "Both. The AI Task Canvas combines the strategic and development decisions needed to define an AI intervention. It connects the business task and the value it should create with AI's job, judgment, inputs, training data & context, feedback, and outcomes needed to develop and evaluate it. You are not creating a strategy document and then translating it into a technical specification. The Canvas does both in one framework.",
+    a: "Both. The AI Task Canvas combines the strategic and development decisions needed to define an AI intervention. It connects the business task and the value it should create with AI's job, judgment & authority, inputs, training data & context, feedback & record, and outcomes needed to develop and evaluate it. You are not creating a strategy document and then translating it into a technical specification. The Canvas does both in one framework.",
     aRich: (
       <>
         <strong style={{ color: '#F5F1EA' }}>Both.</strong>
         <br /><br />
         The AI Task Canvas combines the strategic and development decisions needed to define an AI
         intervention. It connects the business task and the value it should create with AI&apos;s job,
-        judgment, inputs, training data &amp; context, feedback, and outcomes needed to develop and evaluate it.
+        judgment &amp; authority, inputs, training data &amp; context, feedback &amp; record, and outcomes needed to develop and evaluate it.
         <br /><br />
         You are not creating a strategy document and then translating it into a technical specification.{' '}
         <strong style={{ color: '#F5F1EA' }}>The Canvas does both in one framework.</strong>
@@ -425,7 +431,22 @@ export default function WorkshopPage() {
               all seven answered for your own task.
               <br /><br />
               The Canvas combines the strategic and development decisions needed to define an AI intervention.
+              <br /><br />
+              <strong style={{ color: C.white }}>An AI idea describes a possibility. An AI Task Canvas specifies an intervention.</strong>
             </p>
+          </div>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20,
+            marginBottom: 20, padding: '18px 22px', background: C.card, border: `1px solid ${C.border}`, borderRadius: 10,
+          }}>
+            {canvasHeader.map(h => (
+              <div key={h.title}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: C.accent, letterSpacing: '0.08em', margin: '0 0 4px' }}>
+                  {h.title.toUpperCase()}
+                </p>
+                <p style={{ fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.5, fontFamily: bodyFont }}>{h.def}</p>
+              </div>
+            ))}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
             {canvasElements.map(el => (
