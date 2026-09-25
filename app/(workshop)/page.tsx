@@ -94,15 +94,28 @@ const canvasElements = [
 ]
 
 const OUTPUT_TASK = 'Send personalized follow-up messages to patients after appointments.'
+const OUTPUT_OWNER = 'Patient experience lead. Front-desk team handles referred cases.'
+const OUTPUT_BASELINE = 'Today, staff send reminders manually to everyone. About 1 in 5 patients leaves feedback.'
+const OUTPUT_TARGET = 'Raise the feedback rate without messaging patients more often, and resolve every referred case within two working days.'
 
 const outputExample = [
-  { n: '01', title: 'Action', question: 'What are we trying to accomplish?', answer: 'Send personalized follow-up messages to patients after appointments.' },
+  { n: '01', title: 'Action', question: 'What are we trying to accomplish?', answer: 'Collect more patient feedback after appointments, without over-messaging patients.' },
   { n: '02', title: "AI's Job", question: 'What should AI predict, classify, generate, or act on?', answer: 'Predict the likelihood that a patient will leave feedback without a reminder.' },
-  { n: '03', title: 'Judgment & Authority', question: 'How does the prediction change the decision, and who is authorised to act on it?', answer: 'Send a reminder if predicted feedback likelihood is below 40%. AI recommends; a staff member approves before it sends.' },
-  { n: '04', title: 'Input', question: 'What does AI need at the moment of prediction?', answer: 'Patient ID · Last appointment date · Service type · Prior feedback history' },
-  { n: '05', title: 'Training Data & Context', question: 'What does AI need to learn from?', answer: 'Past appointments · Feedback outcomes · Reminder history' },
-  { n: '06', title: 'Feedback & Record', question: 'How does the system learn from what actually happened?', answer: 'Track whether patients who received reminders subsequently left feedback.' },
-  { n: '07', title: 'Outcome', question: 'How will we know it worked?', answer: 'Increase feedback completion while reducing unnecessary reminders.' },
+  {
+    n: '03', title: 'Judgment & Authority',
+    question: 'How does the prediction change the decision, and who is authorised to act on it?',
+    answer: 'Send a reminder if predicted likelihood is below 40%, the patient hasn’t opted out, and there’s no open complaint.',
+    classes: [
+      { tag: 'Machine can check', note: 'Likelihood below 40% — AI acts.' },
+      { tag: 'Machine can check with proof', note: 'Opt-out confirmed against the consent record — AI acts.' },
+      { tag: 'Needs a person’s judgment', note: 'Open complaint — AI refers to the patient experience lead.' },
+      { tag: 'Needs more authority', note: 'Safety issue — AI escalates to the clinical lead.' },
+    ],
+  },
+  { n: '04', title: 'Input', question: 'What does AI need at the moment it acts?', answer: 'Patient ID · Last appointment date · Service type · Prior feedback history · Consent status · Open complaint flag' },
+  { n: '05', title: 'Training Data & Context', question: 'What does AI learn from, or get given?', answer: 'Learns from past appointments, feedback outcomes, and reminder history. It’s given approved message templates, tone guidelines, and a clear definition of what counts as feedback.' },
+  { n: '06', title: 'Feedback & Record', question: 'How does it learn from what happened, and what gets recorded?', answer: 'Tracks whether reminded patients left feedback, and logs every case — sent automatically or referred, under which rule, on which facts.' },
+  { n: '07', title: 'Outcome', question: 'How will we know it worked?', answer: 'Feedback rate rises from the baseline, while reminders sent per patient fall. Referred cases stay a small share and are all handled within two working days.' },
 ]
 
 const outputFlow = ['Action', "AI's Job", 'Judgment & Authority', 'Input', 'Training', 'Feedback & Record', 'Outcome']
@@ -426,8 +439,8 @@ export default function WorkshopPage() {
               7 elements.<br /><span style={{ color: C.accent }}>One session.</span>
             </h2>
             <p style={{ flex: '1 1 280px', color: C.muted, fontSize: 15, lineHeight: 1.75, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
-              Every element forces one more decision you can&apos;t leave undefined — what AI should predict, what
-              data it needs, where human judgment remains, and how you&apos;ll know it worked. You leave with
+              Every element forces one more decision you can&apos;t leave undefined — what AI&apos;s job is, what
+              data it needs, where authority sits, and how you&apos;ll know it worked. You leave with
               all seven answered for your own task.
               <br /><br />
               The Canvas combines the strategic and development decisions needed to define an AI intervention.
@@ -464,10 +477,8 @@ export default function WorkshopPage() {
             ))}
           </div>
           <p style={{ fontSize: 13, color: C.muted, textAlign: 'center', margin: '28px 0 0', fontFamily: bodyFont, lineHeight: 1.7 }}>
-            <strong style={{ color: C.body }}>Built on the AI Canvas</strong> — The AI Task Canvas builds on the AI Canvas
-            introduced by Ajay Agrawal, Joshua Gans and Avi Goldfarb in <em style={{ fontStyle: 'normal' }}>Prediction
-            Machines</em>. It extends the framework for today&apos;s generative and agentic AI, with explicit attention
-            to human judgment, authority, feedback and measurable outcomes.
+            Based on the AI Canvas by Ajay Agrawal, Joshua Gans and Avi Goldfarb, <em style={{ fontStyle: 'normal' }}>Prediction
+            Machines</em>.
           </p>
         </section>
 
@@ -493,9 +504,21 @@ export default function WorkshopPage() {
             boxShadow: '0 20px 50px rgba(0,0,0,0.35)', overflow: 'hidden',
           }}>
             <div style={{ padding: '24px 32px', borderBottom: '1px solid #e5e2d9', background: '#f2efe7' }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#9a9483', letterSpacing: '0.08em', margin: '0 0 10px' }}>AI TASK CANVAS</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#9a6b00', letterSpacing: '0.08em', margin: '0 0 14px' }}>HYPOTHETICAL EXAMPLE &middot; PATIENT FEEDBACK</p>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#9a9483', letterSpacing: '0.08em', margin: '0 0 6px' }}>REAL BUSINESS TASK</p>
-              <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: 0, lineHeight: 1.5 }}>{OUTPUT_TASK}</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: '0 0 18px', lineHeight: 1.5 }}>{OUTPUT_TASK}</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
+                {[
+                  { label: 'Owner', value: OUTPUT_OWNER },
+                  { label: 'Baseline', value: OUTPUT_BASELINE },
+                  { label: 'Target', value: OUTPUT_TARGET },
+                ].map(f => (
+                  <div key={f.label}>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: '#9a9483', letterSpacing: '0.08em', margin: '0 0 3px' }}>{f.label.toUpperCase()}</p>
+                    <p style={{ fontSize: 13, color: '#4b4638', margin: 0, lineHeight: 1.5 }}>{f.value}</p>
+                  </div>
+                ))}
+              </div>
             </div>
             <div>
               {outputExample.map((el, i) => (
@@ -507,6 +530,18 @@ export default function WorkshopPage() {
                   </p>
                   <p style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: '0 0 6px' }}>{el.question}</p>
                   <p style={{ fontSize: 14, color: '#4b4638', margin: 0, lineHeight: 1.6 }}>{el.answer}</p>
+                  {el.classes && (
+                    <div style={{
+                      marginTop: 12, paddingTop: 12, borderTop: '1px solid #e5e2d9',
+                      display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '4px 20px',
+                    }}>
+                      {el.classes.map(c => (
+                        <p key={c.tag} style={{ fontSize: 12.5, color: '#4b4638', margin: 0, lineHeight: 1.5 }}>
+                          <strong style={{ color: '#1a1a1a' }}>{c.tag}</strong> — {c.note}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
