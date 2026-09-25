@@ -4,6 +4,7 @@ import { Fraunces, Inter } from 'next/font/google'
 import Countdown from '@/components/Countdown'
 import ScrollScaleVideo from '@/components/ScrollScaleVideo'
 import MobileNav from '@/components/MobileNav'
+import CanvasBuilder from '@/components/CanvasBuilder'
 import { faqSchema } from '@/lib/schema'
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['600', '700', '900'], style: ['normal', 'italic'] })
@@ -93,18 +94,22 @@ const canvasElements = [
   { n: '7', title: 'Outcome', def: 'What measurable change tells you the intervention created value?', example: 'e.g. "Increase feedback completion rate without increasing reminder volume."' },
 ]
 
+const OUTPUT_LABEL = 'HYPOTHETICAL EXAMPLE · PATIENT FEEDBACK'
 const OUTPUT_TASK = 'Send personalized follow-up messages to patients after appointments.'
 const OUTPUT_OWNER = 'Patient experience lead. Front-desk team handles referred cases.'
 const OUTPUT_BASELINE = 'Today, staff send reminders manually to everyone. About 1 in 5 patients leaves feedback.'
 const OUTPUT_TARGET = 'Raise the feedback rate without messaging patients more often, and resolve every referred case within two working days.'
+const OUTPUT_IDEA = 'Use AI to improve patient follow-up.'
+const OUTPUT_FLOW_LINE = 'AI predicts → AI checks authority conditions → AI acts on routine cases → AI refers exceptions → outcome is measured'
+const OUTPUT_INTERVENTION = 'Predict which patients are unlikely to leave feedback, automatically remind the ones who are eligible, refer any case that needs judgment or authority, and measure the effect against today’s baseline.'
 
-const outputExample = [
-  { n: '01', title: 'Action', question: 'What are we trying to accomplish?', answer: 'Collect more patient feedback after appointments, without over-messaging patients.' },
-  { n: '02', title: "AI's Job", question: 'What should AI predict, classify, generate, or act on?', answer: 'Predict the likelihood that a patient will leave feedback without a reminder.' },
+const canvasStages = [
+  { n: '01', title: 'Action', summary: 'Collect more patient feedback after appointments, without over-messaging patients.' },
+  { n: '02', title: "AI's Job", summary: 'Predict the likelihood that a patient will leave feedback without a reminder.' },
   {
     n: '03', title: 'Judgment & Authority',
-    question: 'How does the prediction change the decision, and who is authorised to act on it?',
-    answer: 'Send a reminder if predicted likelihood is below 40%, the patient hasn’t opted out, and there’s no open complaint.',
+    summary: 'Define exactly what AI can decide on its own, and where it has to stop.',
+    rule: { ifLines: ['likelihood < 40%', 'no opt-out', 'no open complaint'], then: 'send reminder' },
     classes: [
       { tag: 'Machine can check', note: 'Likelihood below 40% — AI acts.' },
       { tag: 'Machine can check with proof', note: 'Opt-out confirmed against the consent record — AI acts.' },
@@ -112,10 +117,10 @@ const outputExample = [
       { tag: 'Needs more authority', note: 'Safety issue — AI escalates to the clinical lead.' },
     ],
   },
-  { n: '04', title: 'Input', question: 'What does AI need at the moment it acts?', answer: 'Patient ID · Last appointment date · Service type · Prior feedback history · Consent status · Open complaint flag' },
-  { n: '05', title: 'Training Data & Context', question: 'What does AI learn from, or get given?', answer: 'Learns from past appointments, feedback outcomes, and reminder history. It’s given approved message templates, tone guidelines, and a clear definition of what counts as feedback.' },
-  { n: '06', title: 'Feedback & Record', question: 'How does it learn from what happened, and what gets recorded?', answer: 'Tracks whether reminded patients left feedback, and logs every case — sent automatically or referred, under which rule, on which facts.' },
-  { n: '07', title: 'Outcome', question: 'How will we know it worked?', answer: 'Feedback rate rises from the baseline, while reminders sent per patient fall. Referred cases stay a small share and are all handled within two working days.' },
+  { n: '04', title: 'Input', summary: 'Patient ID · Last appointment date · Service type · Prior feedback history · Consent status · Open complaint flag.' },
+  { n: '05', title: 'Training Data & Context', summary: 'Learns from past appointments, feedback outcomes, and reminder history. It’s given approved message templates, tone guidelines, and a clear definition of what counts as feedback.' },
+  { n: '06', title: 'Feedback & Record', summary: 'Tracks whether reminded patients left feedback, and logs every case — sent automatically or referred, under which rule, on which facts.' },
+  { n: '07', title: 'Outcome', summary: 'Feedback rate rises from the baseline, while reminders sent per patient fall. Referred cases stay a small share and are all handled within two working days.' },
 ]
 
 const outputFlow = ['Action', "AI's Job", 'Judgment & Authority', 'Input', 'Training', 'Feedback & Record', 'Outcome']
@@ -499,53 +504,18 @@ export default function WorkshopPage() {
             </p>
           </div>
 
-          <div className="output-card" style={{
-            maxWidth: 760, margin: '0 auto', background: '#fbfaf7', borderRadius: 14,
-            boxShadow: '0 20px 50px rgba(0,0,0,0.35)', overflow: 'hidden',
-          }}>
-            <div style={{ padding: '24px 32px', borderBottom: '1px solid #e5e2d9', background: '#f2efe7' }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#9a6b00', letterSpacing: '0.08em', margin: '0 0 14px' }}>HYPOTHETICAL EXAMPLE &middot; PATIENT FEEDBACK</p>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#9a9483', letterSpacing: '0.08em', margin: '0 0 6px' }}>REAL BUSINESS TASK</p>
-              <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: '0 0 18px', lineHeight: 1.5 }}>{OUTPUT_TASK}</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
-                {[
-                  { label: 'Owner', value: OUTPUT_OWNER },
-                  { label: 'Baseline', value: OUTPUT_BASELINE },
-                  { label: 'Target', value: OUTPUT_TARGET },
-                ].map(f => (
-                  <div key={f.label}>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: '#9a9483', letterSpacing: '0.08em', margin: '0 0 3px' }}>{f.label.toUpperCase()}</p>
-                    <p style={{ fontSize: 13, color: '#4b4638', margin: 0, lineHeight: 1.5 }}>{f.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              {outputExample.map((el, i) => (
-                <div key={el.n} style={{
-                  padding: '22px 32px', borderBottom: i !== outputExample.length - 1 ? '1px solid #e5e2d9' : 'none',
-                }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: '#9a6b00', letterSpacing: '0.06em', margin: '0 0 8px' }}>
-                    {el.n} &middot; {el.title.toUpperCase()}
-                  </p>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: '0 0 6px' }}>{el.question}</p>
-                  <p style={{ fontSize: 14, color: '#4b4638', margin: 0, lineHeight: 1.6 }}>{el.answer}</p>
-                  {el.classes && (
-                    <div style={{
-                      marginTop: 12, paddingTop: 12, borderTop: '1px solid #e5e2d9',
-                      display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '4px 20px',
-                    }}>
-                      {el.classes.map(c => (
-                        <p key={c.tag} style={{ fontSize: 12.5, color: '#4b4638', margin: 0, lineHeight: 1.5 }}>
-                          <strong style={{ color: '#1a1a1a' }}>{c.tag}</strong> — {c.note}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <CanvasBuilder
+            label={OUTPUT_LABEL}
+            task={OUTPUT_TASK}
+            owner={OUTPUT_OWNER}
+            baseline={OUTPUT_BASELINE}
+            target={OUTPUT_TARGET}
+            ideaQuote={OUTPUT_IDEA}
+            stages={canvasStages}
+            flowLine={OUTPUT_FLOW_LINE}
+            interventionSummary={OUTPUT_INTERVENTION}
+            accent={C.accent}
+          />
 
           <div style={{ textAlign: 'center', marginTop: 56 }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', margin: '0 0 20px' }}>
@@ -950,6 +920,16 @@ export default function WorkshopPage() {
           @keyframes livePulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.25; }
+          }
+          @keyframes canvasEntryIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .canvas-builder-entry {
+            animation: canvasEntryIn 0.25s ease-out;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .canvas-builder-entry { animation: none; }
           }
           .live-dot {
             display: inline-block; width: 7px; height: 7px; border-radius: 50%;
