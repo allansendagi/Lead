@@ -40,6 +40,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
   const [captureName, setCaptureName] = useState('')
   const [captureEmail, setCaptureEmail] = useState('')
   const [captureState, setCaptureState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [captureError, setCaptureError] = useState<string | null>(null)
 
   const effectiveWorkflow = workflow === 'Something else' ? customWorkflow : workflow
   const keptTasks = tasks.filter(t => t.keep && t.text.trim())
@@ -78,6 +79,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
   async function submitCapture() {
     if (!selectedTask || !classification || captureState === 'sending') return
     setCaptureState('sending')
+    setCaptureError(null)
     try {
       const res = await fetch('/api/task-picker', {
         method: 'POST',
@@ -96,9 +98,21 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
           aiPotential,
         }),
       })
-      if (!res.ok) throw new Error('request failed')
+      if (!res.ok) {
+        let message = 'Something went wrong — try again, or just register directly above.'
+        try {
+          const data = await res.json()
+          if (data?.fields?.email) message = "That email address doesn't look right — check it and try again."
+          else if (data?.fields?.name) message = 'That name is too long — shorten it and try again.'
+          else if (data?.fields) message = "Something in that submission wasn't valid — try again, or just register directly above."
+        } catch { /* keep default message */ }
+        setCaptureError(message)
+        setCaptureState('error')
+        return
+      }
       setCaptureState('sent')
     } catch {
+      setCaptureError('Something went wrong — try again, or just register directly above.')
       setCaptureState('error')
     }
   }
@@ -411,7 +425,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
               }}>
                 Bring this task to the workshop &rarr;
               </a>
-              <button onClick={() => { selectTask(null); setStep(keptTasks.length > 1 ? 'pick' : 'delete') }} style={{
+              <button onClick={() => { selectTask(null); setStep(keptTasks.length > 1 ? 'pick' : 'tasks') }} style={{
                 background: 'none', border: `1px solid ${C.border}`, color: C.muted,
                 padding: '15px 24px', borderRadius: 12, fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
               }}>
@@ -467,7 +481,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
                   </div>
                   {captureState === 'error' && (
                     <p style={{ fontSize: 12.5, color: C.accentSoft, margin: '10px 0 0' }}>
-                      Something went wrong — try again, or just register directly above.
+                      {captureError || 'Something went wrong — try again, or just register directly above.'}
                     </p>
                   )}
                 </>
