@@ -5,6 +5,7 @@ import Countdown from '@/components/Countdown'
 import ScrollScaleVideo from '@/components/ScrollScaleVideo'
 import MobileNav from '@/components/MobileNav'
 import CanvasBuilder from '@/components/CanvasBuilder'
+import Cohort2Waitlist from '@/components/Cohort2Modal'
 import { faqSchema } from '@/lib/schema'
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['600', '700', '900'], style: ['normal', 'italic'] })
@@ -236,8 +237,8 @@ export default function WorkshopPage() {
       <div className={fraunces.className} style={{ background: C.bg, color: C.white, overflowX: 'hidden' }}>
 
         {/* ── Announcement bar ── */}
-        <div style={{ background: C.accent, color: C.white, textAlign: 'center', padding: '10px 16px', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', fontFamily: bodyFont }}>
-          LAUNCH COHORT &middot; 10 PARTICIPANTS
+        <div style={{ fontFamily: bodyFont, position: 'sticky', top: 0, zIndex: 100 }}>
+          <Cohort2Waitlist variant="banner" />
         </div>
 
         {/* ── Nav ── */}
