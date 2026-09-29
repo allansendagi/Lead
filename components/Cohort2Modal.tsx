@@ -6,6 +6,12 @@ const C = {
   accent: '#C2410C', accentSoft: '#E8823D', white: '#F5F1EA', muted: '#A39C90', body: '#D8D2C6',
 }
 
+function track(event: string, params?: Record<string, unknown>) {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    ;(window as any).gtag('event', event, params)
+  }
+}
+
 type TriggerProps = {
   label?: string
   style?: CSSProperties
@@ -34,7 +40,7 @@ export default function Cohort2Waitlist({ label, style, variant = 'link' }: Trig
           </a>
           <span aria-hidden="true">&middot;</span>
           <button
-            onClick={() => setOpen(true)}
+            onClick={() => { track('cohort2_waitlist_open', { variant: 'banner' }); setOpen(true) }}
             style={{
               background: 'none', border: 'none', color: C.white, textDecoration: 'underline',
               cursor: 'pointer', padding: 0, font: 'inherit', letterSpacing: 'inherit',
@@ -51,7 +57,7 @@ export default function Cohort2Waitlist({ label, style, variant = 'link' }: Trig
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => { track('cohort2_waitlist_open', { variant: 'link' }); setOpen(true) }}
         style={{
           background: 'none', border: 'none', color: C.muted, fontSize: 13,
           textDecoration: 'underline', cursor: 'pointer', padding: 0, font: 'inherit',
@@ -108,6 +114,7 @@ function Cohort2Modal({ open, onClose }: Props) {
         return
       }
       setState('sent')
+      track('cohort2_waitlist_submit')
     } catch {
       setError('Something went wrong — try again.')
       setState('error')

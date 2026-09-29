@@ -30,6 +30,12 @@ const LINE = '#e5e2d9'
 const CARD_BG = '#fbfaf7'
 const HEADER_BG = '#f2efe7'
 
+function track(event: string, params?: Record<string, unknown>) {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    ;(window as any).gtag('event', event, params)
+  }
+}
+
 export default function CanvasBuilder({
   label, task, owner, baseline, target, ideaQuote, stages, flowLine, interventionSummary, accent,
 }: Props) {
@@ -49,7 +55,7 @@ export default function CanvasBuilder({
           &ldquo;{ideaQuote}&rdquo;
         </p>
         <button
-          onClick={() => setStarted(true)}
+          onClick={() => { track('canvas_builder_start'); setStarted(true) }}
           style={{
             background: accent, color: '#fff', border: 'none', borderRadius: 10,
             padding: '14px 28px', fontSize: 14, fontWeight: 800, letterSpacing: '0.02em',
@@ -99,7 +105,11 @@ export default function CanvasBuilder({
             return (
               <button
                 key={s.n}
-                onClick={() => setRevealed(i + 1)}
+                onClick={() => {
+                  track('canvas_stage_click', { stage: s.n, stage_title: s.title })
+                  if (i + 1 === stages.length) track('canvas_builder_complete')
+                  setRevealed(i + 1)
+                }}
                 style={{
                   border: `1px solid ${active ? accent : LINE}`,
                   background: active ? accent : 'transparent',

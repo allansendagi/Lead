@@ -33,6 +33,12 @@ function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
 }
 
+function track(event: string, params?: Record<string, unknown>) {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    ;(window as any).gtag('event', event, params)
+  }
+}
+
 export default function CheckoutContents({ waNumber, paypalClientId }: { waNumber: string; paypalClientId: string }) {
   const [seats, setSeats] = useState(1)
   const [method, setMethod] = useState<'whatsapp' | 'bank' | 'paypal'>('bank')
@@ -78,6 +84,10 @@ export default function CheckoutContents({ waNumber, paypalClientId }: { waNumbe
   async function handleAction(action: 'reserve' | 'paid') {
     setTouched(true)
     if (!detailsValid) return
+
+    track(action === 'paid' ? 'bank_transfer_paid_click' : 'reserve_whatsapp_click', {
+      seats, value: totalQar, currency: 'QAR',
+    })
 
     const waUrl = action === 'paid' ? paidUrl : reserveUrl
     const win = window.open(waUrl, '_blank', 'noopener,noreferrer')
@@ -126,6 +136,9 @@ export default function CheckoutContents({ waNumber, paypalClientId }: { waNumbe
         style: { color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
         createOrder: async () => {
           setPaypalError(null)
+          track('begin_checkout', {
+            value: formStateRef.current.seats * PRICE_PER_SEAT_USD, currency: 'USD', seats: formStateRef.current.seats,
+          })
           const res = await fetch('/api/paypal/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -152,17 +165,30 @@ export default function CheckoutContents({ waNumber, paypalClientId }: { waNumbe
             const result = await res.json()
             if (result.success) {
               setSendState('sent')
+              track('purchase', {
+                transaction_id: data.orderID,
+                value: formStateRef.current.seats * PRICE_PER_SEAT_USD,
+                currency: 'USD',
+                items: [{
+                  item_name: 'AI Value Sandbox seat',
+                  quantity: formStateRef.current.seats,
+                  price: PRICE_PER_SEAT_USD,
+                }],
+              })
             } else {
               setSendState('idle')
               setPaypalError('Payment could not be confirmed. Please contact Allan on WhatsApp with your PayPal receipt.')
+              track('paypal_capture_failed', { order_id: data.orderID })
             }
           } catch {
             setSendState('idle')
             setPaypalError('Payment could not be confirmed. Please contact Allan on WhatsApp with your PayPal receipt.')
+            track('paypal_capture_failed', { order_id: data.orderID })
           }
         },
         onError: () => {
           setPaypalError('PayPal ran into a problem. Please try again, or use bank transfer / WhatsApp instead.')
+          track('paypal_error')
         },
       }).render(paypalContainerRef.current)
     }

@@ -6,6 +6,7 @@ import ScrollScaleVideo from '@/components/ScrollScaleVideo'
 import MobileNav from '@/components/MobileNav'
 import CanvasBuilder from '@/components/CanvasBuilder'
 import Cohort2Waitlist from '@/components/Cohort2Modal'
+import TrackedLink from '@/components/TrackedLink'
 import { faqSchema } from '@/lib/schema'
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['600', '700', '900'], style: ['normal', 'italic'] })
@@ -317,8 +318,9 @@ export default function WorkshopPage() {
             Leave with a defined AI intervention and the metrics to prove it works.
           </p>
 
-          <a
+          <TrackedLink
             href="/checkout"
+            location="hero"
             style={{
               display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
               padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
@@ -326,7 +328,7 @@ export default function WorkshopPage() {
             }}
           >
             Join The Launch Cohort
-          </a>
+          </TrackedLink>
         </section>
 
         {/* ── Ticker marquee ── */}
@@ -419,8 +421,9 @@ export default function WorkshopPage() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: 48 }}>
-            <a
+            <TrackedLink
               href="/checkout"
+              location="walkaway_section"
               style={{
                 display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
                 padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
@@ -428,7 +431,7 @@ export default function WorkshopPage() {
               }}
             >
               I Want a Defined AI Intervention
-            </a>
+            </TrackedLink>
           </div>
         </section>
 
@@ -544,8 +547,9 @@ export default function WorkshopPage() {
               ))}
             </div>
             <div style={{ textAlign: 'center', marginTop: 48 }}>
-              <a
+              <TrackedLink
                 href="/checkout"
+                location="canvas_output_section"
                 style={{
                   display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
                   padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
@@ -553,7 +557,7 @@ export default function WorkshopPage() {
                 }}
               >
                 Turn My Task Into an AI Specification
-              </a>
+              </TrackedLink>
               <p style={{ margin: '16px 0 0' }}>
                 <a
                   href="/pick-your-task"
@@ -653,8 +657,9 @@ export default function WorkshopPage() {
               ))}
             </ul>
 
-            <a
+            <TrackedLink
               href="/checkout"
+              location="pricing"
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
@@ -662,18 +667,19 @@ export default function WorkshopPage() {
               }}
             >
               Reserve Your Seat
-            </a>
+            </TrackedLink>
             <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', margin: '14px 0 0' }}>
               10 participants maximum. Launch cohort pricing applies to this cohort.
             </p>
             <p style={{ fontSize: 13, color: C.muted, textAlign: 'center', margin: '10px 0 0', fontFamily: bodyFont }}>
               Not sure your task is a fit?{' '}
-              <a
+              <TrackedLink
                 href={`https://wa.me/97450176561?text=${encodeURIComponent("Hi Allan, I want to check if my task is a good fit for the AI Value Sandbox workshop")}`}
+                location="pricing_qualify_whatsapp"
                 style={{ color: C.accent, fontWeight: 700, textDecoration: 'none' }}
               >
                 Message me on WhatsApp
-              </a>{' '}
+              </TrackedLink>{' '}
               and I&apos;ll tell you.
             </p>
           </div>
@@ -878,8 +884,9 @@ export default function WorkshopPage() {
             From there, you can test it, brief development, engage a vendor, or take it into your wider AI roadmap.
           </p>
 
-          <a
+          <TrackedLink
             href="/checkout"
+            location="closer_section"
             style={{
               display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
               padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
@@ -887,7 +894,7 @@ export default function WorkshopPage() {
             }}
           >
             I Want to Make AI Work
-          </a>
+          </TrackedLink>
           <p style={{ fontSize: 13, color: C.muted, margin: '18px 0 0', fontFamily: bodyFont, textTransform: 'none' }}>
             10 seats · Enrollment is first come, first served
           </p>
@@ -902,14 +909,15 @@ export default function WorkshopPage() {
             {' '}&middot;{' '}
             <a href="/privacy" style={{ color: C.muted, textDecoration: 'underline' }}>Privacy</a>
             {' '}&middot;{' '}
-            <a
+            <TrackedLink
               href={`https://wa.me/97450176561?text=${encodeURIComponent("Hi Allan, we're interested in team training using the AI Value Sandbox workshop")}`}
+              location="footer_team_training"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: C.muted, textDecoration: 'underline' }}
             >
               Training for Teams
-            </a>
+            </TrackedLink>
           </p>
         </div>
 

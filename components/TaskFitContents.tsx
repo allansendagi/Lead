@@ -29,6 +29,12 @@ function uid() {
   return Math.random().toString(36).slice(2, 9)
 }
 
+function track(event: string, params?: Record<string, unknown>) {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    ;(window as any).gtag('event', event, params)
+  }
+}
+
 export default function TaskFitContents({ displayFont }: { displayFont: string }) {
   const [step, setStep] = useState<'intro' | 'workflow' | 'tasks' | 'delete' | 'pick' | 'score' | 'result'>('intro')
   const [workflow, setWorkflow] = useState('')
@@ -111,6 +117,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
         return
       }
       setCaptureState('sent')
+      track('task_picker_capture_submit', { ai_potential: aiPotential })
     } catch {
       setCaptureError('Something went wrong — try again, or just register directly above.')
       setCaptureState('error')
@@ -375,7 +382,10 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
 
             <NavRow
               back={() => setStep(keptTasks.length > 1 ? 'pick' : 'delete')}
-              next={() => setStep('result')}
+              next={() => {
+                track('task_picker_result', { classification, automation_fit: automationFit, ai_potential: aiPotential })
+                setStep('result')
+              }}
               nextDisabled={!classification}
               nextLabel="See result"
             />
@@ -418,11 +428,15 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
             </div>
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 40 }}>
-              <a href="/checkout" style={{
-                display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
-                padding: '15px 30px', borderRadius: 12, fontSize: 14, fontWeight: 800,
-                textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
-              }}>
+              <a
+                href="/checkout"
+                onClick={() => track('cta_click', { location: 'task_picker_result', ai_potential: aiPotential })}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
+                  padding: '15px 30px', borderRadius: 12, fontSize: 14, fontWeight: 800,
+                  textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
+                }}
+              >
                 Bring this task to the workshop &rarr;
               </a>
               <button onClick={() => { selectTask(null); setStep(keptTasks.length > 1 ? 'pick' : 'tasks') }} style={{
