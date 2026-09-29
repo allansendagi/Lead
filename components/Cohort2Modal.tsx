@@ -18,16 +18,31 @@ export default function Cohort2Waitlist({ label, style, variant = 'link' }: Trig
   if (variant === 'banner') {
     return (
       <>
-        <button
-          onClick={() => setOpen(true)}
+        <div
           style={{
-            display: 'block', width: '100%', background: C.accent, color: C.white,
-            textAlign: 'center', padding: '10px 16px', fontSize: 12, fontWeight: 700,
-            letterSpacing: '0.06em', border: 'none', cursor: 'pointer', font: 'inherit',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap',
+            width: '100%', background: C.accent, color: C.white,
+            padding: '10px 16px', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em',
+            gap: '0.4em',
           }}
         >
-          {label || "LAUNCH COHORT · 10 PARTICIPANTS · SEATS CLOSING · JOIN THE COHORT 2 WAITLIST →"}
-        </button>
+          <a
+            href="/checkout"
+            style={{ color: C.white, textDecoration: 'none', font: 'inherit', letterSpacing: 'inherit' }}
+          >
+            LAUNCH COHORT &middot; 10 PARTICIPANTS &middot; SEATS CLOSING
+          </a>
+          <span aria-hidden="true">&middot;</span>
+          <button
+            onClick={() => setOpen(true)}
+            style={{
+              background: 'none', border: 'none', color: C.white, textDecoration: 'underline',
+              cursor: 'pointer', padding: 0, font: 'inherit', letterSpacing: 'inherit',
+            }}
+          >
+            JOIN THE COHORT 2 WAITLIST &rarr;
+          </button>
+        </div>
         <Cohort2Modal open={open} onClose={() => setOpen(false)} />
       </>
     )
