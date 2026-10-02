@@ -36,7 +36,7 @@ export default function Cohort2Waitlist({ label, style, variant = 'link' }: Trig
             href="/checkout"
             style={{ color: C.white, textDecoration: 'none', font: 'inherit', letterSpacing: 'inherit' }}
           >
-            LAUNCH COHORT &middot; 10 PARTICIPANTS &middot; SEATS CLOSING
+            LAUNCH COHORT &middot; 10 PARTICIPANTS &middot; SOLD OUT
           </a>
           <span aria-hidden="true">&middot;</span>
           <button
