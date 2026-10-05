@@ -437,7 +437,7 @@ export default function WorkshopPage() {
                 textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
               }}
             >
-              Map My Workflow
+              I Want a Defined AI Intervention
             </TrackedLink>
           </div>
         </section>
@@ -563,7 +563,7 @@ export default function WorkshopPage() {
                   textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
                 }}
               >
-                Turn My Workflow Into an AI Specification
+                Turn My Task Into an AI Specification
               </TrackedLink>
             </div>
           </div>
