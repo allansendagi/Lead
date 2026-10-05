@@ -39,11 +39,11 @@ export default function SiteBanner() {
       }}
     >
       <span className="banner-desktop">
-        Launch cohort completed &middot; Next cohort: Saturday 24 October &middot; 10 seats &middot; AED 1,000 &middot;
+        Launch cohort completed &middot; Next cohort: Saturday 24 October &middot; 10 seats &middot; $275 &middot;
         Full refund if it&apos;s not useful &middot; {link}
       </span>
       <span className="banner-mobile">
-        Cohort 2 &middot; 24 Oct &middot; AED 1,000 &middot; {link}
+        Cohort 2 &middot; 24 Oct &middot; $275 &middot; {link}
       </span>
       <style>{`
         #site-banner .banner-mobile { display: none; }
