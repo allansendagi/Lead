@@ -43,7 +43,7 @@ export default function SiteBanner() {
         Full refund if it&apos;s not useful &middot; {link}
       </span>
       <span className="banner-mobile">
-        Cohort 2 &middot; 24 Oct &middot; $275 &middot; {link}
+        Launch cohort completed &middot; Cohort 2 &middot; 24 Oct &middot; $275<br />{link}
       </span>
       <style>{`
         #site-banner .banner-mobile { display: none; }
