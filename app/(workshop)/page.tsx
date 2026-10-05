@@ -314,10 +314,10 @@ export default function WorkshopPage() {
             Make AI <span style={{ color: C.accent }}>Work</span>
           </h1>
           <p style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)', fontWeight: 700, color: C.white, lineHeight: 1.5, margin: '0 auto 16px', maxWidth: 760, fontFamily: bodyFont, textWrap: 'balance' }}>
-            Bring the process that eats your week. Find the work AI and agents should do. Leave with one task specified well enough to build next week.
+            Go from AI experiments to one AI task you can build next week.
           </p>
-          <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.6, margin: '0 auto 36px', maxWidth: 640, fontFamily: bodyFont }}>
-            <strong style={{ color: C.white }}>Cohort 2:</strong> Workflow mapping, agent design, and a one-page build-ready specification.
+          <p style={{ fontSize: 16, color: C.body, lineHeight: 1.65, margin: '0 auto 36px', maxWidth: 640, fontFamily: bodyFont, textWrap: 'balance' }}>
+            Bring the process that eats your week. In 2.5 hours, find the work AI and agents should do in it, and leave with a one-page specification.
           </p>
 
           <TrackedLink
