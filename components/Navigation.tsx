@@ -24,7 +24,7 @@ export default function Navigation() {
   return (
     <>
       <header style={{
-        position:'fixed',top:0,left:0,right:0,zIndex:9000,height:64,
+        position:'fixed',top:'var(--banner-h, 0px)',left:0,right:0,zIndex:9000,height:64,
         background:'rgba(255,255,255,0.97)',
         borderBottom:'1px solid #e5e7eb',
         backdropFilter:'blur(12px)',
@@ -113,7 +113,7 @@ export default function Navigation() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div style={{
-          position:'fixed',top:64,left:0,right:0,zIndex:8999,
+          position:'fixed',top:'calc(var(--banner-h, 0px) + 64px)',left:0,right:0,zIndex:8999,
           background:'#fff',borderBottom:'1px solid #e5e7eb',
           padding:'16px 24px 24px',display:'flex',flexDirection:'column',gap:4,
         }}>

@@ -1,5 +1,6 @@
 'use client'
 import type { CSSProperties, ReactNode } from 'react'
+import { FIT_CALL_URL } from '@/lib/cohort2'
 
 type Props = {
   href: string
@@ -22,6 +23,7 @@ export default function TrackedLink({ href, location, style, className, target, 
       onClick={() => {
         if (typeof window !== 'undefined' && (window as any).gtag) {
           ;(window as any).gtag('event', 'cta_click', { location, destination: href })
+          if (href === FIT_CALL_URL) (window as any).gtag('event', 'fit_call_click', { location })
         }
       }}
     >

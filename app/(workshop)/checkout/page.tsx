@@ -2,11 +2,10 @@ import type { Metadata } from 'next'
 import CheckoutContents from '@/components/CheckoutContents'
 
 export const metadata: Metadata = {
-  title: 'Complete Your Enrollment — AI Value Sandbox',
+  title: 'Reserve your seat · Cohort 2',
   robots: { index: false, follow: false },
 }
 
-const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '97450176561'
 // PayPal Client IDs are meant to be public (same trust model as a Stripe
 // publishable key) — safe to read server-side and pass to the client.
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || ''
@@ -19,7 +18,7 @@ export default function CheckoutPage() {
           &larr; Back to the workshop
         </a>
       </div>
-      <CheckoutContents waNumber={WA_NUMBER} paypalClientId={PAYPAL_CLIENT_ID} />
+      <CheckoutContents paypalClientId={PAYPAL_CLIENT_ID} />
     </div>
   )
 }

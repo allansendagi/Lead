@@ -1,0 +1,20 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AI Navigator//Make AI Work//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:make-ai-work-cohort-2-20261024@ainavsystem.com
+DTSTAMP:20261005T000000Z
+DTSTART:20261024T070000Z
+DTEND:20261024T093000Z
+SUMMARY:Make AI Work · Cohort 2
+DESCRIPTION:Live online working session with Allan Sendagi. 10:00 Doha / 11:00 Dubai. Your session link arrives 24 hours before we start.
+LOCATION:Online
+BEGIN:VALARM
+TRIGGER:-PT1H
+ACTION:DISPLAY
+DESCRIPTION:Make AI Work · Cohort 2 starts in 1 hour
+END:VALARM
+END:VEVENT
+END:VCALENDAR

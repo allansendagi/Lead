@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://www.ainavsystem.com/terms/' },
 }
 
-const EFFECTIVE_DATE = 'September 2026'
+const EFFECTIVE_DATE = 'October 2026'
 const C = { bg: '#080808', accent: '#C2410C', white: '#F5F1EA', muted: '#A39C90', body: '#D8D2C6', border: 'rgba(245,241,234,0.12)' }
 
 export default function TermsPage() {
@@ -55,27 +55,34 @@ export default function TermsPage() {
           <section>
             <h2 style={h2}>Reserving a workshop seat</h2>
             <p>
-              AI Value Sandbox is a paid, live workshop. Reservations are made by messaging
-              Allan directly on WhatsApp — no payment is collected on this website. Payment is
-              arranged and confirmed directly with Allan once your seat is reserved.
+              Make AI Work is a paid, live workshop. We recommend a short fit call first, to check
+              your workflow suits the session. You then reserve your seat on the{' '}
+              <Link href="/checkout" style={link}>reservation page</Link>, either by paying by card
+              or PayPal, or by requesting an invoice for payment by bank transfer.
             </p>
             <p>
-              Current pricing, what&apos;s included, and seat availability are shown on the{' '}
-              <Link href="/checkout" style={link}>reservation page</Link> at the time you reserve.
+              Current pricing, what&apos;s included, and seat availability are shown on the
+              reservation page at the time you reserve.
             </p>
           </section>
 
           <section>
-            <h2 style={h2}>Refund policy</h2>
+            <h2 style={h2}>Refunds and cancellations</h2>
+            <ul style={{ paddingLeft: 22, display: 'flex', flexDirection: 'column', gap: 8, margin: '0 0 12px' }}>
+              <li>
+                Full refund if you don&apos;t leave with a specification you&apos;d use. Ask by email
+                within 48 hours of the session.
+              </li>
+              <li>
+                Can&apos;t make it? Cancel up to 7 days before for a full refund, or move your seat to
+                the next cohort at any time.
+              </li>
+              <li>If the session doesn&apos;t go ahead, you get a full refund.</li>
+            </ul>
             <p>
-              You may request a full refund up to 7 days before the workshop. Between 7 days and
-              48 hours before, refunds are available at 50%. Within 48 hours of the workshop, or
-              after it has taken place, no refunds are issued — seats are limited and cannot be
-              reallocated on short notice. To request a refund, email{' '}
+              To ask for a refund or move your seat, email{' '}
               <a href="mailto:allan@safehavenai.world" style={link}>allan@safehavenai.world</a>{' '}
-              before the applicable deadline, including your name and the email or WhatsApp number
-              used to register. If the workshop is postponed or cancelled by SafeHaven, you will
-              receive an automatic full refund.
+              with your name and the email or WhatsApp number used to register.
             </p>
           </section>
 

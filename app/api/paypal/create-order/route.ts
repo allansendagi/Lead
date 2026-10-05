@@ -1,31 +1,13 @@
 import { NextResponse } from 'next/server'
 import { getPaypalAccessToken, paypalConfigured, PAYPAL_API_BASE } from '@/lib/paypal'
-import { PRICE_PER_SEAT_USD } from '@/lib/reservations'
+import { COHORT_NAME, PAYPAL_AMOUNT, PAYPAL_CURRENCY } from '@/lib/cohort2'
 
 export const runtime = 'nodejs'
 
-function isValidSeats(v: unknown): v is number {
-  return typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 10
-}
-
-export async function POST(req: Request) {
+export async function POST() {
   if (!paypalConfigured()) {
     return NextResponse.json({ error: 'PayPal is not configured' }, { status: 500 })
   }
-
-  let body: Record<string, unknown>
-  try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
-  }
-
-  if (!isValidSeats(body.seats)) {
-    return NextResponse.json({ error: 'Invalid seat count' }, { status: 400 })
-  }
-
-  const seats = body.seats as number
-  const total = (seats * PRICE_PER_SEAT_USD).toFixed(2)
 
   try {
     const token = await getPaypalAccessToken()
@@ -39,8 +21,8 @@ export async function POST(req: Request) {
         intent: 'CAPTURE',
         purchase_units: [
           {
-            description: `AI Value Sandbox — ${seats} seat${seats > 1 ? 's' : ''}`,
-            amount: { currency_code: 'USD', value: total },
+            description: `${COHORT_NAME}, 24 October 2026 (AED 1,000)`,
+            amount: { currency_code: PAYPAL_CURRENCY, value: PAYPAL_AMOUNT },
           },
         ],
       }),

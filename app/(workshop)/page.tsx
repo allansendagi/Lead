@@ -4,26 +4,30 @@ import { Fraunces, Inter } from 'next/font/google'
 import ScrollScaleVideo from '@/components/ScrollScaleVideo'
 import MobileNav from '@/components/MobileNav'
 import CanvasBuilder from '@/components/CanvasBuilder'
-import Cohort2Waitlist from '@/components/Cohort2Modal'
 import TrackedLink from '@/components/TrackedLink'
 import { faqSchema } from '@/lib/schema'
+import { FIT_CALL_URL, COHORT_DESCRIPTION } from '@/lib/cohort2'
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['600', '700', '900'], style: ['normal', 'italic'] })
 const inter = Inter({ subsets: ['latin'] })
 const bodyFont = inter.style.fontFamily
 
 export const metadata: Metadata = {
-  title: 'The AI Value Creation Sandbox — Live Workshop',
-  description:
-    'A hands-on workshop for turning your highest-potential AI idea into a precise, buildable specification — using the AI Task Canvas. Hosted live by Allan Sendagi, author of The AI Roadmap.',
+  // Root layout appends " | AI Navigator", giving "Make AI Work · Cohort 2, 24 October | AI Navigator".
+  title: 'Make AI Work · Cohort 2, 24 October',
+  description: COHORT_DESCRIPTION,
   alternates: { canonical: 'https://www.ainavsystem.com/' },
+  openGraph: {
+    title: 'Make AI Work · Cohort 2, 24 October | AI Navigator',
+    description: COHORT_DESCRIPTION,
+    url: 'https://www.ainavsystem.com/',
+    type: 'website',
+  },
 }
 
 // ── Editable event details — fill these in once confirmed ──────────────────
 const WORKSHOP_DATE = 'October 24, 2026'
 const WORKSHOP_TIME = '10:00 AM Doha (GMT+3) / 11:00 AM Dubai (GMT+4)'
-// Fit call: WhatsApp for now. Swap for a Calendly link when one exists.
-const FIT_CALL_URL = `https://wa.me/97450176561?text=${encodeURIComponent('Hi Allan, I would like to book a 10-minute fit call for the AI Value Sandbox workshop')}`
 
 // ── Editorial Authority palette — black kept, one deliberate accent ────────
 const C = {
@@ -38,8 +42,8 @@ const C = {
 }
 
 const tickerItems = [
-  'REAL BUSINESS TASK', "AI'S ROLE", 'HUMAN JUDGMENT',
-  'REQUIRED DATA', 'FEEDBACK', 'MEASURABLE OUTCOME',
+  'YOUR WORKFLOW', 'EVERY STEP LABELLED', 'ONE TASK',
+  "THE AGENT'S LIMITS", 'ONE-PAGE SPECIFICATION', 'A FIRST TEST',
 ]
 
 const stats = [
@@ -268,10 +272,7 @@ export default function WorkshopPage() {
 
       <div className={fraunces.className} style={{ background: C.bg, color: C.white, overflowX: 'hidden' }}>
 
-        {/* ── Announcement bar ── */}
-        <div style={{ fontFamily: bodyFont, position: 'sticky', top: 0, zIndex: 100 }}>
-          <Cohort2Waitlist variant="banner" />
-        </div>
+        {/* Announcement bar now lives in the root layout (components/SiteBanner.tsx) */}
 
         {/* ── Nav ── */}
         <nav className="site-nav" style={{
@@ -324,8 +325,11 @@ export default function WorkshopPage() {
           <h1 style={{ fontSize: 'clamp(2.8rem, 8vw, 5.5rem)', fontWeight: 900, lineHeight: 1.04, margin: '0 0 20px', textTransform: 'uppercase' }}>
             Make AI <span style={{ color: C.accent }}>Work</span>
           </h1>
-          <p style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)', fontWeight: 700, color: C.white, lineHeight: 1.5, margin: '0 auto 36px', maxWidth: 760, fontFamily: bodyFont }}>
+          <p style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)', fontWeight: 700, color: C.white, lineHeight: 1.5, margin: '0 auto 16px', maxWidth: 760, fontFamily: bodyFont }}>
             Bring one workflow. Find the work AI should do in it. Leave with one task specified well enough to build next week.
+          </p>
+          <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.6, margin: '0 auto 36px', maxWidth: 640, fontFamily: bodyFont }}>
+            New for Cohort 2: workflow mapping, an agent layer, and a one-page build-ready specification.
           </p>
 
           <TrackedLink
@@ -342,7 +346,7 @@ export default function WorkshopPage() {
             Book a 10-minute fit call
           </TrackedLink>
           <p style={{ margin: '18px 0 0' }}>
-            <a href="#program" style={{ color: C.muted, fontSize: 13.5, textDecoration: 'underline', fontFamily: bodyFont }}>
+            <a href="#session-breakdown" style={{ color: C.muted, fontSize: 13.5, textDecoration: 'underline', fontFamily: bodyFont }}>
               See how it works &darr;
             </a>
           </p>
@@ -455,7 +459,7 @@ export default function WorkshopPage() {
         </section>
 
         {/* ── The framework ── */}
-        <section id="program" style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px 40px', scrollMarginTop: 24 }}>
+        <section id="program" style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px 40px', scrollMarginTop: 64 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28 }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', margin: 0, whiteSpace: 'nowrap' }}>
               THE AI TASK CANVAS
@@ -584,7 +588,7 @@ export default function WorkshopPage() {
         </section>
 
         {/* ── Session breakdown ── */}
-        <section style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 80px' }}>
+        <section id="session-breakdown" style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 80px', scrollMarginTop: 60 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28 }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', margin: 0, whiteSpace: 'nowrap' }}>
               SESSION BREAKDOWN
@@ -614,7 +618,7 @@ export default function WorkshopPage() {
         </section>
 
         {/* ── Pricing ── */}
-        <section id="enrollment" style={{ maxWidth: 640, margin: '0 auto', padding: '80px 24px', scrollMarginTop: 24 }}>
+        <section id="enrollment" style={{ maxWidth: 640, margin: '0 auto', padding: '80px 24px', scrollMarginTop: 64 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', textAlign: 'center', margin: '0 0 12px' }}>
             COHORT 2 PRICING
           </p>
@@ -680,7 +684,7 @@ export default function WorkshopPage() {
         </section>
 
         {/* ── Instructor ── */}
-        <section id="about" style={{ borderTop: `1px solid ${C.border}`, background: '#0c0c0c', padding: '80px 24px', scrollMarginTop: 24 }}>
+        <section id="about" style={{ borderTop: `1px solid ${C.border}`, background: '#0c0c0c', padding: '80px 24px', scrollMarginTop: 64 }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 56 }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', margin: 0, whiteSpace: 'nowrap' }}>
@@ -831,7 +835,7 @@ export default function WorkshopPage() {
         </section>
 
         {/* ── The Promise + FAQ ── */}
-        <section id="faq" style={{ borderTop: `1px solid ${C.border}`, background: '#0c0c0c', padding: '80px 24px', scrollMarginTop: 24 }}>
+        <section id="faq" style={{ borderTop: `1px solid ${C.border}`, background: '#0c0c0c', padding: '80px 24px', scrollMarginTop: 64 }}>
           <div className="promise-faq-grid" style={{
             maxWidth: 1100, margin: '0 auto', display: 'grid',
             gridTemplateColumns: 'minmax(260px, 1fr) minmax(320px, 1.7fr)', gap: 60,
@@ -964,6 +968,7 @@ export default function WorkshopPage() {
           .canvas-card:hover {
             border-color: ${C.accent};
           }
+          html { scroll-behavior: smooth; }
           .mobile-nav { display: none; }
           @media (max-width: 860px) {
             .site-nav-menu { display: none !important; }

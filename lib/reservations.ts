@@ -1,4 +1,8 @@
 import { Resend } from 'resend'
+import {
+  COHORT_NAME, COHORT_DATE_LONG, COHORT_TIME_DOHA, COHORT_TIME_DUBAI,
+  PRICE_AED, PAYPAL_CURRENCY, PAYPAL_AMOUNT, INVOICE_EMAIL,
+} from './cohort2'
 
 const SUPA_URL = process.env.SUPABASE_URL
 const SUPA_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY
@@ -6,22 +10,17 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'allan@safehavenai.world'
 const ADMIN_EMAIL = process.env.RESERVATION_NOTIFY_EMAIL || 'allan@safehavenai.world'
 
-export const PRICE_PER_SEAT_QAR = 550
-export const PRICE_PER_SEAT_USD = 151 // QAR is pegged at ~3.64/USD — fixed price, not a live conversion
-export const WORKSHOP_DATE = 'October 3, 2026'
-export const WORKSHOP_TIME = '10:00 AM Doha (GMT+3) / 11:00 AM Dubai (GMT+4)'
-
-export const BANK = {
-  bank: 'Commercial Bank of Qatar',
-  accountName: 'SAFEHAVEN LLC',
-  accountNumber: '401031480031001',
-  iban: 'QA31CBQA000000401031480031001',
-  swift: 'CBQAQAQA',
-  currency: 'QAR',
-}
-
-export type Method = 'bank_transfer' | 'whatsapp' | 'paypal'
+export type Method = 'paypal'
 export type Status = 'pending' | 'confirmed'
+
+// Details collected on the checkout form, beyond name and email.
+export type BuyerDetails = {
+  whatsapp: string
+  company: string
+  role: string
+  workflow: string
+  billingAddress?: string
+}
 
 // ── Supabase (native fetch — matches this project's existing convention) ──
 async function dbUpsert(row: Record<string, unknown>, conflictColumn?: string) {
@@ -58,136 +57,128 @@ async function markEmailSent(id: string) {
 }
 
 // ── Email ──────────────────────────────────────────────────────────────
-function esc(s: string) {
+export function esc(s: string) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-function buildEmailHtml(opts: { name: string; seats: number; total: number; currency: 'QAR' | 'USD'; method: Method; waUrl: string }) {
-  const { name, seats, total, currency, method, waUrl } = opts
-  const firstName = esc(name.trim().split(' ')[0] || 'there')
-  const seatWord = seats > 1 ? 'seats' : 'seat'
-
-  const bankRows = [
-    ['Bank', BANK.bank],
-    ['Account name', BANK.accountName],
-    ['Account number', BANK.accountNumber],
-    ['IBAN', BANK.iban],
-    ['SWIFT / BIC', BANK.swift],
-    ['Currency', BANK.currency],
+function detailRows(d: BuyerDetails) {
+  const rows: [string, string][] = [
+    ['WhatsApp', d.whatsapp],
+    ['Company', d.company],
+    ['Role', d.role],
+    ['Workflow', d.workflow],
   ]
-    .map(
-      ([label, value]) => `
-        <tr>
-          <td style="padding:10px 0;border-top:1px solid #2a2a2a;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#A39C90;text-transform:uppercase;letter-spacing:0.04em;">${label}</td>
-          <td style="padding:10px 0;border-top:1px solid #2a2a2a;font-family:'Courier New',monospace;font-size:14px;color:#F5F1EA;text-align:right;">${esc(value)}</td>
-        </tr>`
-    )
+  if (d.billingAddress) rows.push(['Billing address', d.billingAddress])
+  return rows
+    .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#6b7280;vertical-align:top;">${k}</td><td>${esc(v).replace(/\n/g, '<br>')}</td></tr>`)
     .join('')
+}
 
-  let paymentBlock: string
-  if (method === 'bank_transfer') {
-    paymentBlock = `
-        <p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#D8D2C6;margin:0 0 16px;">
-          Transfer <strong style="color:#F5F1EA;">${currency} ${total}</strong> using the details below, then send proof of payment
-          on WhatsApp so Allan can confirm your seat${seats > 1 ? 's' : ''}.
-        </p>
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#161513;border-radius:12px;padding:0 18px;margin:0 0 24px;">
-          ${bankRows}
-        </table>`
-  } else if (method === 'paypal') {
-    paymentBlock = `
-        <p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#D8D2C6;margin:0 0 24px;">
-          Paid in full via PayPal — <strong style="color:#F5F1EA;">${currency} ${total}</strong>. Nothing else to do;
-          your seat${seats > 1 ? 's are' : ' is'} confirmed.
-        </p>`
-  } else {
-    paymentBlock = `
-        <p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#D8D2C6;margin:0 0 24px;">
-          You started a reservation via WhatsApp. Message Allan there to confirm your seat${seats > 1 ? 's' : ''}
-          and arrange payment.
-        </p>`
-  }
-
+function buildEmailHtml(opts: { name: string; waUrl: string }) {
+  const firstName = esc(opts.name.trim().split(' ')[0] || 'there')
+  const p = 'font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#D8D2C6;margin:0 0 16px;'
   return `
   <div style="background:#080808;padding:40px 16px;">
     <div style="max-width:520px;margin:0 auto;background:#0c0c0c;border:1px solid #2a2a2a;border-radius:16px;overflow:hidden;">
       <div style="background:#C2410C;padding:18px 28px;">
         <p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#F5F1EA;margin:0;">
-          AI Value Sandbox
+          ${esc(COHORT_NAME)}
         </p>
       </div>
       <div style="padding:32px 28px;">
         <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#F5F1EA;margin:0 0 16px;">
-          Hi ${firstName}, your seat is ${method === 'paypal' ? 'confirmed' : 'reserved'}.
+          Hi ${firstName}, you&apos;re in.
         </h1>
-        <p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#D8D2C6;margin:0 0 24px;">
-          ${seats} ${seatWord} &middot; <strong style="color:#F5F1EA;">${WORKSHOP_DATE} &middot; ${WORKSHOP_TIME}</strong> &middot; 2.5 hours &middot; Live online
+        <p style="${p}">
+          <strong style="color:#F5F1EA;">${COHORT_DATE_LONG}</strong><br>
+          ${COHORT_TIME_DOHA} / ${COHORT_TIME_DUBAI}<br>
+          Live online &middot; 1 seat &middot; paid in full (AED ${PRICE_AED.toLocaleString('en-US')}, charged as ${PAYPAL_CURRENCY} ${PAYPAL_AMOUNT})
         </p>
-        ${paymentBlock}
-        <a href="${waUrl}" style="display:inline-block;background:#C2410C;color:#F5F1EA;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;padding:14px 24px;border-radius:10px;">
-          Message Allan on WhatsApp
+        <p style="${p}">What happens next:</p>
+        <ol style="${p}padding-left:20px;">
+          <li>A short pre-work email follows, to help you list your workflow&apos;s steps.</li>
+          <li>Your session link arrives 24 hours before we start.</li>
+        </ol>
+        <a href="${opts.waUrl}" style="display:inline-block;background:#C2410C;color:#F5F1EA;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;padding:14px 24px;border-radius:10px;">
+          Questions? Message me
         </a>
-        <p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.7;color:#A39C90;margin:28px 0 0;">
-          Bring one real business task you want to improve with AI. No technical background required.
-        </p>
-        <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#6b6b6b;margin:20px 0 0;">
-          Questions? Just reply to this email, or reach Allan directly at allan@safehavenai.world.
+        <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#6b6b6b;margin:24px 0 0;">
+          Full refund if you don&apos;t leave with a specification you&apos;d use. Ask by email within 48 hours of the session. You can also reply to this email, or write to ${INVOICE_EMAIL}.
         </p>
       </div>
     </div>
   </div>`
 }
 
-async function sendConfirmationEmail(opts: { to: string; name: string; seats: number; total: number; currency: 'QAR' | 'USD'; method: Method; waUrl: string }) {
+async function sendConfirmationEmail(opts: { to: string; name: string; waUrl: string }) {
   const resend = new Resend(RESEND_API_KEY)
   await resend.emails.send({
     from: `Allan Sendagi <${FROM_EMAIL}>`,
     to: opts.to,
-    subject: `You're ${opts.method === 'paypal' ? 'confirmed' : 'reserved'} — AI Value Sandbox (${opts.seats} seat${opts.seats > 1 ? 's' : ''})`,
+    subject: `You're in — ${COHORT_NAME}, 24 October`,
     html: buildEmailHtml(opts),
   })
 }
 
-async function sendAdminNotification(opts: { name: string; email: string; seats: number; total: number; currency: 'QAR' | 'USD'; method: Method; saved: boolean }) {
+async function sendAdminNotification(opts: { name: string; email: string; details: BuyerDetails; saved: boolean }) {
   const resend = new Resend(RESEND_API_KEY)
-  const methodLabel = { bank_transfer: 'Bank transfer', whatsapp: 'WhatsApp', paypal: 'PayPal (paid)' }[opts.method]
-  const note = {
-    bank_transfer: "They'll message you on WhatsApp once they've paid, with proof of payment.",
-    whatsapp: "They've been sent to WhatsApp to reach you directly.",
-    paypal: 'Payment already confirmed via PayPal — no action needed.',
-  }[opts.method]
   await resend.emails.send({
-    from: `AI Value Sandbox <${FROM_EMAIL}>`,
+    from: `${COHORT_NAME} <${FROM_EMAIL}>`,
     to: ADMIN_EMAIL,
-    subject: `New reservation — ${esc(opts.name)} (${opts.seats} seat${opts.seats > 1 ? 's' : ''})`,
+    subject: `New seat — ${esc(opts.name)} (${esc(COHORT_NAME)})`,
     html: `
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.7;">
-        <p><strong>${esc(opts.name)}</strong> just reserved ${opts.seats} seat${opts.seats > 1 ? 's' : ''} for AI Value Sandbox.</p>
+        <p><strong>${esc(opts.name)}</strong> paid for a seat in ${esc(COHORT_NAME)}.</p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;">
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Email</td><td>${esc(opts.email)}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Seats</td><td>${opts.seats}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Total</td><td>${opts.currency} ${opts.total}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Method</td><td>${methodLabel}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Saved to database</td><td>${opts.saved ? 'Yes' : 'No — Supabase not configured'}</td></tr>
+          ${detailRows(opts.details)}
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Paid</td><td>${PAYPAL_CURRENCY} ${PAYPAL_AMOUNT} (AED ${PRICE_AED})</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Saved to database</td><td>${opts.saved ? 'Yes (name, email, amount only)' : 'No — Supabase not configured'}</td></tr>
         </table>
-        <p style="color:#6b7280;font-size:13px;">${note}</p>
+        <p style="color:#6b7280;font-size:13px;">Payment already confirmed via PayPal. The details above are only in this email.</p>
       </div>`,
   })
+}
+
+// Invoice request: the buyer asked to pay by bank transfer. Returns false if the email could not be sent.
+export async function sendInvoiceRequest(opts: { name: string; email: string; details: BuyerDetails }): Promise<boolean> {
+  if (!RESEND_API_KEY) {
+    console.error('[reservations] RESEND_API_KEY not set — invoice request not sent')
+    return false
+  }
+  const resend = new Resend(RESEND_API_KEY)
+  const { error } = await resend.emails.send({
+    from: `${COHORT_NAME} <${FROM_EMAIL}>`,
+    to: INVOICE_EMAIL,
+    replyTo: opts.email,
+    subject: 'Invoice request: Cohort 2',
+    html: `
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.7;">
+        <p><strong>${esc(opts.name)}</strong> asked for an invoice for ${esc(COHORT_NAME)} (${COHORT_DATE_LONG}), AED ${PRICE_AED.toLocaleString('en-US')} for 1 seat.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;">
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Name</td><td>${esc(opts.name)}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Email</td><td>${esc(opts.email)}</td></tr>
+          ${detailRows(opts.details)}
+        </table>
+        <p style="color:#6b7280;font-size:13px;">Reply to this email to reach the buyer. Promised turnaround: one working day.</p>
+      </div>`,
+  })
+  if (error) {
+    console.error('[reservations] invoice request email failed:', JSON.stringify(error))
+    return false
+  }
+  return true
 }
 
 // ── Public entry point ────────────────────────────────────────────────
 export async function saveReservationAndNotify(opts: {
   name: string
   email: string
-  seats: number
-  total: number
-  currency: 'QAR' | 'USD'
-  method: Method
-  status: Status
+  details: BuyerDetails
   waUrl: string
   ip?: string
   userAgent?: string | null
-  paypalOrderId?: string
+  paypalOrderId: string
 }): Promise<{ id: string | null; saved: boolean; emailSent: boolean }> {
   let reservationId: string | null = null
   let saved = false
@@ -198,16 +189,16 @@ export async function saveReservationAndNotify(opts: {
         {
           name: opts.name,
           email: opts.email,
-          seats: opts.seats,
-          total_amount: opts.total,
-          currency: opts.currency,
-          payment_method: opts.method,
-          status: opts.status,
+          seats: 1,
+          total_amount: Number(PAYPAL_AMOUNT),
+          currency: PAYPAL_CURRENCY,
+          payment_method: 'paypal',
+          status: 'confirmed',
           user_agent: opts.userAgent ?? null,
           ip_address: opts.ip ?? 'unknown',
-          ...(opts.paypalOrderId ? { paypal_order_id: opts.paypalOrderId } : {}),
+          paypal_order_id: opts.paypalOrderId,
         },
-        opts.paypalOrderId ? 'paypal_order_id' : undefined
+        'paypal_order_id'
       )
       reservationId = row?.id || null
       saved = true
@@ -221,10 +212,7 @@ export async function saveReservationAndNotify(opts: {
   let emailSent = false
   if (RESEND_API_KEY) {
     try {
-      await sendConfirmationEmail({
-        to: opts.email, name: opts.name, seats: opts.seats, total: opts.total,
-        currency: opts.currency, method: opts.method, waUrl: opts.waUrl,
-      })
+      await sendConfirmationEmail({ to: opts.email, name: opts.name, waUrl: opts.waUrl })
       emailSent = true
       if (reservationId) await markEmailSent(reservationId)
     } catch (err) {
@@ -232,10 +220,7 @@ export async function saveReservationAndNotify(opts: {
     }
 
     try {
-      await sendAdminNotification({
-        name: opts.name, email: opts.email, seats: opts.seats, total: opts.total,
-        currency: opts.currency, method: opts.method, saved,
-      })
+      await sendAdminNotification({ name: opts.name, email: opts.email, details: opts.details, saved })
     } catch (err) {
       console.error('[reservations] admin notification failed:', (err as Error).message)
     }

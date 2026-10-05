@@ -26,14 +26,20 @@
   <style>
     #sn-banner {
       position: fixed; top: 0; left: 0; right: 0; z-index: 9001;
-      height: 36px; background: #C2410C; color: #F5F1EA;
+      min-height: 36px; background: #C2410C; color: #F5F1EA;
       display: flex; align-items: center; justify-content: center;
       font-family: 'Inter', -apple-system, sans-serif;
       font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-align: center;
-      padding: 0 16px;
+      padding: 6px 16px; line-height: 1.5;
+    }
+    #sn-banner a { color: inherit; text-decoration: underline; }
+    #sn-banner .bn-mobile { display: none; }
+    @media (max-width: 639px) {
+      #sn-banner .bn-desktop { display: none; }
+      #sn-banner .bn-mobile { display: inline; }
     }
     #sn-nav {
-      position: fixed; top: 36px; left: 0; right: 0; z-index: 9000;
+      position: fixed; top: var(--bh, 36px); left: 0; right: 0; z-index: 9000;
       height: 56px; background: rgba(12,14,20,0.96);
       border-bottom: 1px solid rgba(255,255,255,0.08);
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -89,7 +95,7 @@
       min-height: 100vh; background: var(--bg); color: var(--text);
       font-family: var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden;
     }
-    body { padding-top: 92px; }
+    body { padding-top: calc(var(--bh, 36px) + 56px); }
 
     /* ─ Screens ─ */
     .screen { display: none; min-height: 100vh; flex-direction: column; }
@@ -366,7 +372,10 @@
 <body>
 
 <!-- ═══ ANNOUNCEMENT BAR ═══ -->
-<div id="sn-banner">LAUNCH COHORT &middot; 10 PARTICIPANTS</div>
+<div id="sn-banner">
+  <span class="bn-desktop">Launch cohort completed &middot; Next cohort: Saturday 24 October &middot; 10 seats &middot; AED 1,000 &middot; Full refund if it&#39;s not useful &middot; <a href="https://wa.me/97450176561?text=Hi%20Allan%2C%20I%27d%20like%20to%20book%20a%2010-minute%20fit%20call%20for%20Cohort%202%20of%20Make%20AI%20Work%20%2824%20October%29." target="_blank" rel="noopener" onclick="window.gtag&&gtag('event','fit_call_click',{location:'banner'})">Book a fit call &rarr;</a></span>
+  <span class="bn-mobile">Cohort 2 &middot; 24 Oct &middot; AED 1,000 &middot; <a href="https://wa.me/97450176561?text=Hi%20Allan%2C%20I%27d%20like%20to%20book%20a%2010-minute%20fit%20call%20for%20Cohort%202%20of%20Make%20AI%20Work%20%2824%20October%29." target="_blank" rel="noopener" onclick="window.gtag&&gtag('event','fit_call_click',{location:'banner'})">Book a fit call &rarr;</a></span>
+</div>
 
 <!-- ═══ SITE NAVIGATION ═══ -->
 <nav id="sn-nav" role="navigation" aria-label="Site navigation">
@@ -641,8 +650,8 @@
     </div>
 
     <div class="rctas">
-      <a href="/checkout" class="btn full rv" style="background:#C2410C;color:#fff;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;text-decoration:none;width:100%;">
-        Reserve Your Seat in AI Value Sandbox →
+      <a href="https://wa.me/97450176561?text=Hi%20Allan%2C%20I%27d%20like%20to%20book%20a%2010-minute%20fit%20call%20for%20Cohort%202%20of%20Make%20AI%20Work%20%2824%20October%29." target="_blank" rel="noopener" onclick="window.gtag&&gtag('event','fit_call_click',{location:'assessment_result'})" class="btn full rv" style="background:#C2410C;color:#fff;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:700;text-decoration:none;width:100%;">
+        Book a 10-minute fit call →
       </a>
     </div>
 
@@ -788,8 +797,8 @@ function renderResults() {
   document.getElementById('offer').innerHTML = `
     <div class="offer-ey">Recommended next step</div>
     <div class="offer-title">AI Value Sandbox</div>
-    <div class="offer-desc">A 2.5-hour live workshop with Allan Sendagi. Bring one real business task and leave with a defined, measurable AI intervention.</div>
-    <div class="offer-price-row"><span class="offer-price">QAR 550</span><span class="offer-note">per seat</span></div>`;
+    <div class="offer-desc">Make AI Work · Cohort 2. A 2.5-hour live working session with Allan Sendagi on Saturday 24 October. Bring one workflow and leave with one task specified well enough to build.</div>
+    <div class="offer-price-row"><span class="offer-price">AED 1,000</span><span class="offer-note">per seat</span></div>`;
 
   // Stagger reveals
   document.querySelectorAll('#s-results .rv').forEach((el,i) => {
@@ -889,6 +898,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('s-hero').classList.add('active');
 });
 
+</script>
+<script>
+  // The banner can wrap to two lines on narrow screens; keep the nav and page content clear of it.
+  (function () {
+    var b = document.getElementById('sn-banner');
+    function fit() { document.documentElement.style.setProperty('--bh', b.offsetHeight + 'px'); }
+    fit(); window.addEventListener('resize', fit);
+  })();
 </script>
 </body>
 </html>

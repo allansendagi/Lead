@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 import { orgSchema } from '@/lib/schema'
+import SiteBanner from '@/components/SiteBanner'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             })(window,document,"clarity","script","CLARITY_PROJECT_ID");
           `}
         </Script>
+        <SiteBanner />
         {children}
       </body>
     </html>

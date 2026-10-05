@@ -1,193 +1,126 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import Countdown from './Countdown'
+import { track } from '@/lib/analytics'
+import {
+  FIT_CALL_URL, COHORT_DATE_LONG, COHORT_TIME_DOHA, COHORT_TIME_DUBAI,
+  PRICE_AED, PRICE_QAR_APPROX, PAYPAL_CURRENCY, PAYPAL_AMOUNT,
+} from '@/lib/cohort2'
 
-const C = { bg: '#080808', card: '#161513', border: 'rgba(245,241,234,0.12)', accent: '#C2410C', white: '#F5F1EA', muted: '#A39C90' }
-
-const WORKSHOP_DEADLINE = '2026-10-03T10:00:00+03:00'
-const PRICE_PER_SEAT_QAR = 550
-const PRICE_PER_SEAT_USD = 151
-const PRICE_PER_SEAT_AED = 554
-const MAX_SEATS = 10
+const C = { bg: '#080808', card: '#161513', border: 'rgba(245,241,234,0.12)', accent: '#C2410C', white: '#F5F1EA', muted: '#A39C90', body: '#d8d2c6' }
 
 const included = [
-  { lead: '1 live 2.5-hour working session', rest: 'with Allan Sendagi. Bring one real business task and work through it from beginning to end.' },
-  { lead: 'The AI Task Canvas', rest: 'a seven-element framework for specifying the task, prediction, judgment, inputs, training data, feedback, and outcome.' },
-  { lead: 'A defined AI intervention', rest: 'specify exactly where AI participates in the work, what it needs to do, and where human judgment remains.' },
-  { lead: 'A measurable value hypothesis', rest: 'define what should improve and how you will know whether the intervention creates value.' },
-  { lead: 'Direct working feedback from Allan', rest: 'throughout the session.' },
-  { lead: 'A completed Canvas', rest: 'you can use to brief a developer, vendor, internal team, or next-stage AI project.' },
-  { lead: 'A clear next step', rest: 'identify what needs to be tested, what data is required, and what happens after the workshop.' },
+  'Live 2.5-hour working session',
+  'Your workflow mapped and labelled',
+  'Completed AI Task Canvas',
+  'One-page AI Task Specification',
+  'Agent steps and limits, if relevant',
+  'A first test to run',
+  'Direct working feedback',
 ]
 
-const bankDetails = [
-  { label: 'Bank', value: 'Commercial Bank of Qatar' },
-  { label: 'Account name', value: 'SAFEHAVEN LLC' },
-  { label: 'Account number', value: '401031480031001' },
-  { label: 'IBAN', value: 'QA31CBQA000000401031480031001' },
-  { label: 'SWIFT / BIC', value: 'CBQAQAQA' },
-  { label: 'Currency', value: 'QAR' },
+const terms = [
+  "Full refund if you don't leave with a specification you'd use. Ask by email within 48 hours of the session.",
+  "Can't make it? Cancel up to 7 days before for a full refund, or move your seat to the next cohort at any time.",
+  "If the session doesn't go ahead, you get a full refund.",
 ]
+
+type Form = {
+  name: string; email: string; whatsapp: string; company: string; role: string; workflow: string; billingAddress: string
+}
+const empty: Form = { name: '', email: '', whatsapp: '', company: '', role: '', workflow: '', billingAddress: '' }
 
 function isValidEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
 }
 
-function track(event: string, params?: Record<string, unknown>) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    ;(window as any).gtag('event', event, params)
-  }
-}
+const inputStyle = (invalid: boolean) => ({
+  width: '100%', padding: '13px 16px', borderRadius: 10, background: C.card,
+  border: `1px solid ${invalid ? C.accent : C.border}`,
+  color: C.white, fontSize: 14, fontFamily: 'inherit', outline: 'none',
+} as const)
 
-export default function CheckoutContents({ waNumber, paypalClientId }: { waNumber: string; paypalClientId: string }) {
-  const [seats, setSeats] = useState(1)
-  const [method, setMethod] = useState<'whatsapp' | 'bank' | 'paypal'>('bank')
-  const [copiedField, setCopiedField] = useState<string | null>(null)
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+export default function CheckoutContents({ paypalClientId }: { paypalClientId: string }) {
+  const [form, setForm] = useState<Form>(empty)
+  const [hp, setHp] = useState('')
+  const [method, setMethod] = useState<'paypal' | 'invoice'>('paypal')
   const [touched, setTouched] = useState(false)
-  const [sendState, setSendState] = useState<'idle' | 'sending' | 'sent'>('idle')
   const [paypalError, setPaypalError] = useState<string | null>(null)
-  const totalQar = seats * PRICE_PER_SEAT_QAR
-  const totalUsd = seats * PRICE_PER_SEAT_USD
+  const [invoiceState, setInvoiceState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [paying, setPaying] = useState(false)
 
-  const nameValid = name.trim().length >= 2
-  const emailValid = isValidEmail(email)
-  const detailsValid = nameValid && emailValid
+  const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm(f => ({ ...f, [k]: e.target.value }))
 
-  function copy(label: string, value: string) {
-    navigator.clipboard?.writeText(value).then(() => {
-      setCopiedField(label)
-      setTimeout(() => setCopiedField(f => (f === label ? null : f)), 1500)
-    })
+  const valid = {
+    name: form.name.trim().length >= 2,
+    email: isValidEmail(form.email),
+    whatsapp: form.whatsapp.trim().length >= 5,
+    company: form.company.trim().length >= 1,
+    role: form.role.trim().length >= 1,
+    workflow: form.workflow.trim().length >= 3,
   }
+  const detailsValid = Object.values(valid).every(Boolean)
 
-  const reserveMsg = encodeURIComponent(
-    [
-      `Hi Allan, I'd like to reserve ${seats} seat${seats > 1 ? 's' : ''} for the AI Value Sandbox workshop.`,
-      ``,
-      `Name: ${name.trim()}`,
-      `Total: QAR ${totalQar}`,
-    ].join('\n')
-  )
-  const paidMsg = encodeURIComponent(
-    [
-      `Hi Allan, I've just made a bank transfer of QAR ${totalQar} for ${seats} seat${seats > 1 ? 's' : ''} in the AI Value Sandbox workshop.`,
-      ``,
-      `Name: ${name.trim()}`,
-      `Sending proof of payment now.`,
-    ].join('\n')
-  )
-  const reserveUrl = `https://wa.me/${waNumber}?text=${reserveMsg}`
-  const paidUrl = `https://wa.me/${waNumber}?text=${paidMsg}`
-
-  async function handleAction(action: 'reserve' | 'paid') {
-    setTouched(true)
-    if (!detailsValid) return
-
-    track(action === 'paid' ? 'bank_transfer_paid_click' : 'reserve_whatsapp_click', {
-      seats, value: totalQar, currency: 'QAR',
+  // GA4 begin_checkout when the page loads.
+  useEffect(() => {
+    track('begin_checkout', {
+      value: PRICE_AED, currency: 'AED',
+      items: [{ item_name: 'Make AI Work · Cohort 2', quantity: 1, price: PRICE_AED }],
     })
-
-    const waUrl = action === 'paid' ? paidUrl : reserveUrl
-    const win = window.open(waUrl, '_blank', 'noopener,noreferrer')
-
-    setSendState('sending')
-    try {
-      await fetch('/api/reserve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          seats,
-          method: method === 'bank' ? 'bank_transfer' : 'whatsapp',
-          waUrl,
-        }),
-      })
-    } catch {
-      // Non-blocking — the WhatsApp tab is already open regardless.
-    } finally {
-      setSendState('sent')
-    }
-
-    if (!win) window.location.href = waUrl
-  }
+  }, [])
 
   // ── PayPal ──────────────────────────────────────────────────────────
-  // Buttons are rendered once the SDK loads and details are valid; a ref
-  // keeps the latest seats/name/email so the callbacks (created once)
-  // never read stale values from an earlier render.
+  // Buttons render once the SDK loads and the details are valid. A ref keeps
+  // the latest form values so callbacks (created once) never read stale state.
   const paypalContainerRef = useRef<HTMLDivElement>(null)
   const paypalRenderedRef = useRef(false)
-  const formStateRef = useRef({ seats, name, email, waUrl: reserveUrl })
-  useEffect(() => {
-    formStateRef.current = { seats, name, email, waUrl: reserveUrl }
-  }, [seats, name, email, reserveUrl])
+  const formRef = useRef(form)
+  useEffect(() => { formRef.current = form }, [form])
 
   useEffect(() => {
     if (method !== 'paypal' || !detailsValid || !paypalClientId || paypalRenderedRef.current) return
 
     function renderButtons() {
       const paypal = (window as any).paypal
-      if (!paypal || !paypalContainerRef.current) return
+      if (!paypal || !paypalContainerRef.current || paypalRenderedRef.current) return
       paypalRenderedRef.current = true
       paypal.Buttons({
         style: { color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
         createOrder: async () => {
           setPaypalError(null)
-          track('begin_checkout', {
-            value: formStateRef.current.seats * PRICE_PER_SEAT_USD, currency: 'USD', seats: formStateRef.current.seats,
-          })
-          const res = await fetch('/api/paypal/create-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ seats: formStateRef.current.seats }),
-          })
+          const res = await fetch('/api/paypal/create-order', { method: 'POST' })
           const data = await res.json()
           if (!res.ok || !data.id) throw new Error(data.error || 'Could not start PayPal checkout')
           return data.id
         },
         onApprove: async (data: { orderID: string }) => {
-          setSendState('sending')
+          setPaying(true)
+          const f = formRef.current
           try {
             const res = await fetch('/api/paypal/capture-order', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 orderID: data.orderID,
-                name: formStateRef.current.name.trim(),
-                email: formStateRef.current.email.trim(),
-                seats: formStateRef.current.seats,
-                waUrl: formStateRef.current.waUrl,
+                name: f.name.trim(), email: f.email.trim(), whatsapp: f.whatsapp.trim(),
+                company: f.company.trim(), role: f.role.trim(), workflow: f.workflow.trim(),
+                billingAddress: f.billingAddress.trim(),
               }),
             })
             const result = await res.json()
             if (result.success) {
-              setSendState('sent')
-              track('purchase', {
-                transaction_id: data.orderID,
-                value: formStateRef.current.seats * PRICE_PER_SEAT_USD,
-                currency: 'USD',
-                items: [{
-                  item_name: 'AI Value Sandbox seat',
-                  quantity: formStateRef.current.seats,
-                  price: PRICE_PER_SEAT_USD,
-                }],
-              })
-            } else {
-              setSendState('idle')
-              setPaypalError('Payment could not be confirmed. Please contact Allan on WhatsApp with your PayPal receipt.')
-              track('paypal_capture_failed', { order_id: data.orderID })
+              window.location.href = `/checkout/success?order=${encodeURIComponent(data.orderID)}`
+              return
             }
+            throw new Error('capture failed')
           } catch {
-            setSendState('idle')
-            setPaypalError('Payment could not be confirmed. Please contact Allan on WhatsApp with your PayPal receipt.')
+            setPaying(false)
+            setPaypalError('Payment could not be confirmed. Please message Allan on WhatsApp with your PayPal receipt.')
             track('paypal_capture_failed', { order_id: data.orderID })
           }
         },
         onError: () => {
-          setPaypalError('PayPal ran into a problem. Please try again, or use bank transfer / WhatsApp instead.')
+          setPaypalError('PayPal ran into a problem. Please try again, or request an invoice instead.')
           track('paypal_error')
         },
       }).render(paypalContainerRef.current)
@@ -203,7 +136,7 @@ export default function CheckoutContents({ waNumber, paypalClientId }: { waNumbe
     if (!script) {
       script = document.createElement('script')
       script.id = scriptId
-      script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypalClientId)}&currency=USD`
+      script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypalClientId)}&currency=${PAYPAL_CURRENCY}`
       script.addEventListener('load', renderButtons)
       document.body.appendChild(script)
     } else {
@@ -211,306 +144,230 @@ export default function CheckoutContents({ waNumber, paypalClientId }: { waNumbe
     }
   }, [method, detailsValid, paypalClientId])
 
+  async function sendInvoiceRequest() {
+    setTouched(true)
+    if (!detailsValid || invoiceState === 'sending') return
+    setInvoiceState('sending')
+    try {
+      const res = await fetch('/api/invoice-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name.trim(), email: form.email.trim(), whatsapp: form.whatsapp.trim(),
+          company: form.company.trim(), role: form.role.trim(), workflow: form.workflow.trim(),
+          billingAddress: form.billingAddress.trim(), hp,
+        }),
+      })
+      if (!res.ok) throw new Error('failed')
+      setInvoiceState('sent')
+      track('invoice_request', { value: PRICE_AED, currency: 'AED' })
+    } catch {
+      setInvoiceState('error')
+    }
+  }
+
+  const err = (ok: boolean, msg: string) =>
+    touched && !ok ? <p style={{ fontSize: 12, color: C.accent, margin: '6px 0 0' }}>{msg}</p> : null
+  const label = (text: string, optional = false) => (
+    <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: C.muted, letterSpacing: '0.04em', margin: '0 0 6px' }}>
+      {text}{optional ? ' (optional)' : ''}
+    </span>
+  )
+
+  const tab = (key: 'paypal' | 'invoice', text: string) => (
+    <button
+      type="button"
+      onClick={() => setMethod(key)}
+      aria-pressed={method === key}
+      style={{
+        flex: 1, padding: '11px 10px', borderRadius: 9, border: 'none', cursor: 'pointer',
+        background: method === key ? C.accent : 'transparent',
+        color: method === key ? C.white : C.muted,
+        fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
+      }}
+    >
+      {text}
+    </button>
+  )
+
   return (
-    <div className="checkout-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '56px 24px 96px', display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: 56 }}>
-      <div>
-        <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', margin: '0 0 20px' }}>
-          AI VALUE SANDBOX &middot; LIVE WORKSHOP
-        </p>
-        <h1 style={{ fontSize: 'clamp(2rem, 4.2vw, 3rem)', fontWeight: 900, color: C.white, lineHeight: 1.1, margin: '0 0 10px' }}>
-          Complete your enrollment.
+    <div className="checkout-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 96px', display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: 56 }}>
+      <div style={{ minWidth: 0 }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 4.2vw, 3rem)', fontWeight: 900, color: C.white, lineHeight: 1.1, margin: '0 0 24px' }}>
+          Reserve your seat &middot; Cohort 2
         </h1>
-        <p style={{ fontSize: 'clamp(1.2rem, 2.4vw, 1.6rem)', fontStyle: 'italic', fontWeight: 700, color: C.white, margin: '0 0 40px' }}>
-          Your seat in AI Value Sandbox.
-        </p>
 
-        <h2 style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px' }}>
-          What&apos;s included
-        </h2>
-        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {included.map(item => (
-            <li key={item.lead} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontSize: 15, lineHeight: 1.65 }}>
-              <span style={{ color: C.accent, flexShrink: 0, fontWeight: 700 }}>&rarr;</span>
-              <span style={{ color: '#d8d2c6' }}>
-                <strong style={{ color: C.white }}>{item.lead}</strong> {item.rest}
-              </span>
-            </li>
-          ))}
-        </ul>
-
-        <h2 style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-          What you need
-        </h2>
-        <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: '0 0 4px' }}>
-          One real business task you want to improve with AI.
-        </p>
-        <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: '0 0 12px' }}>
-          No technical background required. No coding required.
-        </p>
-        <a href="/pick-your-task" style={{ color: C.muted, fontSize: 13.5, textDecoration: 'underline' }}>
-          Don&apos;t have one yet? Find one in 5 minutes &rarr;
-        </a>
-      </div>
-
-      <div>
-        <div style={{ border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '28px 28px', background: C.card, marginBottom: 24, boxShadow: '0 0 40px rgba(194,65,12,0.1)' }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 20px' }}>
-            Launch Cohort &middot; 10 Participants
+        <div style={{ border: `1px solid ${C.border}`, background: C.card, borderRadius: 12, padding: '16px 20px', margin: '0 0 28px' }}>
+          <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.65, margin: 0 }}>
+            Had your fit call? Complete your seat below. Not yet?{' '}
+            <a href={FIT_CALL_URL} target="_blank" rel="noopener noreferrer" onClick={() => track('fit_call_click', { location: 'checkout_notice' })} style={{ color: C.white, fontWeight: 700 }}>
+              Book a 10-minute fit call
+            </a>{' '}
+            first. It&apos;s how we make sure your workflow is a good fit.
           </p>
+        </div>
 
-          <Countdown target={WORKSHOP_DEADLINE} accent={C.accent} />
-
-          <div style={{ borderTop: `1px solid ${C.border}`, margin: '20px 0' }} />
-
-          <p style={{ fontSize: 13, color: C.muted, margin: '0 0 6px' }}>AI Value / Sandbox</p>
-          <p style={{ fontSize: 28, fontWeight: 800, color: C.white, margin: '0 0 4px' }}>
-            QAR {PRICE_PER_SEAT_QAR} <span style={{ fontSize: 14, fontWeight: 500, color: C.muted }}>/ seat</span>
+        <div style={{ border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '28px', background: C.card, marginBottom: 36, boxShadow: '0 0 40px rgba(194,65,12,0.1)' }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 16px' }}>
+            Order summary
           </p>
-          <p style={{ fontSize: 13, color: C.muted, margin: '0 0 20px' }}>
-            &asymp; AED {PRICE_PER_SEAT_AED} / seat
+          <p style={{ fontSize: 22, fontWeight: 800, color: C.white, margin: '0 0 10px' }}>Make AI Work &middot; Cohort 2</p>
+          <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.7, margin: '0 0 4px' }}>
+            {COHORT_DATE_LONG} &middot; {COHORT_TIME_DOHA} / {COHORT_TIME_DUBAI}
           </p>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderTop: `1px solid ${C.border}` }}>
-            <span style={{ fontSize: 14, color: C.white }}>Number of seats</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <button
-                onClick={() => setSeats(n => Math.max(1, n - 1))}
-                disabled={seats <= 1}
-                aria-label="Remove a seat"
-                style={{ width: 30, height: 30, borderRadius: 6, border: `1px solid ${C.border}`, background: 'none', color: C.white, fontSize: 16, cursor: seats <= 1 ? 'not-allowed' : 'pointer', opacity: seats <= 1 ? 0.4 : 1 }}
-              >
-                &minus;
-              </button>
-              <span style={{ minWidth: 20, textAlign: 'center', fontSize: 15, fontWeight: 700, color: C.white }}>{seats}</span>
-              <button
-                onClick={() => setSeats(n => Math.min(MAX_SEATS, n + 1))}
-                disabled={seats >= MAX_SEATS}
-                aria-label="Add a seat"
-                style={{ width: 30, height: 30, borderRadius: 6, border: `1px solid ${C.border}`, background: 'none', color: C.white, fontSize: 16, cursor: seats >= MAX_SEATS ? 'not-allowed' : 'pointer', opacity: seats >= MAX_SEATS ? 0.4 : 1 }}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0 0', borderTop: `1px solid ${C.border}` }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: C.white }}>Total</span>
-            <span style={{ fontSize: 20, fontWeight: 800, color: C.white }}>
-              {method === 'paypal' ? `$${totalUsd}` : `QAR ${totalQar}`}
+          <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.7, margin: '0 0 18px' }}>
+            Live online &middot; session link sent 24 hours before
+          </p>
+          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 14, color: C.white }}>1 seat</span>
+            <span style={{ fontSize: 22, fontWeight: 800, color: C.white }}>
+              AED {PRICE_AED.toLocaleString('en-US')}{' '}
+              <span style={{ fontSize: 14, fontWeight: 500, color: C.muted }}>(&asymp; QAR {PRICE_QAR_APPROX})</span>
             </span>
           </div>
         </div>
 
+        <h2 style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 18px' }}>
+          Included
+        </h2>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {included.map(item => (
+            <li key={item} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontSize: 15, lineHeight: 1.6 }}>
+              <span style={{ color: C.accent, flexShrink: 0, fontWeight: 700 }}>&rarr;</span>
+              <span style={{ color: C.body }}>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div style={{ minWidth: 0 }}>
         <p style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 16px' }}>
           Your details
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
           <div>
-            <input
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Full name"
-              aria-label="Full name"
-              style={{
-                width: '100%', padding: '13px 16px', borderRadius: 10, background: C.card,
-                border: `1px solid ${touched && !nameValid ? C.accent : C.border}`,
-                color: C.white, fontSize: 14, fontFamily: 'inherit', outline: 'none',
-              }}
-            />
-            {touched && !nameValid && (
-              <p style={{ fontSize: 12, color: C.accent, margin: '6px 0 0' }}>Enter your name.</p>
-            )}
+            <label htmlFor="co-name">{label('Full name')}</label>
+            <input id="co-name" value={form.name} onChange={set('name')} autoComplete="name" style={inputStyle(touched && !valid.name)} />
+            {err(valid.name, 'Enter your name.')}
           </div>
           <div>
-            <input
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="Email address"
-              aria-label="Email address"
-              type="email"
-              style={{
-                width: '100%', padding: '13px 16px', borderRadius: 10, background: C.card,
-                border: `1px solid ${touched && !emailValid ? C.accent : C.border}`,
-                color: C.white, fontSize: 14, fontFamily: 'inherit', outline: 'none',
-              }}
-            />
-            {touched && !emailValid && (
-              <p style={{ fontSize: 12, color: C.accent, margin: '6px 0 0' }}>Enter a valid email &mdash; we&apos;ll send your confirmation here.</p>
-            )}
+            <label htmlFor="co-email">{label('Email')}</label>
+            <input id="co-email" type="email" value={form.email} onChange={set('email')} autoComplete="email" style={inputStyle(touched && !valid.email)} />
+            {err(valid.email, 'Enter a valid email. We send your confirmation here.')}
           </div>
+          <div>
+            <label htmlFor="co-whatsapp">{label('WhatsApp number')}</label>
+            <input id="co-whatsapp" type="tel" value={form.whatsapp} onChange={set('whatsapp')} autoComplete="tel" placeholder="+974 5000 0000" style={inputStyle(touched && !valid.whatsapp)} />
+            {err(valid.whatsapp, 'Enter your WhatsApp number, with country code.')}
+          </div>
+          <div>
+            <label htmlFor="co-company">{label('Company')}</label>
+            <input id="co-company" value={form.company} onChange={set('company')} autoComplete="organization" style={inputStyle(touched && !valid.company)} />
+            {err(valid.company, 'Enter your company.')}
+          </div>
+          <div>
+            <label htmlFor="co-role">{label('Role')}</label>
+            <input id="co-role" value={form.role} onChange={set('role')} autoComplete="organization-title" style={inputStyle(touched && !valid.role)} />
+            {err(valid.role, 'Enter your role.')}
+          </div>
+          <div>
+            <label htmlFor="co-workflow">{label("The workflow you'll bring, in one line")}</label>
+            <input id="co-workflow" value={form.workflow} onChange={set('workflow')} placeholder="e.g. Turning customer enquiries into quotes" style={inputStyle(touched && !valid.workflow)} />
+            {err(valid.workflow, 'Describe the workflow in one line.')}
+          </div>
+          <div>
+            <label htmlFor="co-billing">{label('Billing address', true)}</label>
+            <textarea id="co-billing" value={form.billingAddress} onChange={set('billingAddress')} rows={3} autoComplete="street-address" placeholder="For invoices" style={{ ...inputStyle(false), resize: 'vertical' }} />
+          </div>
+          {/* Honeypot — real people never see or fill this */}
+          <input value={hp} onChange={e => setHp(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
         </div>
 
         <p style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 16px' }}>
-          Reserve Your Seats
+          Payment
         </p>
 
-        {/* Method switch */}
         <div style={{ display: 'flex', gap: 6, padding: 4, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 20 }}>
-          <button
-            onClick={() => setMethod('bank')}
-            style={{
-              flex: 1, padding: '10px 10px', borderRadius: 9, border: 'none', cursor: 'pointer',
-              background: method === 'bank' ? C.accent : 'transparent',
-              color: method === 'bank' ? C.white : C.muted,
-              fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
-            }}
-          >
-            Bank Transfer
-          </button>
-          <button
-            onClick={() => setMethod('paypal')}
-            style={{
-              flex: 1, padding: '10px 10px', borderRadius: 9, border: 'none', cursor: 'pointer',
-              background: method === 'paypal' ? C.accent : 'transparent',
-              color: method === 'paypal' ? C.white : C.muted,
-              fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
-            }}
-          >
-            PayPal
-          </button>
-          <button
-            onClick={() => setMethod('whatsapp')}
-            style={{
-              flex: 1, padding: '10px 10px', borderRadius: 9, border: 'none', cursor: 'pointer',
-              background: method === 'whatsapp' ? C.accent : 'transparent',
-              color: method === 'whatsapp' ? C.white : C.muted,
-              fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
-            }}
-          >
-            WhatsApp
-          </button>
+          {tab('paypal', 'Pay by card or PayPal')}
+          {tab('invoice', 'Request an invoice (bank transfer)')}
         </div>
 
-        {method === 'whatsapp' && (
-          <>
-            <button
-              onClick={() => handleAction('reserve')}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%',
-                background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
-                fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer',
-                textTransform: 'uppercase', letterSpacing: '0.04em', opacity: touched && !detailsValid ? 0.6 : 1,
-              }}
-            >
-              Reserve via WhatsApp
-            </button>
-            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '16px 0 0' }}>
-              No payment is taken on this page. Message Allan directly on WhatsApp to confirm your seat{seats > 1 ? 's' : ''} and arrange payment.
-            </p>
-          </>
-        )}
-
-        {method === 'bank' && (
-          <>
-            <div style={{ border: `1px solid ${C.border}`, borderRadius: 14, background: C.card, overflow: 'hidden' }}>
-              {bankDetails.map((row, i) => (
-                <div
-                  key={row.label}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-                    padding: '14px 18px', borderTop: i === 0 ? 'none' : `1px solid ${C.border}`,
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 2px' }}>
-                      {row.label}
-                    </p>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: C.white, margin: 0, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', wordBreak: 'break-all' }}>
-                      {row.value}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => copy(row.label, row.value)}
-                    style={{
-                      flexShrink: 0, padding: '7px 12px', borderRadius: 8, border: `1px solid ${C.border}`,
-                      background: 'none', color: copiedField === row.label ? C.accent : C.muted,
-                      fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                    }}
-                  >
-                    {copiedField === row.label ? 'Copied' : 'Copy'}
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '16px 0 20px' }}>
-              Transfer <strong style={{ color: C.white }}>QAR {totalQar}</strong> using the details above.
-              Bank transfers can take 1&ndash;2 business days to reflect. Once you&apos;ve paid, confirm your
-              seat{seats > 1 ? 's' : ''} by sending proof of payment on WhatsApp.
-            </p>
-
-            <button
-              onClick={() => handleAction('paid')}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%',
-                background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
-                fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer',
-                textTransform: 'uppercase', letterSpacing: '0.04em', opacity: touched && !detailsValid ? 0.6 : 1,
-              }}
-            >
-              I&apos;ve Paid &mdash; Confirm via WhatsApp
-            </button>
-          </>
-        )}
-
-        {method === 'paypal' && (
-          <>
-            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 16px' }}>
-              PayPal charges in US dollars &mdash; <strong style={{ color: C.white }}>${totalUsd}</strong> for{' '}
-              {seats} seat{seats > 1 ? 's' : ''} (QAR {totalQar} at a fixed rate). Payment is confirmed instantly.
-            </p>
-            {!detailsValid ? (
-              <button
-                onClick={() => setTouched(true)}
-                style={{
-                  width: '100%', padding: '16px 24px', borderRadius: 12, border: `1px solid ${C.border}`,
-                  background: 'none', color: C.muted, fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                }}
-              >
-                Enter your name and email above to pay with PayPal
-              </button>
-            ) : (
-              <div ref={paypalContainerRef} style={{ minHeight: 45 }} />
-            )}
-            {paypalError && (
-              <p style={{ fontSize: 13, color: C.accent, lineHeight: 1.7, margin: '12px 0 0' }}>{paypalError}</p>
-            )}
-          </>
-        )}
-
-        {sendState === 'sent' && (
-          <p style={{ fontSize: 13, color: C.accent, margin: '14px 0 0' }}>
-            &#10003; A confirmation email is on its way to {email}.
-          </p>
-        )}
-
-        <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 24, paddingTop: 24 }}>
-          <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: 0 }}>
-            By registering, you agree to our{' '}
-            <a href="/terms" style={{ color: C.accent }}>Terms of Service</a> and{' '}
+        <div style={{ border: `1px solid ${C.border}`, background: C.card, borderRadius: 12, padding: '18px 20px', marginBottom: 20 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: C.white, margin: '0 0 10px' }}>Terms</p>
+          <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {terms.map(t => (
+              <li key={t} style={{ fontSize: 13, color: C.body, lineHeight: 1.65 }}>{t}</li>
+            ))}
+          </ul>
+          <p style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.65, margin: '12px 0 0' }}>
+            By paying you agree to our <a href="/terms" style={{ color: C.accent }}>Terms of Service</a> and{' '}
             <a href="/privacy" style={{ color: C.accent }}>Privacy Notice</a>.
           </p>
         </div>
 
-        <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 24, paddingTop: 24 }}>
-          <p style={{ fontSize: 14, color: C.muted, fontStyle: 'italic', margin: 0 }}>
-            10 participants maximum. Enrollment is first come, first served.
-          </p>
-        </div>
+        {method === 'paypal' && (
+          <>
+            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 16px' }}>
+              The price is <strong style={{ color: C.white }}>AED {PRICE_AED.toLocaleString('en-US')}</strong>. Card and PayPal
+              charge the exact equivalent in US dollars: <strong style={{ color: C.white }}>{PAYPAL_CURRENCY} {PAYPAL_AMOUNT}</strong>.
+              Your seat is confirmed instantly.
+            </p>
+            {!detailsValid ? (
+              <button
+                type="button"
+                onClick={() => setTouched(true)}
+                style={{ width: '100%', padding: '16px 24px', borderRadius: 12, border: `1px solid ${C.border}`, background: 'none', color: C.muted, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+              >
+                Complete your details above to pay
+              </button>
+            ) : paypalClientId ? (
+              <div ref={paypalContainerRef} style={{ minHeight: 45 }} />
+            ) : (
+              <p style={{ fontSize: 13, color: C.accent, lineHeight: 1.7, margin: 0 }}>
+                Card and PayPal payment is not set up on this site yet. Please request an invoice instead.
+              </p>
+            )}
+            {paying && <p style={{ fontSize: 13, color: C.muted, margin: '12px 0 0' }}>Confirming your payment&hellip;</p>}
+            {paypalError && <p style={{ fontSize: 13, color: C.accent, lineHeight: 1.7, margin: '12px 0 0' }}>{paypalError}</p>}
+          </>
+        )}
 
-        <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 24, paddingTop: 24 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: C.white, margin: '0 0 10px' }}>Refund policy</p>
-          <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: 0 }}>
-            You may request a full refund up to 7 days before the workshop. Between 7 days and 48 hours
-            before, refunds are available at 50%. Within 48 hours of the workshop, or after it has taken
-            place, no refunds are issued — seats are limited to 10 participants and cannot be reallocated
-            on short notice. To request a refund, email{' '}
-            <a href="mailto:allan@safehavenai.world" style={{ color: C.accent }}>allan@safehavenai.world</a>{' '}
-            before the applicable deadline, including your name and the email used to register. If the
-            workshop is postponed or cancelled by SafeHaven AI, you will receive an automatic full refund.
-          </p>
-        </div>
+        {method === 'invoice' && (
+          <>
+            {invoiceState === 'sent' ? (
+              <p style={{ fontSize: 15, color: C.white, lineHeight: 1.7, margin: 0 }}>
+                Thanks, I&apos;ll send your invoice within one working day.
+              </p>
+            ) : (
+              <>
+                <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 16px' }}>
+                  I&apos;ll email you an invoice for <strong style={{ color: C.white }}>AED {PRICE_AED.toLocaleString('en-US')}</strong> with
+                  bank transfer details. Your seat is held once the transfer arrives.
+                </p>
+                <button
+                  type="button"
+                  onClick={sendInvoiceRequest}
+                  disabled={invoiceState === 'sending'}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%',
+                    background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
+                    fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer',
+                    textTransform: 'uppercase', letterSpacing: '0.04em',
+                    opacity: invoiceState === 'sending' || (touched && !detailsValid) ? 0.6 : 1,
+                  }}
+                >
+                  {invoiceState === 'sending' ? 'Sending…' : 'Request my invoice'}
+                </button>
+                {invoiceState === 'error' && (
+                  <p style={{ fontSize: 13, color: C.accent, lineHeight: 1.7, margin: '12px 0 0' }}>
+                    The request did not go through. Please try again, or message Allan on WhatsApp.
+                  </p>
+                )}
+              </>
+            )}
+          </>
+        )}
       </div>
 
       <style>{`

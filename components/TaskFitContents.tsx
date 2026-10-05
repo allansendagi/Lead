@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { FIT_CALL_URL } from '@/lib/cohort2'
 
 const C = {
   bg: '#080808', card: '#161513', sunk: '#0c0c0c', border: 'rgba(245,241,234,0.12)',
@@ -135,9 +136,6 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
 
   return (
     <div style={{ background: C.bg, minHeight: '100vh', fontFamily: 'var(--font)' }}>
-      <div style={{ background: C.accent, color: C.white, textAlign: 'center', padding: '10px 16px', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em' }}>
-        LAUNCH COHORT &middot; 10 PARTICIPANTS
-      </div>
       <div style={{ padding: '20px 24px' }}>
         <a href="/" style={{ color: C.white, fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>&larr; Back to the workshop</a>
       </div>
@@ -429,15 +427,20 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 40 }}>
               <a
-                href="/checkout"
-                onClick={() => track('cta_click', { location: 'task_picker_result', ai_potential: aiPotential })}
+                href={FIT_CALL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  track('cta_click', { location: 'task_picker_result', ai_potential: aiPotential })
+                  track('fit_call_click', { location: 'task_picker_result' })
+                }}
                 style={{
                   display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
                   padding: '15px 30px', borderRadius: 12, fontSize: 14, fontWeight: 800,
                   textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
                 }}
               >
-                Bring this task to the workshop &rarr;
+                Book a fit call about this task &rarr;
               </a>
               <button onClick={() => { selectTask(null); setStep(keptTasks.length > 1 ? 'pick' : 'tasks') }} style={{
                 background: 'none', border: `1px solid ${C.border}`, color: C.muted,
@@ -450,12 +453,12 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '20px 22px', marginBottom: 28 }}>
               {captureState === 'sent' ? (
                 <p style={{ fontSize: 14, color: C.white, margin: 0 }}>
-                  Saved — we&apos;ll follow up before 3 October if it&apos;s useful.
+                  Saved — we&apos;ll follow up before 24 October if it&apos;s useful.
                 </p>
               ) : (
                 <>
                   <p style={{ fontSize: 14, fontWeight: 700, color: C.white, margin: '0 0 4px' }}>
-                    Want us to save this and follow up before 3 October?
+                    Want us to save this and follow up before 24 October?
                   </p>
                   <p style={{ fontSize: 12.5, color: C.muted, margin: '0 0 14px' }}>
                     Optional — the button above already works without this.
