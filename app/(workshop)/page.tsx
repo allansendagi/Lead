@@ -221,7 +221,7 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'How do I pay?',
-    a: 'By card, or ask for an invoice. Price is AED 1,000 (about QAR 990) per seat.',
+    a: 'By card, or ask for an invoice. Price is $275 per seat (AED 1,000 or QAR 990).',
   },
   {
     q: 'What if it is not useful?',
@@ -617,10 +617,10 @@ export default function WorkshopPage() {
             </p>
 
             <p style={{ fontSize: 'clamp(2.4rem, 6vw, 3.2rem)', fontWeight: 900, color: C.white, margin: '0 0 4px' }}>
-              AED 1,000
+              $275
             </p>
             <p style={{ fontSize: 14, color: C.muted, margin: '0 0 8px', fontFamily: bodyFont }}>
-              &asymp; QAR 990
+              AED 1,000 &middot; QAR 990
             </p>
             <p style={{ fontSize: 14, color: C.muted, margin: '0 0 24px', fontFamily: bodyFont }}>
               Saturday, {WORKSHOP_DATE.replace(', 2026', '')} &middot; {WORKSHOP_TIME} &middot; 2.5 hours &middot; Live online

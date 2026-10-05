@@ -9,15 +9,15 @@ export const COHORT_DATE_LONG = 'Saturday 24 October 2026'
 export const COHORT_TIME_DOHA = '10:00–12:30 Doha (GMT+3)'
 export const COHORT_TIME_DUBAI = '11:00–13:30 Dubai (GMT+4)'
 
+export const PRICE_USD = 275
 export const PRICE_AED = 1000
-export const PRICE_QAR_APPROX = 990
-// PayPal's standard currency list has no AED, so card/PayPal charges the exact
-// USD equivalent at the fixed AED peg (3.6725 AED per USD): 1,000 / 3.6725 = 272.29.
+export const PRICE_QAR = 990
+// PayPal's standard currency list has no AED, so card/PayPal charges in USD.
+// Bank transfer and invoices can be settled in AED or QAR.
 export const PAYPAL_CURRENCY = 'USD'
-export const PAYPAL_AMOUNT = '272.29'
 export const MAX_SEATS = 10
 
-export const paypalTotal = (seats: number) => (Number(PAYPAL_AMOUNT) * seats).toFixed(2)
+export const paypalTotal = (seats: number) => (PRICE_USD * seats).toFixed(2)
 
 export const BANK = {
   bank: 'Commercial Bank of Qatar',
@@ -31,4 +31,4 @@ export const BANK = {
 export const INVOICE_EMAIL = 'allan@safehavenai.world'
 
 export const COHORT_DESCRIPTION =
-  'A 2.5-hour live working session for business owners: map one workflow, find the work AI should do, and leave with one task specified well enough to build. Cohort 2: Saturday 24 October. AED 1,000.'
+  'A 2.5-hour live working session for business owners: map one workflow, find the work AI should do, and leave with one task specified well enough to build. Cohort 2: Saturday 24 October. $275.'

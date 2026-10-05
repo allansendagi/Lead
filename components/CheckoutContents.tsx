@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { track } from '@/lib/analytics'
 import {
   FIT_CALL_URL, COHORT_DATE_LONG, COHORT_TIME_DOHA, COHORT_TIME_DUBAI,
-  PRICE_AED, PRICE_QAR_APPROX, PAYPAL_CURRENCY, MAX_SEATS, BANK, paypalTotal,
+  PRICE_USD, PRICE_AED, PRICE_QAR, PAYPAL_CURRENCY, MAX_SEATS, BANK, paypalTotal,
 } from '@/lib/cohort2'
 
 const C = { bg: '#080808', card: '#161513', border: 'rgba(245,241,234,0.12)', accent: '#C2410C', white: '#F5F1EA', muted: '#A39C90', body: '#d8d2c6' }
@@ -70,8 +70,9 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
   const [copiedField, setCopiedField] = useState<string | null>(null)
 
   const totalAed = seats * PRICE_AED
-  const totalQar = seats * PRICE_QAR_APPROX
-  const totalUsd = paypalTotal(seats)
+  const totalQar = seats * PRICE_QAR
+  const totalUsd = seats * PRICE_USD
+  const fmt = (n: number) => n.toLocaleString('en-US')
   const seatWord = seats > 1 ? 'seats' : 'seat'
 
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -114,12 +115,12 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
       `Hi Allan, I'd like to reserve ${seats} ${seatWord} for Make AI Work · Cohort 2 (24 October).`,
       ``,
       `Name: ${form.name.trim()}`,
-      `Total: AED ${totalAed.toLocaleString('en-US')}`,
+      `Total: $${totalUsd} (AED ${fmt(totalAed)} / QAR ${fmt(totalQar)})`,
     ].join('\n')
   )}`
   const paidUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
     [
-      `Hi Allan, I've just made a bank transfer of AED ${totalAed.toLocaleString('en-US')} for ${seats} ${seatWord} in Make AI Work · Cohort 2.`,
+      `Hi Allan, I've just made a bank transfer for ${seats} ${seatWord} in Make AI Work · Cohort 2 (AED ${fmt(totalAed)} or QAR ${fmt(totalQar)}).`,
       ``,
       `Name: ${form.name.trim()}`,
       `Sending proof of payment now.`,
@@ -321,11 +322,29 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
             </div>
           </div>
 
+          <div style={{ borderTop: `1px solid ${C.border}`, padding: '16px 0' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 10px' }}>
+              Price per seat
+            </p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {[
+                { amount: `$${PRICE_USD}`, via: 'Card or PayPal' },
+                { amount: `AED ${fmt(PRICE_AED)}`, via: 'Bank transfer' },
+                { amount: `QAR ${fmt(PRICE_QAR)}`, via: 'Bank transfer' },
+              ].map(c => (
+                <div key={c.amount} style={{ flex: '1 1 110px', border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px' }}>
+                  <p style={{ fontSize: 16, fontWeight: 800, color: C.white, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{c.amount}</p>
+                  <p style={{ fontSize: 11.5, color: C.muted, margin: '2px 0 0' }}>{c.via}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 14, color: C.white }}>{seats} {seatWord} &middot; AED {PRICE_AED.toLocaleString('en-US')} each</span>
-            <span style={{ fontSize: 22, fontWeight: 800, color: C.white }}>
-              AED {totalAed.toLocaleString('en-US')}{' '}
-              <span style={{ fontSize: 14, fontWeight: 500, color: C.muted }}>(&asymp; QAR {totalQar})</span>
+            <span style={{ fontSize: 14, color: C.white }}>Total &middot; {seats} {seatWord}</span>
+            <span style={{ textAlign: 'right' }}>
+              <span style={{ display: 'block', fontSize: 24, fontWeight: 800, color: C.white, fontVariantNumeric: 'tabular-nums' }}>${fmt(totalUsd)}</span>
+              <span style={{ display: 'block', fontSize: 13, color: C.muted, fontVariantNumeric: 'tabular-nums' }}>AED {fmt(totalAed)} &middot; QAR {fmt(totalQar)}</span>
             </span>
           </div>
         </div>
@@ -426,8 +445,7 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
         {method === 'paypal' && (
           <>
             <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 16px' }}>
-              The price is <strong style={{ color: C.white }}>AED {totalAed.toLocaleString('en-US')}</strong>. Card and PayPal charge the
-              exact equivalent in US dollars: <strong style={{ color: C.white }}>{PAYPAL_CURRENCY} {totalUsd}</strong> for {seats} {seatWord}.
+              Card and PayPal charge <strong style={{ color: C.white }}>${fmt(totalUsd)}</strong> ({PAYPAL_CURRENCY}) for {seats} {seatWord}.
               Payment is confirmed instantly.
             </p>
             {!detailsValid ? (
@@ -485,7 +503,7 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
             </div>
 
             <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '16px 0 20px' }}>
-              Transfer <strong style={{ color: C.white }}>AED {totalAed.toLocaleString('en-US')}</strong> (&asymp; QAR {totalQar}) using the details above.
+              Transfer <strong style={{ color: C.white }}>AED {fmt(totalAed)}</strong> or <strong style={{ color: C.white }}>QAR {fmt(totalQar)}</strong> using the details above.
               Bank transfers can take 1&ndash;2 business days to reflect. Once you&apos;ve paid, confirm your
               {' '}{seatWord} by sending proof of payment on WhatsApp.
             </p>
@@ -502,7 +520,7 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
               ) : (
                 <>
                   <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 12px' }}>
-                    Need an invoice first? I&apos;ll email one for <strong style={{ color: C.white }}>AED {totalAed.toLocaleString('en-US')}</strong> with
+                    Need an invoice first? I&apos;ll email one for <strong style={{ color: C.white }}>${fmt(totalUsd)}</strong> (AED {fmt(totalAed)} or QAR {fmt(totalQar)}) with
                     bank transfer details.
                   </p>
                   <button

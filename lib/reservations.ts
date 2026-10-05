@@ -1,7 +1,7 @@
 import { Resend } from 'resend'
 import {
   COHORT_NAME, COHORT_DATE_LONG, COHORT_TIME_DOHA, COHORT_TIME_DUBAI,
-  PRICE_AED, PRICE_QAR_APPROX, INVOICE_EMAIL, BANK,
+  PRICE_USD, PRICE_AED, PRICE_QAR, INVOICE_EMAIL, BANK,
 } from './cohort2'
 
 const SUPA_URL = process.env.SUPABASE_URL
@@ -98,7 +98,7 @@ function buildEmailHtml(opts: { name: string; seats: number; total: number; curr
   if (method === 'bank_transfer') {
     paymentBlock = `
         <p style="${p}">
-          Transfer <strong style="color:#F5F1EA;">AED ${total.toLocaleString('en-US')}</strong> (about QAR ${PRICE_QAR_APPROX * seats}) using the details below, then send proof of payment
+          Transfer <strong style="color:#F5F1EA;">AED ${total.toLocaleString('en-US')}</strong> or <strong style="color:#F5F1EA;">QAR ${(PRICE_QAR * seats).toLocaleString('en-US')}</strong> using the details below, then send proof of payment
           on WhatsApp so Allan can confirm your seat${seats > 1 ? 's' : ''}.
         </p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#161513;border-radius:12px;padding:0 18px;margin:0 0 24px;">
@@ -200,7 +200,7 @@ export async function sendInvoiceRequest(opts: { name: string; email: string; se
     subject: 'Invoice request: Cohort 2',
     html: `
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.7;">
-        <p><strong>${esc(opts.name)}</strong> asked for an invoice for ${esc(COHORT_NAME)} (${COHORT_DATE_LONG}), AED ${(PRICE_AED * opts.seats).toLocaleString('en-US')} for ${opts.seats} seat${opts.seats > 1 ? 's' : ''}.</p>
+        <p><strong>${esc(opts.name)}</strong> asked for an invoice for ${esc(COHORT_NAME)} (${COHORT_DATE_LONG}), $${PRICE_USD * opts.seats} (AED ${(PRICE_AED * opts.seats).toLocaleString('en-US')} or QAR ${(PRICE_QAR * opts.seats).toLocaleString('en-US')}) for ${opts.seats} seat${opts.seats > 1 ? 's' : ''}.</p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;">
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Name</td><td>${esc(opts.name)}</td></tr>
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Email</td><td>${esc(opts.email)}</td></tr>
