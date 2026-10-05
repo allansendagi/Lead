@@ -1,10 +1,15 @@
 import type { BuyerDetails } from './reservations'
+import { MAX_SEATS } from './cohort2'
 
 export function isValidName(v: unknown): v is string {
   return typeof v === 'string' && v.trim().length >= 2 && v.trim().length <= 80
 }
 export function isValidEmail(v: unknown): v is string {
   return typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) && v.length <= 120
+}
+
+export function isValidSeats(v: unknown): v is number {
+  return typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= MAX_SEATS
 }
 
 function text(v: unknown, min: number, max: number): v is string {

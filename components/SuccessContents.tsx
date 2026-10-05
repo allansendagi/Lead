@@ -17,8 +17,10 @@ export default function SuccessContents() {
   // GA4 purchase, once per order. The order id comes from the PayPal return;
   // a reload must not count a second purchase.
   useEffect(() => {
-    const order = new URLSearchParams(window.location.search).get('order')
+    const params = new URLSearchParams(window.location.search)
+    const order = params.get('order')
     if (!order) return
+    const n = Math.min(10, Math.max(1, parseInt(params.get('seats') || '1', 10) || 1))
     const key = `purchase_tracked_${order}`
     try {
       if (sessionStorage.getItem(key)) return
@@ -26,9 +28,9 @@ export default function SuccessContents() {
     } catch { /* storage blocked: accept a possible double count */ }
     track('purchase', {
       transaction_id: order,
-      value: PRICE_AED,
+      value: PRICE_AED * n,
       currency: 'AED',
-      items: [{ item_name: 'Make AI Work · Cohort 2', quantity: 1, price: PRICE_AED }],
+      items: [{ item_name: 'Make AI Work · Cohort 2', quantity: n, price: PRICE_AED }],
     })
   }, [])
 

@@ -1,13 +1,25 @@
 import { NextResponse } from 'next/server'
 import { getPaypalAccessToken, paypalConfigured, PAYPAL_API_BASE } from '@/lib/paypal'
-import { COHORT_NAME, PAYPAL_AMOUNT, PAYPAL_CURRENCY } from '@/lib/cohort2'
+import { COHORT_NAME, PAYPAL_CURRENCY, PRICE_AED, paypalTotal } from '@/lib/cohort2'
+import { isValidSeats } from '@/lib/checkoutDetails'
 
 export const runtime = 'nodejs'
 
-export async function POST() {
+export async function POST(req: Request) {
   if (!paypalConfigured()) {
     return NextResponse.json({ error: 'PayPal is not configured' }, { status: 500 })
   }
+
+  let body: Record<string, unknown>
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+  if (!isValidSeats(body.seats)) {
+    return NextResponse.json({ error: 'Invalid seat count' }, { status: 400 })
+  }
+  const seats = body.seats
 
   try {
     const token = await getPaypalAccessToken()
@@ -21,8 +33,8 @@ export async function POST() {
         intent: 'CAPTURE',
         purchase_units: [
           {
-            description: `${COHORT_NAME}, 24 October 2026 (AED 1,000)`,
-            amount: { currency_code: PAYPAL_CURRENCY, value: PAYPAL_AMOUNT },
+            description: `${COHORT_NAME}, 24 October 2026: ${seats} seat${seats > 1 ? 's' : ''} (AED ${(PRICE_AED * seats).toLocaleString('en-US')})`,
+            amount: { currency_code: PAYPAL_CURRENCY, value: paypalTotal(seats) },
           },
         ],
       }),

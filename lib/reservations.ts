@@ -1,7 +1,7 @@
 import { Resend } from 'resend'
 import {
   COHORT_NAME, COHORT_DATE_LONG, COHORT_TIME_DOHA, COHORT_TIME_DUBAI,
-  PRICE_AED, PAYPAL_CURRENCY, PAYPAL_AMOUNT, INVOICE_EMAIL,
+  PRICE_AED, PRICE_QAR_APPROX, INVOICE_EMAIL, BANK,
 } from './cohort2'
 
 const SUPA_URL = process.env.SUPABASE_URL
@@ -10,7 +10,8 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'allan@safehavenai.world'
 const ADMIN_EMAIL = process.env.RESERVATION_NOTIFY_EMAIL || 'allan@safehavenai.world'
 
-export type Method = 'paypal'
+export type Method = 'bank_transfer' | 'whatsapp' | 'paypal'
+export type Currency = 'AED' | 'USD'
 export type Status = 'pending' | 'confirmed'
 
 // Details collected on the checkout form, beyond name and email.
@@ -74,9 +75,49 @@ function detailRows(d: BuyerDetails) {
     .join('')
 }
 
-function buildEmailHtml(opts: { name: string; waUrl: string }) {
+function buildEmailHtml(opts: { name: string; seats: number; total: number; currency: Currency; method: Method; waUrl: string }) {
+  const { seats, total, currency, method } = opts
   const firstName = esc(opts.name.trim().split(' ')[0] || 'there')
   const p = 'font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#D8D2C6;margin:0 0 16px;'
+  const bankRows = [
+    ['Bank', BANK.bank],
+    ['Account name', BANK.accountName],
+    ['Account number', BANK.accountNumber],
+    ['IBAN', BANK.iban],
+    ['SWIFT / BIC', BANK.swift],
+    ['Currency', BANK.currency],
+  ]
+    .map(([label, value]) => `
+        <tr>
+          <td style="padding:10px 0;border-top:1px solid #2a2a2a;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#A39C90;text-transform:uppercase;letter-spacing:0.04em;">${label}</td>
+          <td style="padding:10px 0;border-top:1px solid #2a2a2a;font-family:'Courier New',monospace;font-size:14px;color:#F5F1EA;text-align:right;">${esc(value)}</td>
+        </tr>`)
+    .join('')
+
+  let paymentBlock: string
+  if (method === 'bank_transfer') {
+    paymentBlock = `
+        <p style="${p}">
+          Transfer <strong style="color:#F5F1EA;">AED ${total.toLocaleString('en-US')}</strong> (about QAR ${PRICE_QAR_APPROX * seats}) using the details below, then send proof of payment
+          on WhatsApp so Allan can confirm your seat${seats > 1 ? 's' : ''}.
+        </p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#161513;border-radius:12px;padding:0 18px;margin:0 0 24px;">
+          ${bankRows}
+        </table>`
+  } else if (method === 'paypal') {
+    paymentBlock = `
+        <p style="${p}">
+          Paid in full via PayPal, <strong style="color:#F5F1EA;">${currency} ${total}</strong>. Nothing else to do;
+          your seat${seats > 1 ? 's are' : ' is'} confirmed.
+        </p>`
+  } else {
+    paymentBlock = `
+        <p style="${p}">
+          You started a reservation via WhatsApp. Message Allan there to confirm your seat${seats > 1 ? 's' : ''}
+          and arrange payment.
+        </p>`
+  }
+
   return `
   <div style="background:#080808;padding:40px 16px;">
     <div style="max-width:520px;margin:0 auto;background:#0c0c0c;border:1px solid #2a2a2a;border-radius:16px;overflow:hidden;">
@@ -87,61 +128,66 @@ function buildEmailHtml(opts: { name: string; waUrl: string }) {
       </div>
       <div style="padding:32px 28px;">
         <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#F5F1EA;margin:0 0 16px;">
-          Hi ${firstName}, you&apos;re in.
+          Hi ${firstName}, ${method === 'paypal' ? "you're in" : 'your seat is reserved'}.
         </h1>
         <p style="${p}">
           <strong style="color:#F5F1EA;">${COHORT_DATE_LONG}</strong><br>
           ${COHORT_TIME_DOHA} / ${COHORT_TIME_DUBAI}<br>
-          Live online &middot; 1 seat &middot; paid in full (AED ${PRICE_AED.toLocaleString('en-US')}, charged as ${PAYPAL_CURRENCY} ${PAYPAL_AMOUNT})
+          Live online &middot; ${seats} seat${seats > 1 ? 's' : ''}
         </p>
-        <p style="${p}">What happens next:</p>
-        <ol style="${p}padding-left:20px;">
-          <li>A short pre-work email follows, to help you list your workflow&apos;s steps.</li>
-          <li>Your session link arrives 24 hours before we start.</li>
-        </ol>
-        <a href="${opts.waUrl}" style="display:inline-block;background:#C2410C;color:#F5F1EA;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;padding:14px 24px;border-radius:10px;">
-          Questions? Message me
+        ${paymentBlock}
+        <p style="${p}">What happens next: a short pre-work email follows, to help you list your workflow&apos;s steps. Your session link arrives 24 hours before we start.</p>
+        <a href="${esc(opts.waUrl || 'https://wa.me/97450176561')}" style="display:inline-block;background:#C2410C;color:#F5F1EA;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;padding:14px 24px;border-radius:10px;">
+          Message Allan on WhatsApp
         </a>
         <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#6b6b6b;margin:24px 0 0;">
-          Full refund if you don&apos;t leave with a specification you&apos;d use. Ask by email within 48 hours of the session. You can also reply to this email, or write to ${INVOICE_EMAIL}.
+          Full refund if you don&apos;t leave with a specification you&apos;d use. Ask by email within 48 hours of the session. Questions? Reply to this email, or write to ${INVOICE_EMAIL}.
         </p>
       </div>
     </div>
   </div>`
 }
 
-async function sendConfirmationEmail(opts: { to: string; name: string; waUrl: string }) {
+async function sendConfirmationEmail(opts: { to: string; name: string; seats: number; total: number; currency: Currency; method: Method; waUrl: string }) {
   const resend = new Resend(RESEND_API_KEY)
   await resend.emails.send({
     from: `Allan Sendagi <${FROM_EMAIL}>`,
     to: opts.to,
-    subject: `You're in — ${COHORT_NAME}, 24 October`,
+    subject: `${opts.method === 'paypal' ? "You're in" : "You're reserved"} — ${COHORT_NAME}, 24 October (${opts.seats} seat${opts.seats > 1 ? 's' : ''})`,
     html: buildEmailHtml(opts),
   })
 }
 
-async function sendAdminNotification(opts: { name: string; email: string; details: BuyerDetails; saved: boolean }) {
+async function sendAdminNotification(opts: { name: string; email: string; seats: number; total: number; currency: Currency; method: Method; details: BuyerDetails; saved: boolean }) {
   const resend = new Resend(RESEND_API_KEY)
+  const methodLabel = { bank_transfer: 'Bank transfer', whatsapp: 'WhatsApp', paypal: 'PayPal (paid)' }[opts.method]
+  const note = {
+    bank_transfer: "They'll message you on WhatsApp once they've paid, with proof of payment.",
+    whatsapp: "They've been sent to WhatsApp to reach you directly.",
+    paypal: 'Payment already confirmed via PayPal, no action needed.',
+  }[opts.method]
   await resend.emails.send({
     from: `${COHORT_NAME} <${FROM_EMAIL}>`,
     to: ADMIN_EMAIL,
-    subject: `New seat — ${esc(opts.name)} (${esc(COHORT_NAME)})`,
+    subject: `New reservation — ${esc(opts.name)} (${opts.seats} seat${opts.seats > 1 ? 's' : ''})`,
     html: `
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.7;">
-        <p><strong>${esc(opts.name)}</strong> paid for a seat in ${esc(COHORT_NAME)}.</p>
+        <p><strong>${esc(opts.name)}</strong> reserved ${opts.seats} seat${opts.seats > 1 ? 's' : ''} for ${esc(COHORT_NAME)}.</p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;">
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Email</td><td>${esc(opts.email)}</td></tr>
           ${detailRows(opts.details)}
-          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Paid</td><td>${PAYPAL_CURRENCY} ${PAYPAL_AMOUNT} (AED ${PRICE_AED})</td></tr>
-          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Saved to database</td><td>${opts.saved ? 'Yes (name, email, amount only)' : 'No — Supabase not configured'}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Seats</td><td>${opts.seats}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Total</td><td>${opts.currency} ${opts.total}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Method</td><td>${methodLabel}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Saved to database</td><td>${opts.saved ? 'Yes (name, email, seats, amount only)' : 'No, Supabase not configured'}</td></tr>
         </table>
-        <p style="color:#6b7280;font-size:13px;">Payment already confirmed via PayPal. The details above are only in this email.</p>
+        <p style="color:#6b7280;font-size:13px;">${note}</p>
       </div>`,
   })
 }
 
 // Invoice request: the buyer asked to pay by bank transfer. Returns false if the email could not be sent.
-export async function sendInvoiceRequest(opts: { name: string; email: string; details: BuyerDetails }): Promise<boolean> {
+export async function sendInvoiceRequest(opts: { name: string; email: string; seats: number; details: BuyerDetails }): Promise<boolean> {
   if (!RESEND_API_KEY) {
     console.error('[reservations] RESEND_API_KEY not set — invoice request not sent')
     return false
@@ -154,7 +200,7 @@ export async function sendInvoiceRequest(opts: { name: string; email: string; de
     subject: 'Invoice request: Cohort 2',
     html: `
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.7;">
-        <p><strong>${esc(opts.name)}</strong> asked for an invoice for ${esc(COHORT_NAME)} (${COHORT_DATE_LONG}), AED ${PRICE_AED.toLocaleString('en-US')} for 1 seat.</p>
+        <p><strong>${esc(opts.name)}</strong> asked for an invoice for ${esc(COHORT_NAME)} (${COHORT_DATE_LONG}), AED ${(PRICE_AED * opts.seats).toLocaleString('en-US')} for ${opts.seats} seat${opts.seats > 1 ? 's' : ''}.</p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;">
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Name</td><td>${esc(opts.name)}</td></tr>
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Email</td><td>${esc(opts.email)}</td></tr>
@@ -174,11 +220,16 @@ export async function sendInvoiceRequest(opts: { name: string; email: string; de
 export async function saveReservationAndNotify(opts: {
   name: string
   email: string
+  seats: number
+  total: number
+  currency: Currency
+  method: Method
+  status: Status
   details: BuyerDetails
   waUrl: string
   ip?: string
   userAgent?: string | null
-  paypalOrderId: string
+  paypalOrderId?: string
 }): Promise<{ id: string | null; saved: boolean; emailSent: boolean }> {
   let reservationId: string | null = null
   let saved = false
@@ -189,16 +240,16 @@ export async function saveReservationAndNotify(opts: {
         {
           name: opts.name,
           email: opts.email,
-          seats: 1,
-          total_amount: Number(PAYPAL_AMOUNT),
-          currency: PAYPAL_CURRENCY,
-          payment_method: 'paypal',
-          status: 'confirmed',
+          seats: opts.seats,
+          total_amount: opts.total,
+          currency: opts.currency,
+          payment_method: opts.method,
+          status: opts.status,
           user_agent: opts.userAgent ?? null,
           ip_address: opts.ip ?? 'unknown',
-          paypal_order_id: opts.paypalOrderId,
+          ...(opts.paypalOrderId ? { paypal_order_id: opts.paypalOrderId } : {}),
         },
-        'paypal_order_id'
+        opts.paypalOrderId ? 'paypal_order_id' : undefined
       )
       reservationId = row?.id || null
       saved = true
@@ -212,7 +263,10 @@ export async function saveReservationAndNotify(opts: {
   let emailSent = false
   if (RESEND_API_KEY) {
     try {
-      await sendConfirmationEmail({ to: opts.email, name: opts.name, waUrl: opts.waUrl })
+      await sendConfirmationEmail({
+        to: opts.email, name: opts.name, seats: opts.seats, total: opts.total,
+        currency: opts.currency, method: opts.method, waUrl: opts.waUrl,
+      })
       emailSent = true
       if (reservationId) await markEmailSent(reservationId)
     } catch (err) {
@@ -220,7 +274,10 @@ export async function saveReservationAndNotify(opts: {
     }
 
     try {
-      await sendAdminNotification({ name: opts.name, email: opts.email, details: opts.details, saved })
+      await sendAdminNotification({
+        name: opts.name, email: opts.email, seats: opts.seats, total: opts.total,
+        currency: opts.currency, method: opts.method, details: opts.details, saved,
+      })
     } catch (err) {
       console.error('[reservations] admin notification failed:', (err as Error).message)
     }

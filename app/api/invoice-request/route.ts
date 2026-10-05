@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { sendInvoiceRequest } from '@/lib/reservations'
-import { isValidName, isValidEmail, parseBuyerDetails } from '@/lib/checkoutDetails'
+import { isValidName, isValidEmail, isValidSeats, parseBuyerDetails } from '@/lib/checkoutDetails'
 
 export const runtime = 'nodejs'
 
@@ -20,6 +20,7 @@ export async function POST(req: Request) {
   const { errors, details } = parseBuyerDetails(body)
   if (!isValidName(body.name)) errors.name = 'Invalid name'
   if (!isValidEmail(body.email)) errors.email = 'Invalid email'
+  if (!isValidSeats(body.seats)) errors.seats = 'Invalid seat count'
   if (Object.keys(errors).length > 0) {
     return NextResponse.json({ error: 'Validation failed', fields: errors }, { status: 400 })
   }
@@ -27,6 +28,7 @@ export async function POST(req: Request) {
   const sent = await sendInvoiceRequest({
     name: (body.name as string).trim(),
     email: (body.email as string).toLowerCase().trim(),
+    seats: body.seats as number,
     details,
   })
   if (!sent) {

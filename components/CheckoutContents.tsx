@@ -3,10 +3,12 @@ import { useEffect, useRef, useState } from 'react'
 import { track } from '@/lib/analytics'
 import {
   FIT_CALL_URL, COHORT_DATE_LONG, COHORT_TIME_DOHA, COHORT_TIME_DUBAI,
-  PRICE_AED, PRICE_QAR_APPROX, PAYPAL_CURRENCY, PAYPAL_AMOUNT,
+  PRICE_AED, PRICE_QAR_APPROX, PAYPAL_CURRENCY, MAX_SEATS, BANK, paypalTotal,
 } from '@/lib/cohort2'
 
 const C = { bg: '#080808', card: '#161513', border: 'rgba(245,241,234,0.12)', accent: '#C2410C', white: '#F5F1EA', muted: '#A39C90', body: '#d8d2c6' }
+
+const WA_NUMBER = '97450176561'
 
 const included = [
   'Live 2.5-hour working session',
@@ -25,12 +27,12 @@ const terms = [
 ]
 
 const bankDetails = [
-  { label: 'Bank', value: 'Commercial Bank of Qatar' },
-  { label: 'Account name', value: 'SAFEHAVEN LLC' },
-  { label: 'Account number', value: '401031480031001' },
-  { label: 'IBAN', value: 'QA31CBQA000000401031480031001' },
-  { label: 'SWIFT / BIC', value: 'CBQAQAQA' },
-  { label: 'Currency', value: 'QAR' },
+  { label: 'Bank', value: BANK.bank },
+  { label: 'Account name', value: BANK.accountName },
+  { label: 'Account number', value: BANK.accountNumber },
+  { label: 'IBAN', value: BANK.iban },
+  { label: 'SWIFT / BIC', value: BANK.swift },
+  { label: 'Currency', value: BANK.currency },
 ]
 
 type Form = {
@@ -48,22 +50,29 @@ const inputStyle = (invalid: boolean) => ({
   color: C.white, fontSize: 14, fontFamily: 'inherit', outline: 'none',
 } as const)
 
+const primaryButton = (dim: boolean) => ({
+  display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%',
+  background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
+  fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer',
+  textTransform: 'uppercase', letterSpacing: '0.04em', opacity: dim ? 0.6 : 1,
+} as const)
+
 export default function CheckoutContents({ paypalClientId }: { paypalClientId: string }) {
   const [form, setForm] = useState<Form>(empty)
   const [hp, setHp] = useState('')
-  const [method, setMethod] = useState<'paypal' | 'invoice'>('paypal')
+  const [seats, setSeats] = useState(1)
+  const [method, setMethod] = useState<'paypal' | 'bank' | 'whatsapp'>('paypal')
   const [touched, setTouched] = useState(false)
   const [paypalError, setPaypalError] = useState<string | null>(null)
   const [invoiceState, setInvoiceState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [sendState, setSendState] = useState<'idle' | 'sending' | 'sent'>('idle')
   const [paying, setPaying] = useState(false)
   const [copiedField, setCopiedField] = useState<string | null>(null)
 
-  function copy(label: string, value: string) {
-    navigator.clipboard?.writeText(value).then(() => {
-      setCopiedField(label)
-      setTimeout(() => setCopiedField(f => (f === label ? null : f)), 1500)
-    })
-  }
+  const totalAed = seats * PRICE_AED
+  const totalQar = seats * PRICE_QAR_APPROX
+  const totalUsd = paypalTotal(seats)
+  const seatWord = seats > 1 ? 'seats' : 'seat'
 
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
@@ -78,6 +87,13 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
   }
   const detailsValid = Object.values(valid).every(Boolean)
 
+  function copy(label: string, value: string) {
+    navigator.clipboard?.writeText(value).then(() => {
+      setCopiedField(label)
+      setTimeout(() => setCopiedField(f => (f === label ? null : f)), 1500)
+    })
+  }
+
   // GA4 begin_checkout when the page loads.
   useEffect(() => {
     track('begin_checkout', {
@@ -86,13 +102,64 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
     })
   }, [])
 
+  const details = () => ({
+    name: form.name.trim(), email: form.email.trim(), whatsapp: form.whatsapp.trim(),
+    company: form.company.trim(), role: form.role.trim(), workflow: form.workflow.trim(),
+    billingAddress: form.billingAddress.trim(),
+  })
+
+  // ── WhatsApp / bank transfer ───────────────────────────────────────
+  const reserveUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
+    [
+      `Hi Allan, I'd like to reserve ${seats} ${seatWord} for Make AI Work · Cohort 2 (24 October).`,
+      ``,
+      `Name: ${form.name.trim()}`,
+      `Total: AED ${totalAed.toLocaleString('en-US')}`,
+    ].join('\n')
+  )}`
+  const paidUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
+    [
+      `Hi Allan, I've just made a bank transfer of AED ${totalAed.toLocaleString('en-US')} for ${seats} ${seatWord} in Make AI Work · Cohort 2.`,
+      ``,
+      `Name: ${form.name.trim()}`,
+      `Sending proof of payment now.`,
+    ].join('\n')
+  )}`
+
+  async function handleAction(action: 'reserve' | 'paid') {
+    setTouched(true)
+    if (!detailsValid) return
+
+    track(action === 'paid' ? 'bank_transfer_paid_click' : 'reserve_whatsapp_click', {
+      seats, value: totalAed, currency: 'AED',
+    })
+
+    const waUrl = action === 'paid' ? paidUrl : reserveUrl
+    const win = window.open(waUrl, '_blank', 'noopener,noreferrer')
+
+    setSendState('sending')
+    try {
+      await fetch('/api/reserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...details(), seats, method: method === 'bank' ? 'bank_transfer' : 'whatsapp', waUrl }),
+      })
+    } catch {
+      // Non-blocking — the WhatsApp tab is already open regardless.
+    } finally {
+      setSendState('sent')
+    }
+
+    if (!win) window.location.href = waUrl
+  }
+
   // ── PayPal ──────────────────────────────────────────────────────────
   // Buttons render once the SDK loads and the details are valid. A ref keeps
   // the latest form values so callbacks (created once) never read stale state.
   const paypalContainerRef = useRef<HTMLDivElement>(null)
   const paypalRenderedRef = useRef(false)
-  const formRef = useRef(form)
-  useEffect(() => { formRef.current = form }, [form])
+  const formRef = useRef({ form, seats })
+  useEffect(() => { formRef.current = { form, seats } }, [form, seats])
 
   useEffect(() => {
     if (method !== 'paypal' || !detailsValid || !paypalClientId || paypalRenderedRef.current) return
@@ -105,20 +172,24 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
         style: { color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
         createOrder: async () => {
           setPaypalError(null)
-          const res = await fetch('/api/paypal/create-order', { method: 'POST' })
+          const res = await fetch('/api/paypal/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ seats: formRef.current.seats }),
+          })
           const data = await res.json()
           if (!res.ok || !data.id) throw new Error(data.error || 'Could not start PayPal checkout')
           return data.id
         },
         onApprove: async (data: { orderID: string }) => {
           setPaying(true)
-          const f = formRef.current
+          const { form: f, seats: n } = formRef.current
           try {
             const res = await fetch('/api/paypal/capture-order', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                orderID: data.orderID,
+                orderID: data.orderID, seats: n,
                 name: f.name.trim(), email: f.email.trim(), whatsapp: f.whatsapp.trim(),
                 company: f.company.trim(), role: f.role.trim(), workflow: f.workflow.trim(),
                 billingAddress: f.billingAddress.trim(),
@@ -126,7 +197,7 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
             })
             const result = await res.json()
             if (result.success) {
-              window.location.href = `/checkout/success?order=${encodeURIComponent(data.orderID)}`
+              window.location.href = `/checkout/success?order=${encodeURIComponent(data.orderID)}&seats=${n}`
               return
             }
             throw new Error('capture failed')
@@ -137,7 +208,7 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
           }
         },
         onError: () => {
-          setPaypalError('PayPal ran into a problem. Please try again, or request an invoice instead.')
+          setPaypalError('PayPal ran into a problem. Please try again, or use bank transfer or WhatsApp instead.')
           track('paypal_error')
         },
       }).render(paypalContainerRef.current)
@@ -169,15 +240,11 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
       const res = await fetch('/api/invoice-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.name.trim(), email: form.email.trim(), whatsapp: form.whatsapp.trim(),
-          company: form.company.trim(), role: form.role.trim(), workflow: form.workflow.trim(),
-          billingAddress: form.billingAddress.trim(), hp,
-        }),
+        body: JSON.stringify({ ...details(), seats, hp }),
       })
       if (!res.ok) throw new Error('failed')
       setInvoiceState('sent')
-      track('invoice_request', { value: PRICE_AED, currency: 'AED' })
+      track('invoice_request', { value: totalAed, currency: 'AED' })
     } catch {
       setInvoiceState('error')
     }
@@ -191,13 +258,13 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
     </span>
   )
 
-  const tab = (key: 'paypal' | 'invoice', text: string) => (
+  const tab = (key: 'paypal' | 'bank' | 'whatsapp', text: string) => (
     <button
       type="button"
       onClick={() => setMethod(key)}
       aria-pressed={method === key}
       style={{
-        flex: 1, padding: '11px 10px', borderRadius: 9, border: 'none', cursor: 'pointer',
+        flex: 1, padding: '11px 8px', borderRadius: 9, border: 'none', cursor: 'pointer',
         background: method === key ? C.accent : 'transparent',
         color: method === key ? C.white : C.muted,
         fontSize: 13, fontWeight: 700, letterSpacing: '0.02em', transition: 'background 150ms, color 150ms',
@@ -207,10 +274,22 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
     </button>
   )
 
+  const stepButton = (aria: string, text: string, disabled: boolean, onClick: () => void) => (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={aria}
+      style={{ width: 30, height: 30, borderRadius: 6, border: `1px solid ${C.border}`, background: 'none', color: C.white, fontSize: 16, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1 }}
+    >
+      {text}
+    </button>
+  )
+
   return (
     <div className="checkout-grid" style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 96px', display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: 56 }}>
       <div style={{ minWidth: 0 }}>
-        <h1 style={{ fontSize: 'clamp(2rem, 4.2vw, 3rem)', fontWeight: 900, color: C.white, lineHeight: 1.1, margin: '0 0 24px' }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 4.2vw, 3rem)', fontWeight: 900, color: C.white, lineHeight: 1.1, margin: '0 0 16px' }}>
           Reserve your seat &middot; Cohort 2
         </h1>
 
@@ -232,11 +311,21 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
           <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.7, margin: '0 0 18px' }}>
             Live online &middot; session link sent 24 hours before
           </p>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '16px 0', borderTop: `1px solid ${C.border}` }}>
+            <span style={{ fontSize: 14, color: C.white }}>Number of seats</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {stepButton('Remove a seat', '−', seats <= 1, () => setSeats(n => Math.max(1, n - 1)))}
+              <span style={{ minWidth: 20, textAlign: 'center', fontSize: 15, fontWeight: 700, color: C.white }}>{seats}</span>
+              {stepButton('Add a seat', '+', seats >= MAX_SEATS, () => setSeats(n => Math.min(MAX_SEATS, n + 1)))}
+            </div>
+          </div>
+
           <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 14, color: C.white }}>1 seat</span>
+            <span style={{ fontSize: 14, color: C.white }}>{seats} {seatWord} &middot; AED {PRICE_AED.toLocaleString('en-US')} each</span>
             <span style={{ fontSize: 22, fontWeight: 800, color: C.white }}>
-              AED {PRICE_AED.toLocaleString('en-US')}{' '}
-              <span style={{ fontSize: 14, fontWeight: 500, color: C.muted }}>(&asymp; QAR {PRICE_QAR_APPROX})</span>
+              AED {totalAed.toLocaleString('en-US')}{' '}
+              <span style={{ fontSize: 14, fontWeight: 500, color: C.muted }}>(&asymp; QAR {totalQar})</span>
             </span>
           </div>
         </div>
@@ -244,7 +333,7 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
         <h2 style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 18px' }}>
           Included
         </h2>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {included.map(item => (
             <li key={item} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontSize: 15, lineHeight: 1.6 }}>
               <span style={{ color: C.accent, flexShrink: 0, fontWeight: 700 }}>&rarr;</span>
@@ -252,6 +341,19 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
             </li>
           ))}
         </ul>
+
+        <h2 style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+          What you need
+        </h2>
+        <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: '0 0 4px' }}>
+          One real business task you want to improve with AI.
+        </p>
+        <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: '0 0 12px' }}>
+          No technical background required. No coding required.
+        </p>
+        <a href="/pick-your-task" style={{ color: C.muted, fontSize: 13.5, textDecoration: 'underline' }}>
+          Don&apos;t have one yet? Find one in 5 minutes &rarr;
+        </a>
       </div>
 
       <div style={{ minWidth: 0 }}>
@@ -303,8 +405,9 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
         </p>
 
         <div style={{ display: 'flex', gap: 6, padding: 4, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 20 }}>
-          {tab('paypal', 'Pay by card or PayPal')}
-          {tab('invoice', 'Request an invoice (bank transfer)')}
+          {tab('paypal', 'Card or PayPal')}
+          {tab('bank', 'Bank transfer')}
+          {tab('whatsapp', 'WhatsApp')}
         </div>
 
         <div style={{ border: `1px solid ${C.border}`, background: C.card, borderRadius: 12, padding: '18px 20px', marginBottom: 20 }}>
@@ -323,9 +426,9 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
         {method === 'paypal' && (
           <>
             <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 16px' }}>
-              The price is <strong style={{ color: C.white }}>AED {PRICE_AED.toLocaleString('en-US')}</strong>. Card and PayPal
-              charge the exact equivalent in US dollars: <strong style={{ color: C.white }}>{PAYPAL_CURRENCY} {PAYPAL_AMOUNT}</strong>.
-              Your seat is confirmed instantly.
+              The price is <strong style={{ color: C.white }}>AED {totalAed.toLocaleString('en-US')}</strong>. Card and PayPal charge the
+              exact equivalent in US dollars: <strong style={{ color: C.white }}>{PAYPAL_CURRENCY} {totalUsd}</strong> for {seats} {seatWord}.
+              Payment is confirmed instantly.
             </p>
             {!detailsValid ? (
               <button
@@ -339,7 +442,7 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
               <div ref={paypalContainerRef} style={{ minHeight: 45 }} />
             ) : (
               <p style={{ fontSize: 13, color: C.accent, lineHeight: 1.7, margin: 0 }}>
-                Card and PayPal payment is not set up on this site yet. Please request an invoice instead.
+                Card and PayPal payment is not set up on this site yet. Please use bank transfer or WhatsApp instead.
               </p>
             )}
             {paying && <p style={{ fontSize: 13, color: C.muted, margin: '12px 0 0' }}>Confirming your payment&hellip;</p>}
@@ -347,72 +450,102 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
           </>
         )}
 
-        {method === 'invoice' && (
+        {method === 'bank' && (
           <>
-            {invoiceState === 'sent' ? (
-              <p style={{ fontSize: 15, color: C.white, lineHeight: 1.7, margin: 0 }}>
-                Thanks, I&apos;ll send your invoice within one working day.
-              </p>
-            ) : (
-              <>
-                <div style={{ border: `1px solid ${C.border}`, borderRadius: 14, background: C.card, overflow: 'hidden', marginBottom: 16 }}>
-                  {bankDetails.map((row, i) => (
-                    <div
-                      key={row.label}
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-                        padding: '14px 18px', borderTop: i === 0 ? 'none' : `1px solid ${C.border}`,
-                      }}
-                    >
-                      <div style={{ minWidth: 0 }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 2px' }}>
-                          {row.label}
-                        </p>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: C.white, margin: 0, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', wordBreak: 'break-all' }}>
-                          {row.value}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => copy(row.label, row.value)}
-                        style={{
-                          flexShrink: 0, padding: '7px 12px', borderRadius: 8, border: `1px solid ${C.border}`,
-                          background: 'none', color: copiedField === row.label ? C.accent : C.muted,
-                          fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                        }}
-                      >
-                        {copiedField === row.label ? 'Copied' : 'Copy'}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 16px' }}>
-                  I&apos;ll email you an invoice for <strong style={{ color: C.white }}>AED {PRICE_AED.toLocaleString('en-US')}</strong> with
-                  bank transfer details. Your seat is held once the transfer arrives.
-                </p>
-                <button
-                  type="button"
-                  onClick={sendInvoiceRequest}
-                  disabled={invoiceState === 'sending'}
+            <div style={{ border: `1px solid ${C.border}`, borderRadius: 14, background: C.card, overflow: 'hidden' }}>
+              {bankDetails.map((row, i) => (
+                <div
+                  key={row.label}
                   style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%',
-                    background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
-                    fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer',
-                    textTransform: 'uppercase', letterSpacing: '0.04em',
-                    opacity: invoiceState === 'sending' || (touched && !detailsValid) ? 0.6 : 1,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                    padding: '14px 18px', borderTop: i === 0 ? 'none' : `1px solid ${C.border}`,
                   }}
                 >
-                  {invoiceState === 'sending' ? 'Sending…' : 'Request my invoice'}
-                </button>
-                {invoiceState === 'error' && (
-                  <p style={{ fontSize: 13, color: C.accent, lineHeight: 1.7, margin: '12px 0 0' }}>
-                    The request did not go through. Please try again, or message Allan on WhatsApp.
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 2px' }}>
+                      {row.label}
+                    </p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: C.white, margin: 0, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', wordBreak: 'break-all' }}>
+                      {row.value}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => copy(row.label, row.value)}
+                    style={{
+                      flexShrink: 0, padding: '7px 12px', borderRadius: 8, border: `1px solid ${C.border}`,
+                      background: 'none', color: copiedField === row.label ? C.accent : C.muted,
+                      fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    }}
+                  >
+                    {copiedField === row.label ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '16px 0 20px' }}>
+              Transfer <strong style={{ color: C.white }}>AED {totalAed.toLocaleString('en-US')}</strong> (&asymp; QAR {totalQar}) using the details above.
+              Bank transfers can take 1&ndash;2 business days to reflect. Once you&apos;ve paid, confirm your
+              {' '}{seatWord} by sending proof of payment on WhatsApp.
+            </p>
+
+            <button type="button" onClick={() => handleAction('paid')} style={primaryButton(touched && !detailsValid)}>
+              I&apos;ve Paid &mdash; Confirm via WhatsApp
+            </button>
+
+            <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 24, paddingTop: 20 }}>
+              {invoiceState === 'sent' ? (
+                <p style={{ fontSize: 15, color: C.white, lineHeight: 1.7, margin: 0 }}>
+                  Thanks, I&apos;ll send your invoice within one working day.
+                </p>
+              ) : (
+                <>
+                  <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 12px' }}>
+                    Need an invoice first? I&apos;ll email one for <strong style={{ color: C.white }}>AED {totalAed.toLocaleString('en-US')}</strong> with
+                    bank transfer details.
                   </p>
-                )}
-              </>
-            )}
+                  <button
+                    type="button"
+                    onClick={sendInvoiceRequest}
+                    disabled={invoiceState === 'sending'}
+                    style={{ ...primaryButton(invoiceState === 'sending' || (touched && !detailsValid)), background: 'none', border: `1px solid ${C.accent}`, color: C.white }}
+                  >
+                    {invoiceState === 'sending' ? 'Sending…' : 'Request an invoice'}
+                  </button>
+                  {invoiceState === 'error' && (
+                    <p style={{ fontSize: 13, color: C.accent, lineHeight: 1.7, margin: '12px 0 0' }}>
+                      The request did not go through. Please try again, or message Allan on WhatsApp.
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
           </>
         )}
+
+        {method === 'whatsapp' && (
+          <>
+            <button type="button" onClick={() => handleAction('reserve')} style={primaryButton(touched && !detailsValid)}>
+              Reserve via WhatsApp
+            </button>
+            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '16px 0 0' }}>
+              No payment is taken on this page. Message Allan directly on WhatsApp to confirm your {seatWord} and arrange payment.
+            </p>
+          </>
+        )}
+
+        {sendState === 'sent' && method !== 'paypal' && (
+          <p style={{ fontSize: 13, color: C.accent, margin: '14px 0 0' }}>
+            &#10003; A confirmation email is on its way to {form.email}.
+          </p>
+        )}
+
+        <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 24, paddingTop: 24 }}>
+          <p style={{ fontSize: 14, color: C.muted, fontStyle: 'italic', margin: 0 }}>
+            10 participants maximum. Enrollment is first come, first served.
+          </p>
+        </div>
       </div>
 
       <style>{`

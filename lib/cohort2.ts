@@ -15,6 +15,18 @@ export const PRICE_QAR_APPROX = 990
 // USD equivalent at the fixed AED peg (3.6725 AED per USD): 1,000 / 3.6725 = 272.29.
 export const PAYPAL_CURRENCY = 'USD'
 export const PAYPAL_AMOUNT = '272.29'
+export const MAX_SEATS = 10
+
+export const paypalTotal = (seats: number) => (Number(PAYPAL_AMOUNT) * seats).toFixed(2)
+
+export const BANK = {
+  bank: 'Commercial Bank of Qatar',
+  accountName: 'SAFEHAVEN LLC',
+  accountNumber: '401031480031001',
+  iban: 'QA31CBQA000000401031480031001',
+  swift: 'CBQAQAQA',
+  currency: 'QAR',
+}
 
 export const INVOICE_EMAIL = 'allan@safehavenai.world'
 
