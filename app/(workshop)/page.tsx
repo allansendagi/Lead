@@ -189,7 +189,17 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: "What if I don't have a specific AI idea yet?",
-    a: "That's fine. You do not need to arrive with a fully formed AI use case. You need a real business task that could be improved. We will help you identify and sharpen the task before working through the Canvas.",
+    a: "That's fine. You do not need to arrive with a fully formed AI use case. You need a real business task that could be improved. We will help you identify and sharpen the task before working through the Canvas. Not sure which process to bring? Try the 5-minute Pick Your Process exercise.",
+    aRich: (
+      <>
+        That&apos;s fine. You do not need to arrive with a fully formed AI use case. You need a real business task that
+        could be improved. We will help you identify and sharpen the task before working through the Canvas.{' '}
+        Not sure which process to bring?{' '}
+        <a href="/pick-your-task" style={{ color: '#F5F1EA', fontWeight: 700 }}>
+          Try the 5-minute Pick Your Process exercise &rarr;
+        </a>
+      </>
+    ),
   },
   {
     q: 'What should I bring?',
@@ -903,7 +913,7 @@ export default function WorkshopPage() {
             {' '}&middot;{' '}
             <a href="/assessment" style={{ color: C.muted, textDecoration: 'underline' }}>AI Readiness Quiz</a>
             {' '}&middot;{' '}
-            <a href="/pick-your-task" style={{ color: C.muted, textDecoration: 'underline' }}>Pick Your Task</a>
+            <a href="/pick-your-task" style={{ color: C.muted, textDecoration: 'underline' }}>Pick Your Process</a>
             {' '}&middot;{' '}
             <TrackedLink
               href={`https://wa.me/97450176561?text=${encodeURIComponent("Hi Allan, we're interested in team training using the AI Value Sandbox workshop")}`}

@@ -21,6 +21,9 @@ function isValidScore(v: unknown): v is number {
 function isValidClassification(v: unknown): v is 'fixed' | 'estimate' {
   return v === 'fixed' || v === 'estimate'
 }
+function isValidSteps(v: unknown): v is string[] {
+  return v === undefined || (Array.isArray(v) && v.length <= 10 && v.every(x => typeof x === 'string' && x.trim().length >= 1 && x.trim().length <= 200))
+}
 function isValidBand(v: unknown): v is 'Low' | 'Medium' | 'High' {
   return v === 'Low' || v === 'Medium' || v === 'High'
 }
@@ -50,6 +53,7 @@ export async function POST(req: Request) {
   if (!isValidName(body.name)) errors.name = 'Invalid name'
   if (!isValidText(body.workflow, 120)) errors.workflow = 'Invalid workflow'
   if (!isValidText(body.taskText, 300)) errors.taskText = 'Invalid task'
+  if (!isValidSteps(body.steps)) errors.steps = 'Invalid steps'
   if (!isValidScore(body.predictability)) errors.predictability = 'Invalid score'
   if (!isValidScore(body.dataAvailability)) errors.dataAvailability = 'Invalid score'
   if (!isValidScore(body.complexity)) errors.complexity = 'Invalid score'
@@ -70,6 +74,7 @@ export async function POST(req: Request) {
     name: typeof body.name === 'string' ? body.name.trim() : undefined,
     workflow: (body.workflow as string).trim(),
     taskText: (body.taskText as string).trim(),
+    steps: Array.isArray(body.steps) ? (body.steps as string[]).map(x => x.trim()) : undefined,
     predictability: body.predictability as number,
     dataAvailability: body.dataAvailability as number,
     complexity: body.complexity as number,

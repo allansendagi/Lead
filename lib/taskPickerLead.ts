@@ -15,6 +15,7 @@ export type TaskPickerLead = {
   name?: string
   workflow: string
   taskText: string
+  steps?: string[]
   predictability: number
   dataAvailability: number
   complexity: number
@@ -64,14 +65,15 @@ async function sendAdminNotification(lead: TaskPickerLead, saved: boolean) {
   await resend.emails.send({
     from: `AI Value Sandbox <${FROM_EMAIL}>`,
     to: ADMIN_EMAIL,
-    subject: `Task picker lead — ${esc(lead.name || lead.email)} (${lead.aiPotential} AI potential)`,
+    subject: `Pick Your Process lead — ${esc(lead.name || lead.email)} (${lead.aiPotential} AI potential)`,
     html: `
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.7;">
-        <p><strong>${esc(lead.name || 'Someone')}</strong> completed the task picker at /pick-your-task.</p>
+        <p><strong>${esc(lead.name || 'Someone')}</strong> completed Pick Your Process at /pick-your-task.</p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;">
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Email</td><td>${esc(lead.email)}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Workflow</td><td>${esc(lead.workflow)}</td></tr>
-          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Task</td><td>${esc(lead.taskText)}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Process</td><td>${esc(lead.workflow)}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;vertical-align:top;">Steps</td><td>${(lead.steps || []).map((x, i) => `${i + 1}. ${esc(x)}`).join('<br>') || '—'}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Annoys them most</td><td>${esc(lead.taskText)}</td></tr>
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Scores</td><td>Predictability ${lead.predictability}, Data ${lead.dataAvailability}, Complexity ${lead.complexity}, Frequency ${lead.frequency}</td></tr>
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Classification</td><td>${classificationLabel}</td></tr>
           <tr><td style="padding:4px 12px 4px 0;color:#6b7280;">Automation Fit</td><td>${lead.automationFit}</td></tr>

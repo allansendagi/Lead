@@ -6,9 +6,14 @@ const C = {
   accent: '#C2410C', accentSoft: '#E8823D', white: '#F5F1EA', muted: '#A39C90', body: '#D8D2C6',
 }
 
-const WORKFLOWS = ['Customer follow-up', 'Reporting', 'Invoice processing', 'Hiring', 'Something else']
+const PROCESSES = ['Customer follow-up', 'Reporting', 'Invoice processing', 'Hiring', 'Something else']
 
-type TaskRow = { id: string; text: string; keep: boolean }
+const MIN_STEPS = 3
+const START_ROWS = 6
+const MAX_STEPS = 10
+const WA_NUMBER = '97450176561'
+
+type StepRow = { id: string; text: string }
 
 type Criteria = { predictability: number; data: number; complexity: number; frequency: number }
 
@@ -36,21 +41,21 @@ function track(event: string, params?: Record<string, unknown>) {
 }
 
 export default function TaskFitContents({ displayFont }: { displayFont: string }) {
-  const [step, setStep] = useState<'intro' | 'workflow' | 'tasks' | 'delete' | 'pick' | 'score' | 'result'>('intro')
-  const [workflow, setWorkflow] = useState('')
-  const [customWorkflow, setCustomWorkflow] = useState('')
-  const [tasks, setTasks] = useState<TaskRow[]>([{ id: uid(), text: '', keep: true }])
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [step, setStep] = useState<'intro' | 'process' | 'score' | 'steps' | 'result'>('intro')
+  const [process, setProcess] = useState('')
+  const [customProcess, setCustomProcess] = useState('')
   const [scores, setScores] = useState<Criteria>({ predictability: 3, data: 3, complexity: 3, frequency: 3 })
   const [classification, setClassification] = useState<'fixed' | 'estimate' | null>(null)
+  const [rows, setRows] = useState<StepRow[]>(() => Array.from({ length: START_ROWS }, () => ({ id: uid(), text: '' })))
+  const [annoyingId, setAnnoyingId] = useState<string | null>(null)
   const [captureName, setCaptureName] = useState('')
   const [captureEmail, setCaptureEmail] = useState('')
   const [captureState, setCaptureState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [captureError, setCaptureError] = useState<string | null>(null)
 
-  const effectiveWorkflow = workflow === 'Something else' ? customWorkflow : workflow
-  const keptTasks = tasks.filter(t => t.keep && t.text.trim())
-  const selectedTask = keptTasks.find(t => t.id === selectedTaskId) || null
+  const effectiveProcess = (process === 'Something else' ? customProcess : process).trim()
+  const filledSteps = rows.filter(r => r.text.trim())
+  const annoyingStep = filledSteps.find(r => r.id === annoyingId) || null
 
   const avg = (scores.predictability + scores.data + scores.complexity + scores.frequency) / 4
   const automationFit = band(avg)
@@ -58,32 +63,39 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
 
   const weakest = CRITERIA_META.reduce((min, c) => (scores[c.key] < scores[min.key] ? c : min), CRITERIA_META[0])
 
-  function updateTask(id: string, text: string) {
-    setTasks(prev => prev.map(t => (t.id === id ? { ...t, text } : t)))
+  function updateRow(id: string, text: string) {
+    setRows(prev => prev.map(r => (r.id === id ? { ...r, text } : r)))
   }
-  function toggleKeep(id: string) {
-    setTasks(prev => prev.map(t => (t.id === id ? { ...t, keep: !t.keep } : t)))
+  function addRow() {
+    setRows(prev => (prev.length < MAX_STEPS ? [...prev, { id: uid(), text: '' }] : prev))
   }
-  function addTask() {
-    setTasks(prev => [...prev, { id: uid(), text: '', keep: true }])
-  }
-  function removeTaskRow(id: string) {
-    setTasks(prev => (prev.length > 1 ? prev.filter(t => t.id !== id) : prev))
-  }
-  function selectTask(id: string | null) {
-    setSelectedTaskId(id)
-    setScores({ predictability: 3, data: 3, complexity: 3, frequency: 3 })
-    setClassification(null)
+  function removeRow(id: string) {
+    setRows(prev => (prev.length > MIN_STEPS ? prev.filter(r => r.id !== id) : prev))
+    setAnnoyingId(cur => (cur === id ? null : cur))
   }
   function reset() {
-    setStep('intro'); setWorkflow(''); setCustomWorkflow('')
-    setTasks([{ id: uid(), text: '', keep: true }]); setSelectedTaskId(null)
+    setStep('intro'); setProcess(''); setCustomProcess('')
     setScores({ predictability: 3, data: 3, complexity: 3, frequency: 3 }); setClassification(null)
+    setRows(Array.from({ length: START_ROWS }, () => ({ id: uid(), text: '' }))); setAnnoyingId(null)
     setCaptureName(''); setCaptureEmail(''); setCaptureState('idle')
   }
 
+  // WhatsApp message with the whole result pre-filled.
+  const resultMessage = [
+    "Hi Allan, here's my Pick Your Process result.",
+    '',
+    `Process: ${effectiveProcess}`,
+    `Automation fit: ${automationFit} · AI potential: ${aiPotential}`,
+    '',
+    'Steps:',
+    ...filledSteps.map((r, i) => `${i + 1}. ${r.text.trim()}${r.id === annoyingId ? '  <- annoys me most' : ''}`),
+    '',
+    "I'm interested in Cohort 2 on 24 October.",
+  ].join('\n')
+  const whatsappUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(resultMessage)}`
+
   async function submitCapture() {
-    if (!selectedTask || !classification || captureState === 'sending') return
+    if (!annoyingStep || !classification || captureState === 'sending') return
     setCaptureState('sending')
     setCaptureError(null)
     try {
@@ -93,8 +105,9 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
         body: JSON.stringify({
           email: captureEmail,
           name: captureName || undefined,
-          workflow: effectiveWorkflow,
-          taskText: selectedTask.text,
+          workflow: effectiveProcess,
+          taskText: annoyingStep.text.trim(),
+          steps: filledSteps.map(r => r.text.trim()),
           predictability: scores.predictability,
           dataAvailability: scores.data,
           complexity: scores.complexity,
@@ -105,12 +118,12 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
         }),
       })
       if (!res.ok) {
-        let message = 'Something went wrong — try again, or just register directly above.'
+        let message = 'Something went wrong — try again, or use the buttons above.'
         try {
           const data = await res.json()
           if (data?.fields?.email) message = "That email address doesn't look right — check it and try again."
           else if (data?.fields?.name) message = 'That name is too long — shorten it and try again.'
-          else if (data?.fields) message = "Something in that submission wasn't valid — try again, or just register directly above."
+          else if (data?.fields) message = "Something in that submission wasn't valid — try again, or use the buttons above."
         } catch { /* keep default message */ }
         setCaptureError(message)
         setCaptureState('error')
@@ -119,17 +132,15 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
       setCaptureState('sent')
       track('task_picker_capture_submit', { ai_potential: aiPotential })
     } catch {
-      setCaptureError('Something went wrong — try again, or just register directly above.')
+      setCaptureError('Something went wrong — try again, or use the buttons above.')
       setCaptureState('error')
     }
   }
 
   const steps: { key: typeof step; label: string }[] = [
-    { key: 'workflow', label: 'Workflow' },
-    { key: 'tasks', label: 'Tasks' },
-    { key: 'delete', label: 'Keep / Remove' },
-    { key: 'pick', label: 'Pick one' },
+    { key: 'process', label: 'Process' },
     { key: 'score', label: 'Score' },
+    { key: 'steps', label: 'Steps' },
   ]
   const stepIndex = steps.findIndex(s => s.key === step)
 
@@ -159,15 +170,15 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
               Pre-Work &middot; 5 Minutes
             </p>
             <h1 style={{ fontFamily: displayFont, fontSize: 'clamp(2.2rem, 6vw, 3rem)', fontWeight: 900, color: C.white, lineHeight: 1.08, margin: '0 0 20px', textWrap: 'balance' }}>
-              Pick Your Task
+              Pick Your Process
             </h1>
             <p style={{ fontSize: 17, color: C.muted, lineHeight: 1.7, maxWidth: 460, margin: '0 auto 12px' }}>
-              Find one business task worth pressure-testing — before you spend 2.5 hours building the wrong Canvas.
+              Find the process worth fixing first, in 5 minutes.
             </p>
             <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.7, maxWidth: 460, margin: '0 auto 36px' }}>
               This won&apos;t tell you what AI to buy. It&apos;s a structured way to think it through yourself — from Chapter 6 of <em style={{ fontStyle: 'normal', color: C.body }}>The AI Roadmap</em>.
             </p>
-            <button onClick={() => setStep('workflow')} style={{
+            <button onClick={() => setStep('process')} style={{
               display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
               padding: '16px 40px', borderRadius: 12, fontSize: 14, fontWeight: 800,
               border: 'none', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.04em',
@@ -177,29 +188,30 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
           </div>
         )}
 
-        {step === 'workflow' && (
+        {step === 'process' && (
           <div>
             <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Step 1</p>
             <h2 style={{ fontFamily: displayFont, fontSize: 'clamp(1.6rem, 4vw, 2.1rem)', fontWeight: 900, color: C.white, margin: '0 0 28px' }}>
-              What workflow needs improving?
+              Which process needs fixing?
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
-              {WORKFLOWS.map(w => (
-                <button key={w} onClick={() => setWorkflow(w)} style={{
+              {PROCESSES.map(w => (
+                <button key={w} onClick={() => setProcess(w)} style={{
                   textAlign: 'left', padding: '16px 18px', borderRadius: 10, cursor: 'pointer',
-                  background: workflow === w ? 'rgba(194,65,12,0.12)' : C.card,
-                  border: `1.5px solid ${workflow === w ? C.accent : C.border}`,
-                  color: C.white, fontSize: 15, fontWeight: workflow === w ? 700 : 500,
+                  background: process === w ? 'rgba(194,65,12,0.12)' : C.card,
+                  border: `1.5px solid ${process === w ? C.accent : C.border}`,
+                  color: C.white, fontSize: 15, fontWeight: process === w ? 700 : 500,
                 }}>
                   {w}
                 </button>
               ))}
             </div>
-            {workflow === 'Something else' && (
+            {process === 'Something else' && (
               <input
-                value={customWorkflow}
-                onChange={e => setCustomWorkflow(e.target.value)}
+                value={customProcess}
+                onChange={e => setCustomProcess(e.target.value)}
                 placeholder="e.g. Onboarding new suppliers"
+                aria-label="Your process"
                 style={{
                   width: '100%', padding: '14px 16px', borderRadius: 10, marginBottom: 28,
                   background: C.sunk, border: `1px solid ${C.border}`, color: C.white, fontSize: 15,
@@ -208,126 +220,20 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
             )}
             <NavRow
               back={() => setStep('intro')}
-              next={() => setStep('tasks')}
-              nextDisabled={!effectiveWorkflow.trim()}
+              next={() => setStep('score')}
+              nextDisabled={!effectiveProcess}
             />
-          </div>
-        )}
-
-        {step === 'tasks' && (
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Step 2</p>
-            <h2 style={{ fontFamily: displayFont, fontSize: 'clamp(1.6rem, 4vw, 2.1rem)', fontWeight: 900, color: C.white, margin: '0 0 12px' }}>
-              Break it into tasks
-            </h2>
-            <p style={{ fontSize: 14.5, color: C.muted, lineHeight: 1.6, margin: '0 0 24px' }}>
-              What actually happens, step by step, inside &ldquo;{effectiveWorkflow || 'this workflow'}&rdquo;? One action per line.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-              {tasks.map((t, i) => (
-                <div key={t.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span style={{ fontSize: 13, color: C.muted, width: 20, flexShrink: 0 }}>{i + 1}.</span>
-                  <input
-                    value={t.text}
-                    onChange={e => updateTask(t.id, e.target.value)}
-                    placeholder="e.g. Send reminder if not completed"
-                    style={{
-                      flex: 1, padding: '12px 14px', borderRadius: 8,
-                      background: C.card, border: `1px solid ${C.border}`, color: C.white, fontSize: 14.5,
-                    }}
-                  />
-                  {tasks.length > 1 && (
-                    <button onClick={() => removeTaskRow(t.id)} aria-label="Remove" style={{
-                      background: 'none', border: 'none', color: C.muted, fontSize: 18, cursor: 'pointer', padding: 4,
-                    }}>&times;</button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <button onClick={addTask} style={{
-              background: 'none', border: `1px dashed ${C.border}`, color: C.accentSoft, fontSize: 13.5,
-              fontWeight: 700, padding: '10px 16px', borderRadius: 8, cursor: 'pointer', marginBottom: 28,
-            }}>
-              + Add another task
-            </button>
-            <NavRow
-              back={() => setStep('workflow')}
-              next={() => setStep('delete')}
-              nextDisabled={tasks.filter(t => t.text.trim()).length === 0}
-            />
-          </div>
-        )}
-
-        {step === 'delete' && (
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Step 3</p>
-            <h2 style={{ fontFamily: displayFont, fontSize: 'clamp(1.6rem, 4vw, 2.1rem)', fontWeight: 900, color: C.white, margin: '0 0 12px' }}>
-              Remove what doesn&apos;t belong
-            </h2>
-            <p style={{ fontSize: 14.5, color: C.muted, lineHeight: 1.6, margin: '0 0 24px' }}>
-              For each one — is this task actually necessary? Don&apos;t score anything that shouldn&apos;t exist in the first place.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
-              {tasks.filter(t => t.text.trim()).map(t => (
-                <div key={t.id} style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '14px 16px', borderRadius: 8, background: C.card, border: `1px solid ${C.border}`,
-                  opacity: t.keep ? 1 : 0.45,
-                }}>
-                  <span style={{ fontSize: 14.5, color: C.white, textDecoration: t.keep ? 'none' : 'line-through' }}>{t.text}</span>
-                  <button onClick={() => toggleKeep(t.id)} style={{
-                    background: t.keep ? 'rgba(194,65,12,0.15)' : 'transparent',
-                    border: `1px solid ${t.keep ? C.accent : C.border}`,
-                    color: t.keep ? C.accentSoft : C.muted, fontSize: 11.5, fontWeight: 700,
-                    letterSpacing: '0.04em', textTransform: 'uppercase', padding: '6px 12px',
-                    borderRadius: 20, cursor: 'pointer', flexShrink: 0, marginLeft: 12,
-                  }}>
-                    {t.keep ? 'Keep' : 'Removed'}
-                  </button>
-                </div>
-              ))}
-            </div>
-            <NavRow
-              back={() => setStep('tasks')}
-              next={() => { selectTask(keptTasks[0]?.id ?? null); setStep(keptTasks.length > 1 ? 'pick' : 'score') }}
-              nextDisabled={keptTasks.length === 0}
-            />
-          </div>
-        )}
-
-        {step === 'pick' && (
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Step 4</p>
-            <h2 style={{ fontFamily: displayFont, fontSize: 'clamp(1.6rem, 4vw, 2.1rem)', fontWeight: 900, color: C.white, margin: '0 0 12px' }}>
-              Which one first?
-            </h2>
-            <p style={{ fontSize: 14.5, color: C.muted, lineHeight: 1.6, margin: '0 0 24px' }}>
-              You kept {keptTasks.length}. Score them one at a time — pick the one you&apos;re most curious about.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
-              {keptTasks.map(t => (
-                <button key={t.id} onClick={() => selectTask(t.id)} style={{
-                  textAlign: 'left', padding: '16px 18px', borderRadius: 10, cursor: 'pointer',
-                  background: selectedTaskId === t.id ? 'rgba(194,65,12,0.12)' : C.card,
-                  border: `1.5px solid ${selectedTaskId === t.id ? C.accent : C.border}`,
-                  color: C.white, fontSize: 15, fontWeight: selectedTaskId === t.id ? 700 : 500,
-                }}>
-                  {t.text}
-                </button>
-              ))}
-            </div>
-            <NavRow back={() => setStep('delete')} next={() => setStep('score')} nextDisabled={!selectedTaskId} />
           </div>
         )}
 
         {step === 'score' && (
           <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Step 5</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Step 2</p>
             <h2 style={{ fontFamily: displayFont, fontSize: 'clamp(1.5rem, 3.6vw, 1.9rem)', fontWeight: 900, color: C.white, margin: '0 0 6px' }}>
-              Score it
+              Score this process
             </h2>
             <p style={{ fontSize: 14, color: C.accentSoft, fontWeight: 600, margin: '0 0 28px' }}>
-              &ldquo;{selectedTask?.text}&rdquo;
+              &ldquo;{effectiveProcess}&rdquo;
             </p>
 
             {CRITERIA_META.map(c => (
@@ -378,18 +284,89 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
             </div>
 
             <NavRow
-              back={() => setStep(keptTasks.length > 1 ? 'pick' : 'delete')}
+              back={() => setStep('process')}
+              next={() => setStep('steps')}
+              nextDisabled={!classification}
+            />
+          </div>
+        )}
+
+        {step === 'steps' && (
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Step 3</p>
+            <h2 style={{ fontFamily: displayFont, fontSize: 'clamp(1.6rem, 4vw, 2.1rem)', fontWeight: 900, color: C.white, margin: '0 0 12px' }}>
+              List it in 6&ndash;10 steps
+            </h2>
+            <p style={{ fontSize: 14.5, color: C.muted, lineHeight: 1.6, margin: '0 0 8px' }}>
+              What actually happens, step by step, inside &ldquo;{effectiveProcess}&rdquo;? One line each. Fewer than 6? Split a step in two.
+            </p>
+            <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.6, margin: '0 0 24px' }}>
+              Then mark the step that annoys you most.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+              {rows.map((r, i) => (
+                <div key={r.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{ fontSize: 13, color: C.muted, width: 20, flexShrink: 0 }}>{i + 1}.</span>
+                  <input
+                    value={r.text}
+                    onChange={e => updateRow(r.id, e.target.value)}
+                    placeholder={i === 0 ? 'e.g. Customer enquiry arrives by email' : ''}
+                    aria-label={`Step ${i + 1}`}
+                    style={{
+                      flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: 8,
+                      background: C.card, border: `1px solid ${annoyingId === r.id ? C.accent : C.border}`, color: C.white, fontSize: 14.5,
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => r.text.trim() && setAnnoyingId(cur => (cur === r.id ? null : r.id))}
+                    disabled={!r.text.trim()}
+                    aria-pressed={annoyingId === r.id}
+                    aria-label={`Mark step ${i + 1} as the one that annoys you most`}
+                    title="Annoys me most"
+                    style={{
+                      flexShrink: 0, padding: '8px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 700,
+                      letterSpacing: '0.03em', textTransform: 'uppercase', cursor: r.text.trim() ? 'pointer' : 'not-allowed',
+                      background: annoyingId === r.id ? 'rgba(194,65,12,0.15)' : 'transparent',
+                      border: `1px solid ${annoyingId === r.id ? C.accent : C.border}`,
+                      color: annoyingId === r.id ? C.accentSoft : C.muted, opacity: r.text.trim() ? 1 : 0.4,
+                    }}
+                  >
+                    {annoyingId === r.id ? 'Annoys me most' : 'Annoying?'}
+                  </button>
+                  {rows.length > MIN_STEPS && (
+                    <button onClick={() => removeRow(r.id)} aria-label={`Remove step ${i + 1}`} style={{
+                      background: 'none', border: 'none', color: C.muted, fontSize: 18, cursor: 'pointer', padding: 4,
+                    }}>&times;</button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {rows.length < MAX_STEPS && (
+              <button onClick={addRow} style={{
+                background: 'none', border: `1px dashed ${C.border}`, color: C.accentSoft, fontSize: 13.5,
+                fontWeight: 700, padding: '10px 16px', borderRadius: 8, cursor: 'pointer', marginBottom: 12,
+              }}>
+                + Add another step
+              </button>
+            )}
+            <p style={{ fontSize: 12.5, color: C.muted, margin: '0 0 28px' }}>
+              {filledSteps.length} of 6&ndash;10 steps{filledSteps.length > 0 && filledSteps.length < 6 ? ' (aim for 6 or more)' : ''}
+              {annoyingStep ? '' : ' · mark the step that annoys you most to continue'}
+            </p>
+            <NavRow
+              back={() => setStep('score')}
               next={() => {
-                track('task_picker_result', { classification, automation_fit: automationFit, ai_potential: aiPotential })
+                track('task_picker_result', { classification, automation_fit: automationFit, ai_potential: aiPotential, steps: filledSteps.length })
                 setStep('result')
               }}
-              nextDisabled={!classification}
+              nextDisabled={filledSteps.length < MIN_STEPS || !annoyingStep}
               nextLabel="See result"
             />
           </div>
         )}
 
-        {step === 'result' && selectedTask && (
+        {step === 'result' && annoyingStep && (
           <div>
             <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px' }}>Result</p>
 
@@ -398,8 +375,26 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
               boxShadow: '0 20px 50px rgba(0,0,0,0.35)', marginBottom: 28,
             }}>
               <div style={{ padding: '22px 26px', background: '#f2efe7', borderBottom: '1px solid #e5e2d9' }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#9a9483', letterSpacing: '0.08em', margin: '0 0 8px' }}>YOUR TASK</p>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>{selectedTask.text}</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#9a9483', letterSpacing: '0.08em', margin: '0 0 8px' }}>YOUR PROCESS</p>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>{effectiveProcess}</p>
+              </div>
+              <div style={{ padding: '22px 26px', borderBottom: '1px solid #e5e2d9' }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#9a9483', letterSpacing: '0.08em', margin: '0 0 12px' }}>YOUR STEPS</p>
+                <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {filledSteps.map((r, i) => (
+                    <li key={r.id} style={{ display: 'flex', gap: 10, alignItems: 'baseline', fontSize: 14, lineHeight: 1.5, color: '#1a1a1a', fontWeight: r.id === annoyingId ? 700 : 400 }}>
+                      <span style={{ color: '#9a9483', width: 18, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{i + 1}.</span>
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        {r.text.trim()}
+                        {r.id === annoyingId && (
+                          <span style={{ marginLeft: 8, fontSize: 10.5, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#C2410C', whiteSpace: 'nowrap' }}>
+                            Annoys you most
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
               </div>
               <div style={{ padding: '22px 26px', display: 'flex', gap: 24, borderBottom: '1px solid #e5e2d9' }}>
                 <div>
@@ -424,7 +419,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 40 }}>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
               <a
                 href="/checkout"
                 onClick={() => {
@@ -437,15 +432,29 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
                   textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
                 }}
               >
-                Bring this task to the workshop &rarr;
+                Bring this to Cohort 2 on 24 October &rarr;
               </a>
-              <button onClick={() => { selectTask(null); setStep(keptTasks.length > 1 ? 'pick' : 'tasks') }} style={{
-                background: 'none', border: `1px solid ${C.border}`, color: C.muted,
-                padding: '15px 24px', borderRadius: 12, fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
-              }}>
-                Try another task
-              </button>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => track('send_result_click', { ai_potential: aiPotential })}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', background: 'none', color: C.white,
+                  border: `1px solid ${C.accent}`, padding: '15px 30px', borderRadius: 12, fontSize: 14, fontWeight: 800,
+                  textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
+                }}
+              >
+                Send me your result
+              </a>
             </div>
+            <p style={{ margin: '0 0 40px' }}>
+              <button onClick={() => { setStep('process'); setProcess(''); setCustomProcess('') }} style={{
+                background: 'none', border: 'none', color: C.muted, fontSize: 13.5, textDecoration: 'underline', cursor: 'pointer', padding: 0,
+              }}>
+                Try another process
+              </button>
+            </p>
 
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '20px 22px', marginBottom: 28 }}>
               {captureState === 'sent' ? (
@@ -458,7 +467,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
                     Want us to save this and follow up before 24 October?
                   </p>
                   <p style={{ fontSize: 12.5, color: C.muted, margin: '0 0 14px' }}>
-                    Optional — the button above already works without this.
+                    Optional. The buttons above work without this.
                   </p>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <input
@@ -503,7 +512,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
             </div>
 
             <button onClick={reset} style={{ background: 'none', border: 'none', color: C.muted, fontSize: 13, textDecoration: 'underline', cursor: 'pointer', padding: 0 }}>
-              Start over with a different workflow
+              Start over with a different process
             </button>
           </div>
         )}
