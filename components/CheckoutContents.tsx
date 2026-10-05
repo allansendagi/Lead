@@ -15,7 +15,7 @@ const included = [
   'Your workflow mapped and labelled',
   'Completed AI Task Canvas',
   'One-page AI Task Specification',
-  'Agent steps and limits, if relevant',
+  'Agent design: steps, systems and limits',
   'A first test to run',
   'Direct working feedback',
 ]

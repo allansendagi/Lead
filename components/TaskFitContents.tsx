@@ -18,7 +18,7 @@ type StepRow = { id: string; text: string }
 type Criteria = { predictability: number; data: number; complexity: number; frequency: number }
 
 const CRITERIA_META: { key: keyof Criteria; label: string; low: string; high: string; help: string }[] = [
-  { key: 'predictability', label: 'Predictability', low: 'Needs judgment, exceptions', high: 'Same decision every time', help: 'Does roughly the same decision happen, over and over, the same way?' },
+  { key: 'predictability', label: 'Predictability', low: 'Needs judgment, exceptions', high: 'Same decision every time', help: 'Does the same decision happen, over and over, the same way?' },
   { key: 'data', label: 'Data availability', low: "Doesn't exist yet, or messy", high: 'Structured and accessible', help: 'Do you already have the information this would need, in some usable form?' },
   { key: 'complexity', label: 'Complexity', low: 'Deep reasoning, lots of context', high: 'Simple lookup or classification', help: 'Is this a simple call, or does it need real judgment about a messy situation?' },
   { key: 'frequency', label: 'Frequency', low: 'Rare, occasional', high: 'Dozens of times a week', help: 'How often does this actually happen?' },
@@ -351,7 +351,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
               </button>
             )}
             <p style={{ fontSize: 12.5, color: C.muted, margin: '0 0 28px' }}>
-              {filledSteps.length} of 6&ndash;10 steps{filledSteps.length > 0 && filledSteps.length < 6 ? ' (aim for 6 or more)' : ''}
+              {filledSteps.length} of 6&ndash;10 steps
               {annoyingStep ? '' : ' · mark the step that annoys you most to continue'}
             </p>
             <NavRow
@@ -409,11 +409,11 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
               <div style={{ padding: '22px 26px' }}>
                 <p style={{ fontSize: 13.5, color: '#4b4638', lineHeight: 1.65, margin: 0 }}>
                   {classification === 'fixed' ? (
-                    <>This is a fixed rule, not a prediction — you don&apos;t need AI for it. A calendar or a simple script handles this fine. Try asking a probabilistic version of the same question instead: not &ldquo;did X happen?&rdquo; but &ldquo;how likely is X to happen without intervention?&rdquo; That reframing is usually where the real AI task is hiding.</>
+                    <>This is a fixed rule, not a prediction — you don&apos;t need AI for it. A calendar or a simple script handles this fine. Try asking a probabilistic version of the same question instead: not &ldquo;did X happen?&rdquo; but &ldquo;how likely is X to happen without intervention?&rdquo; That reframing is where the real AI task hides.</>
                   ) : aiPotential === 'High' ? (
                     <>Strong candidate. It&apos;s predictable enough to learn, the data exists, it&apos;s not too complex, and it happens often enough to matter. This is worth bringing to the workshop.</>
                   ) : (
-                    <>Possible, but not there yet — the blocker is <strong>{weakest.label.toLowerCase()}</strong> ({weakest.low.toLowerCase()}). Worth bringing anyway: the workshop can help you see exactly what would need to change, which is a legitimate outcome on its own.</>
+                    <>Not there yet. The blocker is <strong>{weakest.label.toLowerCase()}</strong> ({weakest.low.toLowerCase()}). Bring it to the workshop: we work out exactly what has to change.</>
                   )}
                 </p>
               </div>

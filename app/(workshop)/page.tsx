@@ -99,7 +99,7 @@ const canvasElements = [
   { n: '7', title: 'Outcome', def: 'What measurable change tells you the intervention created value?', example: 'e.g. "Increase feedback completion rate without increasing reminder volume."' },
 ]
 
-const OUTPUT_LABEL = 'HYPOTHETICAL EXAMPLE · PATIENT FEEDBACK'
+const OUTPUT_LABEL = 'WORKED EXAMPLE · PATIENT FEEDBACK'
 const OUTPUT_TASK = 'Send personalized follow-up messages to patients after appointments.'
 const OUTPUT_OWNER = 'Patient experience lead. Front-desk team handles referred cases.'
 const OUTPUT_BASELINE = 'Today, staff send reminders manually to everyone. About 1 in 5 patients leaves feedback.'
@@ -203,7 +203,7 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'What should I bring?',
-    a: "Bring one workflow you are responsible for, ideally one that eats your team's time. After you register you will get a short pre-work email to help you list its steps (6–10 is ideal). You do not need to prepare a technical specification.",
+    a: "Bring one workflow you are responsible for: one that eats your team's time. After you register you will get a short pre-work email to help you list its steps (6–10 steps). You do not need to prepare a technical specification.",
   },
   {
     q: 'Is the Canvas a strategy tool or a technical specification?',
@@ -637,7 +637,7 @@ export default function WorkshopPage() {
             </p>
             <p style={{ fontSize: 15, color: C.body, lineHeight: 1.7, margin: '0 0 32px', fontFamily: bodyFont, textAlign: 'left' }}>
               Limited to <strong style={{ color: C.white }}>10 seats</strong> so I can work on your actual workflow
-              with you, not a hypothetical one. This is a working session, not a webinar.
+              with you. This is a working session, not a webinar.
             </p>
 
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
@@ -844,7 +844,7 @@ export default function WorkshopPage() {
 
             <div>
               <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', margin: '0 0 28px' }}>
-                QUESTIONS YOU MAY BE ASKING
+                YOUR QUESTIONS
               </p>
               {faqs.map((f, i) => (
                 <div key={f.q} style={{ display: 'grid', gridTemplateColumns: '36px 1fr', gap: 16, padding: '20px 0', borderTop: i !== 0 ? `1px solid ${C.border}` : 'none' }}>
