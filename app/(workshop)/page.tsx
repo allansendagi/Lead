@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { Fraunces, Inter } from 'next/font/google'
-import Countdown from '@/components/Countdown'
 import ScrollScaleVideo from '@/components/ScrollScaleVideo'
 import MobileNav from '@/components/MobileNav'
 import CanvasBuilder from '@/components/CanvasBuilder'
@@ -21,9 +20,10 @@ export const metadata: Metadata = {
 }
 
 // ── Editable event details — fill these in once confirmed ──────────────────
-const WORKSHOP_DATE = 'October 3, 2026'
+const WORKSHOP_DATE = 'October 24, 2026'
 const WORKSHOP_TIME = '10:00 AM Doha (GMT+3) / 11:00 AM Dubai (GMT+4)'
-const WORKSHOP_DEADLINE = '2026-10-03T10:00:00+03:00'
+// Fit call: WhatsApp for now. Swap for a Calendly link when one exists.
+const FIT_CALL_URL = `https://wa.me/97450176561?text=${encodeURIComponent('Hi Allan, I would like to book a 10-minute fit call for the AI Value Sandbox workshop')}`
 
 // ── Editorial Authority palette — black kept, one deliberate accent ────────
 const C = {
@@ -53,31 +53,30 @@ const stats = [
 const personas = [
   {
     num: '01',
-    tag: 'The AI Experimenter',
-    title: "Your team uses AI every day. You still can't point to a result it moved.",
-    desc: 'Your teams are using ChatGPT, Copilot, agents and other AI tools. But usage is growing faster than your ability to identify which work should actually change.',
+    tag: 'A process eats your week',
+    title: "A weekly process takes your team hours, and you know it shouldn't.",
+    desc: 'Enquiries, quotes, reports, follow-ups: work that is repetitive, slow, and handled differently by every person on the team.',
   },
   {
     num: '02',
-    tag: 'The Strategy Leader',
-    title: "You're expected to have an AI plan. You're still figuring out where AI actually belongs.",
-    desc: 'You hear AI use cases everywhere. What you need is a way to identify the actual tasks worth changing — and determine what success should look like.',
+    tag: 'AI across the business',
+    title: "You want AI across the business but don't know where to start.",
+    desc: 'Everyone has an opinion on tools. What you need is one workflow taken apart, so you can see which work AI should do and which stays with people.',
   },
   {
     num: '03',
-    tag: 'The Transformation Leader',
-    title: "You don't need another AI presentation. You need something you can work on.",
-    desc: "You have a real process, task or workflow where AI could make a difference. You want to take one of them apart, define AI's role, and leave with something concrete.",
+    tag: 'Tried it, nothing changed',
+    title: "You've tried AI tools and nothing measurable changed.",
+    desc: 'Subscriptions and experiments, but no result you can point to. You want a specific task, a clear role for AI, and a number that tells you if it worked.',
   },
 ]
 
 const walkAwayItems = [
-  { title: 'One real business task', desc: 'Clearly scoped and ready to work on.' },
-  { title: 'One completed AI Task Canvas', desc: "Mapping the action, AI's job, judgment & authority, inputs, training data & context, feedback & record, and outcome." },
-  { title: 'A defined role for AI', desc: 'What AI should do, what it should not do, and where human judgment remains.' },
+  { title: 'Your workflow, mapped', desc: 'Every step labelled: AI assists, AI performs, an agent could run it, stays human, or not worth changing.' },
+  { title: 'A one-page AI Task Specification', desc: 'Precise enough to hand to a developer or vendor, without losing the business intent between strategy and build.' },
+  { title: "The agent's steps, and where it must stop", desc: 'If your task suits an agent: its steps, its systems, its hand-offs, and what it must never do.' },
+  { title: 'A first test to run', desc: 'What to try in the next two weeks, with what data, and what to measure.' },
   { title: 'A measurable outcome', desc: 'How you will know whether the intervention actually improves the work.' },
-  { title: 'A next step', desc: 'What to test, with what data, and what to measure.' },
-  { title: 'A build-ready specification', desc: 'Precise enough to brief a developer, vendor, or AI coding agent — without losing the business intent between strategy and build.' },
 ]
 
 const canvasHeader = [
@@ -127,22 +126,23 @@ const canvasStages = [
 
 const outputFlow = ['Action', "AI's Job", 'Judgment & Authority', 'Input', 'Training', 'Feedback & Record', 'Outcome']
 
-const sessionRows: { type?: 'break'; week: string; tag: string; title: string; desc: string; host: string; role: string }[] = [
-  { week: 'Part 01', tag: 'The Framework · 40 min', title: 'All 7 Elements, With Real Examples', desc: 'Walk through the complete AI Task Canvas using examples from real business tasks across industries.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
-  { type: 'break', week: '', tag: '', title: 'Break', desc: '5 minutes — stretch, refill your coffee.', host: '', role: '' },
-  { week: 'Part 02', tag: 'Build Your Canvas · 70 min', title: 'Your Canvas, Live', desc: 'Apply the canvas to your own priority AI task, element by element, with live guidance from Allan.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
-  { type: 'break', week: '', tag: '', title: 'Break', desc: '5 minutes — stretch, refill your coffee.', host: '', role: '' },
-  { week: 'Part 03', tag: 'Pressure-Test · 30 min', title: 'Stress-Test Before You Build', desc: 'Pressure-test your Judgment rule, Input list, and Outcome before you build, brief a vendor, or commit resources.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+const sessionRows: { week: string; tag: string; title: string; desc: string; host: string; role: string }[] = [
+  { week: 'Part 01', tag: 'Worked Example · 15 min', title: 'One Workflow, Start to Finish', desc: 'A real-shaped example, taken from messy workflow to finished specification, so you see where the session is heading.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { week: 'Part 02', tag: 'Map and Label · 25 min', title: 'Map and Label Your Workflow', desc: 'Lay out your workflow in 6–10 steps and label each one: AI assists, AI performs, an agent could run it, stays human, or not worth changing.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { week: 'Part 03', tag: 'Choose · 10 min', title: 'Pick One Task', desc: 'Choose the single step worth changing first.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { week: 'Part 04', tag: 'Build · 55 min (includes a 5-min break)', title: 'Build the Canvas, With Live Challenge', desc: 'Work through the AI Task Canvas for your task. Vague answers get questioned live until they are specific.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { week: 'Part 05', tag: 'Agent Layer · 25 min', title: 'Agent Layer and Pressure Test', desc: 'If an agent could run the task: define its steps, systems, hand-offs, and what it must never do. Then pressure-test it.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { week: 'Part 06', tag: 'Specify · 20 min', title: 'Write Your Specification', desc: 'Finish with a one-page AI Task Specification you can hand to a developer or vendor.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
 ]
 
 const seatIncludes = [
-  'Live 2.5-hour workshop',
-  'AI Task Canvas',
-  'Defined AI intervention',
-  'Measurable value hypothesis',
+  'Live 2.5-hour working session',
+  'Your workflow mapped and labelled',
+  'Completed AI Task Canvas',
+  'One-page AI Task Specification',
+  'Agent steps and limits, if relevant',
+  'A first test to run',
   'Direct working feedback',
-  'Completed Canvas',
-  'Clear next step',
 ]
 
 
@@ -181,7 +181,7 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'What will I actually have at the end?',
-    a: "You will have one completed AI Task Canvas for a real task from your work. You will have defined the action, AI's job, judgment & authority, input, training data & context, feedback & record, and outcome — along with a clear AI intervention and measurable value hypothesis.",
+    a: "Your workflow mapped with every step labelled, one completed AI Task Canvas for the task you picked, and a one-page AI Task Specification you can hand to a developer or vendor. If the task suits an agent, you also leave with the agent's steps and where it must stop, plus a first test to run in the next two weeks.",
   },
   {
     q: "What if I don't have a specific AI idea yet?",
@@ -189,7 +189,7 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'What should I bring?',
-    a: 'Bring one real business task you are responsible for — something repetitive, analytical, decision-heavy, or difficult to scale. Bring whatever you already know about how that task works. You do not need to prepare a technical specification beforehand.',
+    a: "Bring one workflow you are responsible for, ideally one that eats your team's time. After your fit call you will get a short pre-work email to help you list its steps (6–10 is ideal). You do not need to prepare a technical specification.",
   },
   {
     q: 'Is the Canvas a strategy tool or a technical specification?',
@@ -207,6 +207,34 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
       </>
     ),
   },
+  {
+    q: 'I want AI across my whole business. Will this help?',
+    a: 'Yes. We map one workflow and specify the highest-value task in it. The same method then applies to the rest of the business, one workflow at a time.',
+  },
+  {
+    q: 'Does this cover AI agents?',
+    a: 'Yes. If a task suits an agent, you define its steps, the systems it touches, its hand-offs, and what it must never do. If it does not suit an agent, the session finds the right kind of AI help instead.',
+  },
+  {
+    q: 'How do I pay?',
+    a: 'By card, or ask for an invoice. Price is AED 1,000 (about QAR 990) per seat. You pay after your fit call, once we both agree the session is a fit.',
+  },
+  {
+    q: 'What if it is not useful?',
+    a: "Full refund if you don't leave with a specification you'd use.",
+  },
+  {
+    q: 'Not sure your task or business is ready?',
+    a: 'Two quick tools can help before the fit call: the AI Readiness Quiz and the 5-minute task picker.',
+    aRich: (
+      <>
+        Two quick tools can help before the fit call:{' '}
+        <a href="/assessment" style={{ color: '#F5F1EA', fontWeight: 700 }}>the AI Readiness Quiz</a>{' '}
+        and{' '}
+        <a href="/pick-your-task" style={{ color: '#F5F1EA', fontWeight: 700 }}>the 5-minute task picker</a>.
+      </>
+    ),
+  },
 ]
 
 const funnelSteps = ['AI IDEA', 'REAL BUSINESS TASK', '7-ELEMENT CANVAS', 'AI INTERVENTION', 'MEASURABLE OUTCOME']
@@ -217,6 +245,9 @@ const navLinks = [
   { label: 'ENROLLMENT', href: '#enrollment' },
   { label: 'FAQ', href: '#faq' },
 ]
+
+// Fill in after Cohort 1. The section stays hidden while this is empty.
+const launchParticipantQuotes: { quote: string; name: string; role: string }[] = []
 
 const testimonial = {
   quote: "Allan Sendagi delivers a clear, real-world framework for AI implementation that bridges the gap between strategy and execution. Highly recommended for leaders ready to move beyond the hype and deploy AI with precision.",
@@ -282,21 +313,6 @@ export default function WorkshopPage() {
             </div>
           </div>
 
-          <a
-            href="/assessment"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="site-nav-quiz-link"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              border: `1px solid ${C.border}`, borderRadius: 10, padding: '9px 16px',
-              color: C.white, fontSize: 13, fontWeight: 700, textDecoration: 'none',
-              fontFamily: bodyFont, textTransform: 'none', whiteSpace: 'nowrap',
-            }}
-          >
-            Not sure yet? Take the AI Readiness Quiz →
-          </a>
-
           <MobileNav items={navLinks} />
         </nav>
 
@@ -308,27 +324,28 @@ export default function WorkshopPage() {
           <h1 style={{ fontSize: 'clamp(2.8rem, 8vw, 5.5rem)', fontWeight: 900, lineHeight: 1.04, margin: '0 0 20px', textTransform: 'uppercase' }}>
             Make AI <span style={{ color: C.accent }}>Work</span>
           </h1>
-          <p style={{ fontSize: 'clamp(1.2rem, 2.4vw, 1.6rem)', fontWeight: 700, color: C.white, lineHeight: 1.35, margin: '0 auto 20px', maxWidth: 720, textTransform: 'uppercase' }}>
-            You Are Using AI. Do You Actually Know What&apos;s Changing?
-          </p>
-          <p className="hero-oneline" style={{ fontSize: 18, color: C.muted, lineHeight: 1.75, margin: '0 auto 20px', maxWidth: 'none', whiteSpace: 'nowrap', fontFamily: bodyFont }}>
-            Bring one real business task.
-          </p>
-          <p style={{ fontSize: 18, color: C.white, fontWeight: 700, lineHeight: 1.6, margin: '0 auto 36px', maxWidth: 680, fontFamily: bodyFont }}>
-            Leave with a defined AI intervention and the metrics to prove it works.
+          <p style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)', fontWeight: 700, color: C.white, lineHeight: 1.5, margin: '0 auto 36px', maxWidth: 760, fontFamily: bodyFont }}>
+            Bring one workflow. Find the work AI should do in it. Leave with one task specified well enough to build next week.
           </p>
 
           <TrackedLink
-            href="/checkout"
+            href={FIT_CALL_URL}
             location="hero"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
               padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
               textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
             }}
           >
-            Join The Launch Cohort
+            Book a 10-minute fit call
           </TrackedLink>
+          <p style={{ margin: '18px 0 0' }}>
+            <a href="#program" style={{ color: C.muted, fontSize: 13.5, textDecoration: 'underline', fontFamily: bodyFont }}>
+              See how it works &darr;
+            </a>
+          </p>
         </section>
 
         {/* ── Ticker marquee ── */}
@@ -387,7 +404,7 @@ export default function WorkshopPage() {
               <span style={{ color: C.accent }}>away with.</span>
             </h2>
             <p style={{ flex: '1 1 320px', maxWidth: 460, color: C.muted, fontSize: 16, lineHeight: 1.7, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
-              Not another list of AI ideas. A defined starting point for <strong style={{ color: C.white }}>putting AI to work.</strong>
+              Not another list of AI ideas. One workflow mapped, and one task <strong style={{ color: C.white }}>specified well enough to build.</strong>
             </p>
           </div>
 
@@ -422,15 +439,17 @@ export default function WorkshopPage() {
 
           <div style={{ textAlign: 'center', marginTop: 48 }}>
             <TrackedLink
-              href="/checkout"
+              href={FIT_CALL_URL}
               location="walkaway_section"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
                 padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
                 textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
               }}
             >
-              I Want a Defined AI Intervention
+              Book a 10-minute fit call
             </TrackedLink>
           </div>
         </section>
@@ -548,24 +567,18 @@ export default function WorkshopPage() {
             </div>
             <div style={{ textAlign: 'center', marginTop: 48 }}>
               <TrackedLink
-                href="/checkout"
+                href={FIT_CALL_URL}
                 location="canvas_output_section"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
                   padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
                   textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
                 }}
               >
-                Turn My Task Into an AI Specification
+                Book a 10-minute fit call
               </TrackedLink>
-              <p style={{ margin: '16px 0 0' }}>
-                <a
-                  href="/pick-your-task"
-                  style={{ color: C.muted, fontSize: 13.5, textDecoration: 'underline', fontFamily: bodyFont }}
-                >
-                  Not sure your task is ready? Try the 5-minute task picker &rarr;
-                </a>
-              </p>
             </div>
           </div>
         </section>
@@ -580,18 +593,6 @@ export default function WorkshopPage() {
           </div>
           <div style={{ border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden' }}>
             {sessionRows.map((r, i) => (
-              r.type === 'break' ? (
-                <div key={`break-${i}`} style={{
-                  display: 'flex', alignItems: 'center', gap: 14,
-                  padding: '14px 24px', borderTop: `1px solid ${C.border}`,
-                  background: 'transparent',
-                }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: bodyFont }}>
-                    {r.title}
-                  </span>
-                  <span style={{ fontSize: 13, color: C.muted, fontFamily: bodyFont, textTransform: 'none' }}>{r.desc}</span>
-                </div>
-              ) : (
                 <div key={r.week} className="session-row" style={{
                   display: 'grid', gridTemplateColumns: '140px 1fr 200px', gap: 24,
                   padding: '28px 24px', borderTop: i > 0 ? `1px solid ${C.border}` : 'none',
@@ -608,7 +609,6 @@ export default function WorkshopPage() {
                     <p style={{ fontSize: 12, color: C.muted, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>Author, <em style={{ fontStyle: 'normal' }}>The AI Roadmap</em></p>
                   </div>
                 </div>
-              )
             ))}
           </div>
         </section>
@@ -616,10 +616,10 @@ export default function WorkshopPage() {
         {/* ── Pricing ── */}
         <section id="enrollment" style={{ maxWidth: 640, margin: '0 auto', padding: '80px 24px', scrollMarginTop: 24 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', textAlign: 'center', margin: '0 0 12px' }}>
-            LAUNCH COHORT PRICING
+            COHORT 2 PRICING
           </p>
           <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.8rem)', fontWeight: 700, color: C.white, textAlign: 'center', margin: '0 0 32px', textTransform: 'none' }}>
-            The first live cohort of AI Value / Sandbox
+            Cohort 2 of AI Value / Sandbox
           </h2>
 
           <div style={{
@@ -627,24 +627,20 @@ export default function WorkshopPage() {
             background: '#0c0c0c', boxShadow: '0 0 40px rgba(194,65,12,0.1)', textAlign: 'center',
           }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 24px', fontFamily: bodyFont }}>
-              10 Participants &middot; 1 Working Session
+              10 Seats &middot; 1 Working Session
             </p>
-
-            <Countdown target={WORKSHOP_DEADLINE} accent={C.accent} label="Cohort begins in" closedLabel="The cohort has begun" />
-
-            <div style={{ borderTop: `1px solid ${C.border}`, margin: '24px 0' }} />
 
             <p style={{ fontSize: 'clamp(2.4rem, 6vw, 3.2rem)', fontWeight: 900, color: C.white, margin: '0 0 4px' }}>
-              QAR 550
+              AED 1,000
             </p>
             <p style={{ fontSize: 14, color: C.muted, margin: '0 0 8px', fontFamily: bodyFont }}>
-              &asymp; AED 554
+              &asymp; QAR 990
             </p>
             <p style={{ fontSize: 14, color: C.muted, margin: '0 0 24px', fontFamily: bodyFont }}>
               Saturday, {WORKSHOP_DATE.replace(', 2026', '')} &middot; {WORKSHOP_TIME} &middot; 2.5 hours &middot; Live online
             </p>
             <p style={{ fontSize: 15, color: C.body, lineHeight: 1.7, margin: '0 0 32px', fontFamily: bodyFont, textAlign: 'left' }}>
-              Limited to <strong style={{ color: C.white }}>10 seats</strong> so I can work on your actual task
+              Limited to <strong style={{ color: C.white }}>10 seats</strong> so I can work on your actual workflow
               with you, not a hypothetical one. This is a working session, not a webinar.
             </p>
 
@@ -658,34 +654,28 @@ export default function WorkshopPage() {
             </ul>
 
             <TrackedLink
-              href="/checkout"
+              href={FIT_CALL_URL}
               location="pricing"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
                 fontSize: 14, fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
               }}
             >
-              Reserve Your Seat
+              Book a 10-minute fit call
             </TrackedLink>
-            <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', margin: '14px 0 0' }}>
-              10 participants maximum. Launch cohort pricing applies to this cohort.
+            <p style={{ fontSize: 13, color: C.body, textAlign: 'center', margin: '14px 0 0', fontFamily: bodyFont, lineHeight: 1.6 }}>
+              <strong style={{ color: C.white }}>Full refund</strong> if you don&apos;t leave with a specification you&apos;d use.
             </p>
-            <p style={{ fontSize: 13, color: C.muted, textAlign: 'center', margin: '10px 0 0', fontFamily: bodyFont }}>
-              Not sure your task is a fit?{' '}
-              <TrackedLink
-                href={`https://wa.me/97450176561?text=${encodeURIComponent("Hi Allan, I want to check if my task is a good fit for the AI Value Sandbox workshop")}`}
-                location="pricing_qualify_whatsapp"
-                style={{ color: C.accent, fontWeight: 700, textDecoration: 'none' }}
-              >
-                Message me on WhatsApp
-              </TrackedLink>{' '}
-              and I&apos;ll tell you.
+            <p style={{ fontSize: 13, color: C.muted, textAlign: 'center', margin: '8px 0 0', fontFamily: bodyFont }}>
+              Pay by card, or ask for an invoice. Payment comes after your fit call.
             </p>
           </div>
 
           <p style={{ textAlign: 'center', color: C.muted, fontSize: 13, margin: '32px 0 0', fontFamily: bodyFont, textTransform: 'none' }}>
-            <strong style={{ color: C.white }}>What you&apos;ll need:</strong> One real business task to work on. No technical background required.
+            <strong style={{ color: C.white }}>What you&apos;ll need:</strong> One workflow to work on. No technical background required.
           </p>
         </section>
 
@@ -793,6 +783,24 @@ export default function WorkshopPage() {
           </div>
         </section>
 
+        {/* ── What launch participants said (hidden until filled) ── */}
+        {launchParticipantQuotes.length > 0 && (
+          <section style={{ padding: '80px 24px', textAlign: 'center', borderTop: `1px solid ${C.border}` }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.16em', margin: '0 0 40px' }}>
+              WHAT LAUNCH PARTICIPANTS SAID
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, maxWidth: 1000, margin: '0 auto' }}>
+              {launchParticipantQuotes.map(q => (
+                <div key={q.name} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '28px 24px', textAlign: 'left' }}>
+                  <p style={{ fontSize: 16, lineHeight: 1.7, color: C.white, margin: '0 0 16px', fontFamily: bodyFont }}>&ldquo;{q.quote}&rdquo;</p>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: C.white, margin: '0 0 2px', fontFamily: bodyFont }}>{q.name}</p>
+                  <p style={{ fontSize: 12, color: C.muted, margin: 0, fontFamily: bodyFont }}>{q.role}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ── Testimonial ── */}
         <section style={{ padding: '100px 24px', textAlign: 'center', borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.16em', margin: '0 0 40px' }}>
@@ -836,13 +844,13 @@ export default function WorkshopPage() {
                 You are not buying 2.5 hours.
               </h2>
               <p style={{ color: C.muted, fontSize: 15, lineHeight: 1.75, margin: 0, fontFamily: bodyFont, textTransform: 'none' }}>
-                You leave knowing exactly where AI belongs in one real piece of work — what it should do, and how you&apos;ll know it worked.
+                You leave knowing exactly where AI belongs in one real workflow: what it should do, where it stops, and how you&apos;ll know it worked.
               </p>
             </div>
 
             <div>
               <p style={{ fontSize: 13, fontWeight: 700, color: C.accent, letterSpacing: '0.14em', margin: '0 0 28px' }}>
-                SIX QUESTIONS YOU MAY BE ASKING
+                QUESTIONS YOU MAY BE ASKING
               </p>
               {faqs.map((f, i) => (
                 <div key={f.q} style={{ display: 'grid', gridTemplateColumns: '36px 1fr', gap: 16, padding: '20px 0', borderTop: i !== 0 ? `1px solid ${C.border}` : 'none' }}>
@@ -875,28 +883,30 @@ export default function WorkshopPage() {
           </div>
 
           <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 900, margin: '0 0 14px', lineHeight: 1.15, textTransform: 'none' }}>
-            You walked in with an AI idea.
+            You walked in with a workflow.
           </h2>
           <p style={{ fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', fontWeight: 700, color: C.accent, margin: '0 0 14px' }}>
-            Leave with an AI intervention you can actually specify.
+            Leave with one task you can actually build.
           </p>
           <p style={{ fontSize: 15, color: C.muted, margin: '0 auto 36px', maxWidth: 520, lineHeight: 1.7, fontFamily: bodyFont, textTransform: 'none' }}>
-            From there, you can test it, brief development, engage a vendor, or take it into your wider AI roadmap.
+            From there, you can test it, hand it to your developer next week, brief a vendor, or repeat the method on the next workflow.
           </p>
 
           <TrackedLink
-            href="/checkout"
+            href={FIT_CALL_URL}
             location="closer_section"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
               padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
               textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
             }}
           >
-            I Want to Make AI Work
+            Book a 10-minute fit call
           </TrackedLink>
           <p style={{ fontSize: 13, color: C.muted, margin: '18px 0 0', fontFamily: bodyFont, textTransform: 'none' }}>
-            10 seats · Enrollment is first come, first served
+            10 seats · Cohort 2 · Saturday 24 October
           </p>
         </section>
 
@@ -957,7 +967,6 @@ export default function WorkshopPage() {
           .mobile-nav { display: none; }
           @media (max-width: 860px) {
             .site-nav-menu { display: none !important; }
-            .site-nav-quiz-link { display: none !important; }
             .site-nav { padding: 18px 20px !important; }
             .mobile-nav { display: block; }
           }
