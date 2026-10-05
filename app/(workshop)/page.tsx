@@ -313,11 +313,11 @@ export default function WorkshopPage() {
           <h1 style={{ fontSize: 'clamp(2.8rem, 8vw, 5.5rem)', fontWeight: 900, lineHeight: 1.04, margin: '0 0 20px', textTransform: 'uppercase' }}>
             Make AI <span style={{ color: C.accent }}>Work</span>
           </h1>
-          <p style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)', fontWeight: 700, color: C.white, lineHeight: 1.5, margin: '0 auto 16px', maxWidth: 760, fontFamily: bodyFont }}>
-            Bring one workflow. Find the work AI and agents should do in it. Leave with one task specified well enough to build next week.
+          <p style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)', fontWeight: 700, color: C.white, lineHeight: 1.5, margin: '0 auto 16px', maxWidth: 760, fontFamily: bodyFont, textWrap: 'balance' }}>
+            Bring the process that eats your week. Find the work AI and agents should do. Leave with one task specified well enough to build next week.
           </p>
           <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.6, margin: '0 auto 36px', maxWidth: 640, fontFamily: bodyFont }}>
-            New for Cohort 2: workflow mapping, agent design, and a one-page build-ready specification.
+            <strong style={{ color: C.white }}>Cohort 2:</strong> Workflow mapping, agent design, and a one-page build-ready specification.
           </p>
 
           <TrackedLink
