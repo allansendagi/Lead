@@ -24,6 +24,15 @@ const terms = [
   "If the session doesn't go ahead, you get a full refund.",
 ]
 
+const bankDetails = [
+  { label: 'Bank', value: 'Commercial Bank of Qatar' },
+  { label: 'Account name', value: 'SAFEHAVEN LLC' },
+  { label: 'Account number', value: '401031480031001' },
+  { label: 'IBAN', value: 'QA31CBQA000000401031480031001' },
+  { label: 'SWIFT / BIC', value: 'CBQAQAQA' },
+  { label: 'Currency', value: 'QAR' },
+]
+
 type Form = {
   name: string; email: string; whatsapp: string; company: string; role: string; workflow: string; billingAddress: string
 }
@@ -47,6 +56,14 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
   const [paypalError, setPaypalError] = useState<string | null>(null)
   const [invoiceState, setInvoiceState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [paying, setPaying] = useState(false)
+  const [copiedField, setCopiedField] = useState<string | null>(null)
+
+  function copy(label: string, value: string) {
+    navigator.clipboard?.writeText(value).then(() => {
+      setCopiedField(label)
+      setTimeout(() => setCopiedField(f => (f === label ? null : f)), 1500)
+    })
+  }
 
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
@@ -338,6 +355,37 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
               </p>
             ) : (
               <>
+                <div style={{ border: `1px solid ${C.border}`, borderRadius: 14, background: C.card, overflow: 'hidden', marginBottom: 16 }}>
+                  {bankDetails.map((row, i) => (
+                    <div
+                      key={row.label}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                        padding: '14px 18px', borderTop: i === 0 ? 'none' : `1px solid ${C.border}`,
+                      }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 2px' }}>
+                          {row.label}
+                        </p>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: C.white, margin: 0, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', wordBreak: 'break-all' }}>
+                          {row.value}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => copy(row.label, row.value)}
+                        style={{
+                          flexShrink: 0, padding: '7px 12px', borderRadius: 8, border: `1px solid ${C.border}`,
+                          background: 'none', color: copiedField === row.label ? C.accent : C.muted,
+                          fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                        }}
+                      >
+                        {copiedField === row.label ? 'Copied' : 'Copy'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
                 <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 16px' }}>
                   I&apos;ll email you an invoice for <strong style={{ color: C.white }}>AED {PRICE_AED.toLocaleString('en-US')}</strong> with
                   bank transfer details. Your seat is held once the transfer arrives.
