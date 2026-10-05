@@ -32,12 +32,9 @@ export default function Cohort2Waitlist({ label, style, variant = 'link' }: Trig
             gap: '0.4em',
           }}
         >
-          <a
-            href="/checkout"
-            style={{ color: C.white, textDecoration: 'none', font: 'inherit', letterSpacing: 'inherit' }}
-          >
-            LAUNCH COHORT &middot; 10 PARTICIPANTS &middot; SOLD OUT
-          </a>
+          <span>
+            NEXT COHORT: SATURDAY 24 OCTOBER &middot; 10 SEATS &middot; AED 1,000 &middot; FULL REFUND IF IT&apos;S NOT USEFUL
+          </span>
           <span aria-hidden="true">&middot;</span>
           <button
             onClick={() => { track('cohort2_waitlist_open', { variant: 'banner' }); setOpen(true) }}
@@ -46,7 +43,7 @@ export default function Cohort2Waitlist({ label, style, variant = 'link' }: Trig
               cursor: 'pointer', padding: 0, font: 'inherit', letterSpacing: 'inherit',
             }}
           >
-            JOIN THE COHORT 2 WAITLIST &rarr;
+            BOOK A FIT CALL &rarr;
           </button>
         </div>
         <Cohort2Modal open={open} onClose={() => setOpen(false)} />
@@ -64,7 +61,7 @@ export default function Cohort2Waitlist({ label, style, variant = 'link' }: Trig
           ...style,
         }}
       >
-        {label || "Can't make Oct 3? Join the Cohort 2 waitlist"}
+        {label || "Can't make it? Book a fit call for Cohort 2"}
       </button>
       <Cohort2Modal open={open} onClose={() => setOpen(false)} />
     </>
@@ -150,7 +147,7 @@ function Cohort2Modal({ open, onClose }: Props) {
         </button>
 
         <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>
-          Cohort 2 &middot; Waitlist
+          Cohort 2 &middot; 24 October
         </p>
 
         {state === 'sent' ? (
@@ -159,16 +156,16 @@ function Cohort2Modal({ open, onClose }: Props) {
               You&apos;re on the list.
             </h2>
             <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: 0 }}>
-              I&apos;ll reach out the moment Cohort 2 is scheduled — before it&apos;s announced anywhere else.
+              I&apos;ll reach out personally to set up your 10-minute fit call.
             </p>
           </>
         ) : (
           <>
             <h2 style={{ fontSize: 'clamp(1.4rem, 4vw, 1.8rem)', fontWeight: 900, color: C.white, lineHeight: 1.2, margin: '0 0 12px' }}>
-              Can&apos;t make October 3?
+              Book a fit call
             </h2>
             <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: '0 0 24px' }}>
-              Cohort 1 is close to full. Leave your email and I&apos;ll reach out personally the moment Cohort 2 is scheduled — no date or price set yet, so you&apos;re not committing to anything.
+              Cohort 2 runs Saturday 24 October, 10:00 Doha / 11:00 Dubai, with 10 seats at AED 1,000 and a full refund if it&apos;s not useful. Leave your email and I&apos;ll reach out personally for a 10-minute fit call — no commitment until we&apos;ve talked.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 10 }}>
               <input
@@ -200,7 +197,7 @@ function Cohort2Modal({ open, onClose }: Props) {
                   opacity: !email.trim() || state === 'sending' ? 0.5 : 1,
                 }}
               >
-                {state === 'sending' ? 'Joining…' : 'Join the waitlist →'}
+                {state === 'sending' ? 'Sending…' : 'Book my fit call →'}
               </button>
             </div>
             {state === 'error' && (
