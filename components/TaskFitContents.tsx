@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { FIT_CALL_URL } from '@/lib/cohort2'
 
 const C = {
   bg: '#080808', card: '#161513', sunk: '#0c0c0c', border: 'rgba(245,241,234,0.12)',
@@ -427,12 +426,10 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 40 }}>
               <a
-                href={FIT_CALL_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/checkout"
                 onClick={() => {
                   track('cta_click', { location: 'task_picker_result', ai_potential: aiPotential })
-                  track('fit_call_click', { location: 'task_picker_result' })
+                  track('join_click', { location: 'task_picker_result' })
                 }}
                 style={{
                   display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
@@ -440,7 +437,7 @@ export default function TaskFitContents({ displayFont }: { displayFont: string }
                   textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
                 }}
               >
-                Book a fit call about this task &rarr;
+                Bring this task to the workshop &rarr;
               </a>
               <button onClick={() => { selectTask(null); setStep(keptTasks.length > 1 ? 'pick' : 'tasks') }} style={{
                 background: 'none', border: `1px solid ${C.border}`, color: C.muted,

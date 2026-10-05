@@ -24,6 +24,7 @@ export default function TrackedLink({ href, location, style, className, target, 
         if (typeof window !== 'undefined' && (window as any).gtag) {
           ;(window as any).gtag('event', 'cta_click', { location, destination: href })
           if (href === FIT_CALL_URL) (window as any).gtag('event', 'fit_call_click', { location })
+          if (href === '/checkout') (window as any).gtag('event', 'join_click', { location })
         }
       }}
     >

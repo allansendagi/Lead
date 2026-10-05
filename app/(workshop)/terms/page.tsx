@@ -55,8 +55,7 @@ export default function TermsPage() {
           <section>
             <h2 style={h2}>Reserving a workshop seat</h2>
             <p>
-              Make AI Work is a paid, live workshop. We recommend a short fit call first, to check
-              your workflow suits the session. You then reserve your seat on the{' '}
+              Make AI Work is a paid, live workshop. You reserve your seat on the{' '}
               <Link href="/checkout" style={link}>reservation page</Link>, either by paying by card
               or PayPal, or by requesting an invoice for payment by bank transfer.
             </p>

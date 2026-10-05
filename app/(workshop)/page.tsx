@@ -6,7 +6,7 @@ import MobileNav from '@/components/MobileNav'
 import CanvasBuilder from '@/components/CanvasBuilder'
 import TrackedLink from '@/components/TrackedLink'
 import { faqSchema } from '@/lib/schema'
-import { FIT_CALL_URL, COHORT_DESCRIPTION } from '@/lib/cohort2'
+import { COHORT_DESCRIPTION } from '@/lib/cohort2'
 
 const fraunces = Fraunces({ subsets: ['latin'], weight: ['600', '700', '900'], style: ['normal', 'italic'] })
 const inter = Inter({ subsets: ['latin'] })
@@ -42,8 +42,8 @@ const C = {
 }
 
 const tickerItems = [
-  'YOUR WORKFLOW', 'EVERY STEP LABELLED', 'ONE TASK',
-  "THE AGENT'S LIMITS", 'ONE-PAGE SPECIFICATION', 'A FIRST TEST',
+  'YOUR WORKFLOW', 'EVERY STEP LABELLED', 'THE WORK FOR AGENTS',
+  'WHERE THE AGENT STOPS', 'ONE-PAGE SPECIFICATION', 'A FIRST TEST',
 ]
 
 const stats = [
@@ -76,9 +76,9 @@ const personas = [
 ]
 
 const walkAwayItems = [
-  { title: 'Your workflow, mapped', desc: 'Every step labelled: AI assists, AI performs, an agent could run it, stays human, or not worth changing.' },
+  { title: 'Your workflow, mapped', desc: 'Every step labelled: AI assists · AI performs · Agent runs it · Stays human · Not worth changing.' },
   { title: 'A one-page AI Task Specification', desc: 'Precise enough to hand to a developer or vendor, without losing the business intent between strategy and build.' },
-  { title: "The agent's steps, and where it must stop", desc: 'If your task suits an agent: its steps, its systems, its hand-offs, and what it must never do.' },
+  { title: 'Agent design', desc: 'Which steps an agent takes on, the systems it uses, its hand-offs, and what it must never do.' },
   { title: 'A first test to run', desc: 'What to try in the next two weeks, with what data, and what to measure.' },
   { title: 'A measurable outcome', desc: 'How you will know whether the intervention actually improves the work.' },
 ]
@@ -131,11 +131,11 @@ const canvasStages = [
 const outputFlow = ['Action', "AI's Job", 'Judgment & Authority', 'Input', 'Training', 'Feedback & Record', 'Outcome']
 
 const sessionRows: { week: string; tag: string; title: string; desc: string; host: string; role: string }[] = [
-  { week: 'Part 01', tag: 'Worked Example · 15 min', title: 'One Workflow, Start to Finish', desc: 'A real-shaped example, taken from messy workflow to finished specification, so you see where the session is heading.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
-  { week: 'Part 02', tag: 'Map and Label · 25 min', title: 'Map and Label Your Workflow', desc: 'Lay out your workflow in 6–10 steps and label each one: AI assists, AI performs, an agent could run it, stays human, or not worth changing.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { week: 'Part 01', tag: 'Worked Example · 15 min', title: 'One Workflow, Start to Finish', desc: 'A worked example, taken from messy workflow to finished specification, so you see where the session is heading.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { week: 'Part 02', tag: 'Map and Label · 25 min', title: 'Map and Label Your Workflow', desc: 'Lay out your workflow in 6–10 steps and label each one: AI assists · AI performs · Agent runs it · Stays human · Not worth changing.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
   { week: 'Part 03', tag: 'Choose · 10 min', title: 'Pick One Task', desc: 'Choose the single step worth changing first.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
   { week: 'Part 04', tag: 'Build · 55 min (includes a 5-min break)', title: 'Build the Canvas, With Live Challenge', desc: 'Work through the AI Task Canvas for your task. Vague answers get questioned live until they are specific.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
-  { week: 'Part 05', tag: 'Agent Layer · 25 min', title: 'Agent Layer and Pressure Test', desc: 'If an agent could run the task: define its steps, systems, hand-offs, and what it must never do. Then pressure-test it.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
+  { week: 'Part 05', tag: 'Agent Design · 25 min', title: 'Agent Design and Pressure Test', desc: "Define the agent's steps, systems, hand-offs, and what it must never do. Then pressure-test the whole design.", host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
   { week: 'Part 06', tag: 'Specify · 20 min', title: 'Write Your Specification', desc: 'Finish with a one-page AI Task Specification you can hand to a developer or vendor.', host: 'Allan Sendagi', role: 'Author, The AI Roadmap' },
 ]
 
@@ -144,7 +144,7 @@ const seatIncludes = [
   'Your workflow mapped and labelled',
   'Completed AI Task Canvas',
   'One-page AI Task Specification',
-  'Agent steps and limits, if relevant',
+  'Agent design: steps, systems and limits',
   'A first test to run',
   'Direct working feedback',
 ]
@@ -185,7 +185,7 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'What will I actually have at the end?',
-    a: "Your workflow mapped with every step labelled, one completed AI Task Canvas for the task you picked, and a one-page AI Task Specification you can hand to a developer or vendor. If the task suits an agent, you also leave with the agent's steps and where it must stop, plus a first test to run in the next two weeks.",
+    a: "Your workflow mapped with every step labelled, one completed AI Task Canvas for the task you picked, and a one-page AI Task Specification you can hand to a developer or vendor. You also leave with the agent design for your workflow and a first test to run in the next two weeks.",
   },
   {
     q: "What if I don't have a specific AI idea yet?",
@@ -193,7 +193,7 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'What should I bring?',
-    a: "Bring one workflow you are responsible for, ideally one that eats your team's time. After your fit call you will get a short pre-work email to help you list its steps (6–10 is ideal). You do not need to prepare a technical specification.",
+    a: "Bring one workflow you are responsible for, ideally one that eats your team's time. After you register you will get a short pre-work email to help you list its steps (6–10 is ideal). You do not need to prepare a technical specification.",
   },
   {
     q: 'Is the Canvas a strategy tool or a technical specification?',
@@ -217,27 +217,15 @@ const faqs: { q: string; a: string; aRich?: React.ReactNode }[] = [
   },
   {
     q: 'Does this cover AI agents?',
-    a: 'Yes. If a task suits an agent, you define its steps, the systems it touches, its hand-offs, and what it must never do. If it does not suit an agent, the session finds the right kind of AI help instead.',
+    a: "Yes. Every step of your workflow is checked for agent work, and you leave with the agent's steps, systems, hand-offs, and what it must never do.",
   },
   {
     q: 'How do I pay?',
-    a: 'By card, or ask for an invoice. Price is AED 1,000 (about QAR 990) per seat. You pay after your fit call, once we both agree the session is a fit.',
+    a: 'By card, or ask for an invoice. Price is AED 1,000 (about QAR 990) per seat.',
   },
   {
     q: 'What if it is not useful?',
     a: "Full refund if you don't leave with a specification you'd use.",
-  },
-  {
-    q: 'Not sure your task or business is ready?',
-    a: 'Two quick tools can help before the fit call: the AI Readiness Quiz and the 5-minute task picker.',
-    aRich: (
-      <>
-        Two quick tools can help before the fit call:{' '}
-        <a href="/assessment" style={{ color: '#F5F1EA', fontWeight: 700 }}>the AI Readiness Quiz</a>{' '}
-        and{' '}
-        <a href="/pick-your-task" style={{ color: '#F5F1EA', fontWeight: 700 }}>the 5-minute task picker</a>.
-      </>
-    ),
   },
 ]
 
@@ -326,24 +314,22 @@ export default function WorkshopPage() {
             Make AI <span style={{ color: C.accent }}>Work</span>
           </h1>
           <p style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)', fontWeight: 700, color: C.white, lineHeight: 1.5, margin: '0 auto 16px', maxWidth: 760, fontFamily: bodyFont }}>
-            Bring one workflow. Find the work AI should do in it. Leave with one task specified well enough to build next week.
+            Bring one workflow. Find the work AI and agents should do in it. Leave with one task specified well enough to build next week.
           </p>
           <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.6, margin: '0 auto 36px', maxWidth: 640, fontFamily: bodyFont }}>
-            New for Cohort 2: workflow mapping, an agent layer, and a one-page build-ready specification.
+            New for Cohort 2: workflow mapping, agent design, and a one-page build-ready specification.
           </p>
 
           <TrackedLink
-            href={FIT_CALL_URL}
+            href="/checkout"
             location="hero"
-            target="_blank"
-            rel="noopener noreferrer"
             style={{
               display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
               padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
               textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
             }}
           >
-            Book a 10-minute fit call
+            Join Cohort 2
           </TrackedLink>
           <p style={{ margin: '18px 0 0' }}>
             <a href="#session-breakdown" style={{ color: C.muted, fontSize: 13.5, textDecoration: 'underline', fontFamily: bodyFont }}>
@@ -443,17 +429,15 @@ export default function WorkshopPage() {
 
           <div style={{ textAlign: 'center', marginTop: 48 }}>
             <TrackedLink
-              href={FIT_CALL_URL}
+              href="/checkout"
               location="walkaway_section"
-              target="_blank"
-              rel="noopener noreferrer"
               style={{
                 display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
                 padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
                 textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
               }}
             >
-              Book a 10-minute fit call
+              Map My Workflow
             </TrackedLink>
           </div>
         </section>
@@ -571,17 +555,15 @@ export default function WorkshopPage() {
             </div>
             <div style={{ textAlign: 'center', marginTop: 48 }}>
               <TrackedLink
-                href={FIT_CALL_URL}
+                href="/checkout"
                 location="canvas_output_section"
-                target="_blank"
-                rel="noopener noreferrer"
                 style={{
                   display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
                   padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
                   textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
                 }}
               >
-                Book a 10-minute fit call
+                Turn My Workflow Into an AI Specification
               </TrackedLink>
             </div>
           </div>
@@ -658,23 +640,21 @@ export default function WorkshopPage() {
             </ul>
 
             <TrackedLink
-              href={FIT_CALL_URL}
+              href="/checkout"
               location="pricing"
-              target="_blank"
-              rel="noopener noreferrer"
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: C.accent, color: C.white, padding: '16px 24px', borderRadius: 12,
                 fontSize: 14, fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
               }}
             >
-              Book a 10-minute fit call
+              Reserve Your Seat
             </TrackedLink>
             <p style={{ fontSize: 13, color: C.body, textAlign: 'center', margin: '14px 0 0', fontFamily: bodyFont, lineHeight: 1.6 }}>
               <strong style={{ color: C.white }}>Full refund</strong> if you don&apos;t leave with a specification you&apos;d use.
             </p>
             <p style={{ fontSize: 13, color: C.muted, textAlign: 'center', margin: '8px 0 0', fontFamily: bodyFont }}>
-              Pay by card, or ask for an invoice. Payment comes after your fit call.
+              Pay by card, or ask for an invoice.
             </p>
           </div>
 
@@ -897,17 +877,15 @@ export default function WorkshopPage() {
           </p>
 
           <TrackedLink
-            href={FIT_CALL_URL}
+            href="/checkout"
             location="closer_section"
-            target="_blank"
-            rel="noopener noreferrer"
             style={{
               display: 'inline-flex', alignItems: 'center', background: C.accent, color: C.white,
               padding: '16px 48px', borderRadius: 15, fontSize: 14, fontWeight: 800,
               textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em',
             }}
           >
-            Book a 10-minute fit call
+            I Want to Make AI Work
           </TrackedLink>
           <p style={{ fontSize: 13, color: C.muted, margin: '18px 0 0', fontFamily: bodyFont, textTransform: 'none' }}>
             10 seats · Cohort 2 · Saturday 24 October
@@ -922,6 +900,10 @@ export default function WorkshopPage() {
             <a href="/terms" style={{ color: C.muted, textDecoration: 'underline' }}>Terms</a>
             {' '}&middot;{' '}
             <a href="/privacy" style={{ color: C.muted, textDecoration: 'underline' }}>Privacy</a>
+            {' '}&middot;{' '}
+            <a href="/assessment" style={{ color: C.muted, textDecoration: 'underline' }}>AI Readiness Quiz</a>
+            {' '}&middot;{' '}
+            <a href="/pick-your-task" style={{ color: C.muted, textDecoration: 'underline' }}>Pick Your Task</a>
             {' '}&middot;{' '}
             <TrackedLink
               href={`https://wa.me/97450176561?text=${encodeURIComponent("Hi Allan, we're interested in team training using the AI Value Sandbox workshop")}`}

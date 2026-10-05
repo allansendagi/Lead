@@ -197,15 +197,12 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
           Reserve your seat &middot; Cohort 2
         </h1>
 
-        <div style={{ border: `1px solid ${C.border}`, background: C.card, borderRadius: 12, padding: '16px 20px', margin: '0 0 28px' }}>
-          <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.65, margin: 0 }}>
-            Had your fit call? Complete your seat below. Not yet?{' '}
-            <a href={FIT_CALL_URL} target="_blank" rel="noopener noreferrer" onClick={() => track('fit_call_click', { location: 'checkout_notice' })} style={{ color: C.white, fontWeight: 700 }}>
-              Book a 10-minute fit call
-            </a>{' '}
-            first. It&apos;s how we make sure your workflow is a good fit.
-          </p>
-        </div>
+        <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.6, margin: '0 0 28px' }}>
+          Want to talk first?{' '}
+          <a href={FIT_CALL_URL} target="_blank" rel="noopener noreferrer" onClick={() => track('fit_call_click', { location: 'checkout' })} style={{ color: C.white, fontWeight: 600 }}>
+            Book a free 10-minute call &rarr;
+          </a>
+        </p>
 
         <div style={{ border: `1.5px solid ${C.accent}`, borderRadius: 14, padding: '28px', background: C.card, marginBottom: 36, boxShadow: '0 0 40px rgba(194,65,12,0.1)' }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 16px' }}>

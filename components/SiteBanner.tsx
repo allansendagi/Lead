@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import TrackedLink from './TrackedLink'
-import { FIT_CALL_URL } from '@/lib/cohort2'
 
 // Top bar shown on every page. It publishes its height as --banner-h so the
 // fixed navigation on the (site) pages can sit directly beneath it.
@@ -20,13 +19,11 @@ export default function SiteBanner() {
 
   const link = (
     <TrackedLink
-      href={FIT_CALL_URL}
+      href="/checkout"
       location="banner"
-      target="_blank"
-      rel="noopener noreferrer"
       style={{ color: 'inherit', textDecoration: 'underline', font: 'inherit', letterSpacing: 'inherit' }}
     >
-      Book a fit call &rarr;
+      Join Cohort 2 &rarr;
     </TrackedLink>
   )
 
