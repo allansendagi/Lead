@@ -52,7 +52,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         backgroundSize: '26px 26px',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{ display: 'flex', fontSize: 26, fontWeight: 600 }}>{ISSUER} · Make AI Work</div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}><div style={{ display: 'flex', fontSize: 26, fontWeight: 600 }}>{ISSUER} · Make AI Work</div><div style={{ display: 'flex', fontSize: 20, color: SUB, marginTop: 4 }}>operated by SafeHaven LLC</div></div>
           <div style={{ display: 'flex', position: 'relative', width: 200, height: 200, marginTop: -30, marginRight: -10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={s.src} width={200} height={200} alt="" />

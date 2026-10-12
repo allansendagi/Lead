@@ -27,6 +27,7 @@ export type Credential = {
 
 export const SITE = 'https://www.ainavsystem.com'
 export const ISSUER = 'AI Value Sandbox'
+export const OPERATOR = 'SafeHaven LLC'
 export const CREDENTIAL_NAME = 'Make AI Work: AI Task Specification'
 
 const ID_RE = /^MAW-C\d+-\d{3}$/

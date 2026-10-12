@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Seal from '@/components/credentials/Seal'
 import CopyLink from '@/components/credentials/CopyLink'
-import { credentials, getCredential, credentialUrl, formatDate, linkedInAddUrl, ISSUER, type StepLabel } from '@/lib/credentials'
+import { credentials, getCredential, credentialUrl, formatDate, linkedInAddUrl, ISSUER, OPERATOR, type StepLabel } from '@/lib/credentials'
 
 export const dynamicParams = false
 
@@ -86,7 +86,7 @@ export default async function CredentialPage({ params }: Props) {
           <div><span className="cr-k">Date</span>{formatDate(c.date)}</div>
           <div><span className="cr-k">Format</span>{c.format}</div>
           <div><span className="cr-k">Credential ID</span><b>{c.id}</b></div>
-          <div><span className="cr-k">Issued by</span><span className="cr-sig">Allan Sendagi</span></div>
+          <div><span className="cr-k">Issued by</span><span className="cr-sig">Allan Sendagi</span><span className="cr-small" style={{ display: "block", marginTop: 4 }}>for {ISSUER}, operated by {OPERATOR}</span></div>
           <div><span className="cr-k">Role</span>Facilitator; author of <i>The AI Roadmap</i></div>
           <div><span className="cr-k">Method</span>Authority-Aware AI Task Canvas</div>
           <div><span className="cr-k">Verify at</span>ainavsystem.com/verify</div>
@@ -134,7 +134,7 @@ export default async function CredentialPage({ params }: Props) {
             The holder brought a real workflow, labelled every step, and wrote a one-page specification for one AI task:
             what it does, the data it needs, where it must stop and hand to a person, what gets recorded, and how success is measured.
           </p>
-          <p>It is a certificate of completion for a 2.5-hour practical session run by {ISSUER}. It is not an accredited qualification.</p>
+          <p>It is a certificate of completion for a 2.5-hour practical session run by {ISSUER}, operated by {OPERATOR}. It is not an accredited qualification.</p>
         </div>
       </section>
     </main>

@@ -25,7 +25,7 @@ export default function CredentialsLayout({ children }: { children: React.ReactN
     <div className={`cr-root ${display.variable} ${body.variable}`}>
       <div className="cr-wrap">
         <header className="cr-top">
-          <a className="cr-brand" href="/">AI Value Sandbox <span>/ Credentials</span></a>
+          <a className="cr-brand" href="/">AI Value Sandbox <span>/ Credentials</span><small>operated by SafeHaven LLC</small></a>
           <a href="/verify">Verify a credential</a>
         </header>
         {children}

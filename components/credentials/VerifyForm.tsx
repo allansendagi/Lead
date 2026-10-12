@@ -44,7 +44,7 @@ export default function VerifyForm({ index }: { index: VerifyEntry[] }) {
           <div className="cr-vres">
             <span className="cr-pill revoked">No match</span>
             <h2>No credential with the ID {checked}</h2>
-            <p className="cr-small">Check the ID against the certificate. IDs look like MAW-C2-007. If it still does not match, the certificate was not issued by AI Value Sandbox.</p>
+            <p className="cr-small">Check the ID against the certificate. IDs look like MAW-C2-007. If it still does not match, the certificate was not issued by AI Value Sandbox, operated by SafeHaven LLC.</p>
           </div>
         )}
         {hit && (
