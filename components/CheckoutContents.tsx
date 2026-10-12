@@ -309,8 +309,11 @@ export default function CheckoutContents({ paypalClientId }: { paypalClientId: s
           <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.7, margin: '0 0 4px' }}>
             {COHORT_DATE_LONG} &middot; {COHORT_TIME_DOHA} / {COHORT_TIME_DUBAI}
           </p>
-          <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.7, margin: '0 0 18px' }}>
+          <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.7, margin: '0 0 4px' }}>
             Live online &middot; session link sent 24 hours before
+          </p>
+          <p style={{ fontSize: 14.5, color: C.body, lineHeight: 1.7, margin: '0 0 18px' }}>
+            Afterwards: your one-page AI Task Specification as a PDF, and a verifiable credential naming what you built.
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '16px 0', borderTop: `1px solid ${C.border}` }}>

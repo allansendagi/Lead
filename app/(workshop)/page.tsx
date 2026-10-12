@@ -81,6 +81,7 @@ const walkAwayItems = [
   { title: 'Agent design', desc: 'Which steps an agent takes on, the systems it uses, its hand-offs, and what it must never do.' },
   { title: 'A first test to run', desc: 'What to try in the next two weeks, with what data, and what to measure.' },
   { title: 'A measurable outcome', desc: 'How you will know whether the intervention actually improves the work.' },
+  { title: 'A verifiable credential', desc: 'A certificate naming the specification you built, with its own page you can add to LinkedIn and anyone can verify.' },
 ]
 
 const canvasHeader = [
@@ -420,7 +421,7 @@ export default function WorkshopPage() {
                 style={{
                   padding: '40px 36px',
                   borderRight: i % 2 === 0 && i !== walkAwayItems.length - 1 ? `1px solid ${C.border}` : 'none',
-                  borderBottom: i !== walkAwayItems.length - 1 ? `1px solid ${C.border}` : 'none',
+                  borderBottom: i < walkAwayItems.length - (walkAwayItems.length % 2 === 0 ? 2 : 1) ? `1px solid ${C.border}` : 'none',
                   gridColumn: i === walkAwayItems.length - 1 && walkAwayItems.length % 2 === 1 ? '1 / -1' : undefined,
                 }}
               >
@@ -914,6 +915,8 @@ export default function WorkshopPage() {
             <a href="/assessment" style={{ color: C.muted, textDecoration: 'underline' }}>AI Readiness Quiz</a>
             {' '}&middot;{' '}
             <a href="/pick-your-task" style={{ color: C.muted, textDecoration: 'underline' }}>Pick Your Process</a>
+            {' '}&middot;{' '}
+            <a href="/verify" style={{ color: C.muted, textDecoration: 'underline' }}>Verify a credential</a>
             {' '}&middot;{' '}
             <TrackedLink
               href={`https://wa.me/97450176561?text=${encodeURIComponent("Hi Allan, we're interested in team training using the AI Value Sandbox workshop")}`}
