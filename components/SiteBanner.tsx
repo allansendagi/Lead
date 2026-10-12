@@ -1,21 +1,25 @@
 'use client'
 import { useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import TrackedLink from './TrackedLink'
 
 // Top bar shown on every page. It publishes its height as --banner-h so the
 // fixed navigation on the (site) pages can sit directly beneath it.
 export default function SiteBanner() {
   const ref = useRef<HTMLDivElement>(null)
+  const pathname = usePathname() || ''
+  // Credential and verification pages are records, not sales pages: no promo banner there.
+  const hidden = pathname.startsWith('/c/') || pathname.startsWith('/verify')
 
   useEffect(() => {
     const el = ref.current
-    if (!el) return
+    if (!el) { document.documentElement.style.setProperty('--banner-h', '0px'); return }
     const publish = () => document.documentElement.style.setProperty('--banner-h', `${el.offsetHeight}px`)
     publish()
     const ro = new ResizeObserver(publish)
     ro.observe(el)
     return () => ro.disconnect()
-  }, [])
+  }, [hidden])
 
   const link = (
     <TrackedLink
@@ -26,6 +30,8 @@ export default function SiteBanner() {
       Join Cohort 2 &rarr;
     </TrackedLink>
   )
+
+  if (hidden) return null
 
   return (
     <div
