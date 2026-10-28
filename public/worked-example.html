@@ -361,7 +361,7 @@ const SCENES=[
    beats:[0]},
   {name:"Strategy", panel:"strategy", k:"Step 1 · Strategy", ch:"Book ch. 2–4",
    h:"Choose the pace before the task.",
-   p:"This team works by hand today and needs results within months. Each path commits you to a different investment, timeline, data effort and change for people. Click either one.",
+   p:"This team works by hand today and needs results within weeks. Each path commits you to a different investment, timeline, data effort and change for people. Click either one.",
    beats:[0,1500]},
   {name:"Workflow", panel:"workflow", k:"Step 2 · Workflow", ch:"Book ch. 5",
    h:"Choose one workflow. Ask why three times.",
@@ -419,16 +419,16 @@ $("#toc").innerHTML=TOC.map((t,i)=>`<li style="transition-delay:${120+i*110}ms">
 
 const CONSEQ={
   evo:[["Investment & risk","Lower","Minimal disruption to the wider organisation."],
-       ["Timeline","3–6 months","To the first visible win."],
+       ["Timeline","2–6 weeks","To the first visible win."],
        ["Data","What exists","Existing sources, light cleanup."],
        ["People","Little change","1–3 focused pilots."]],
   rev:[["Investment & risk","Higher","Higher potential reward."],
-       ["Timeline","12–18+ months","For major phases."],
+       ["Timeline","3–6 months","For major phases."],
        ["Data","Rebuild","New infrastructure or a major overhaul."],
        ["People","New roles","New workflows, roles and skills."]]};
 const ROWS=[
   ["Investment & risk","Lower. Minimal disruption to the wider organisation.","Higher, with higher potential reward."],
-  ["Timeline","First wins in 3–6 months.","12–18 months or more for major phases."],
+  ["Timeline","First wins in 2–6 weeks.","3–6 months for major phases."],
   ["Scope","1–3 focused pilots.","Cross-functional or company-wide; parallel workstreams."],
   ["Data","Existing sources, light cleanup.","New infrastructure or a major overhaul."],
   ["People","Little change to how teams work.","New workflows, roles and skills."],
@@ -440,7 +440,7 @@ $("#cons").innerHTML=`<div class="cr hd"><div></div><div class="e">Evolutionary<
 $("#full").addEventListener("toggle",()=>layout());
 const VERDICT={
   none:"Click a path to see what it commits you to.",
-  evo:"<b>Fits this team:</b> work done by hand today, results needed within months.",
+  evo:"<b>Fits this team:</b> work done by hand today, results needed within weeks.",
   rev:"<b>Not this team’s fit:</b> it needs executive sponsorship and ready foundations. Don’t choose on ambition alone."};
 let strat=null;
 function setStrat(v){
