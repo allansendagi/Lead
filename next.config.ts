@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
       { source: '/workshop', destination: '/', permanent: true },
     ]
   },
+  async rewrites() {
+    return [
+      // Static worked-example walkthrough lives in public/ as a single HTML file.
+      { source: '/worked-example', destination: '/worked-example.html' },
+    ]
+  },
   async headers() {
     return [
       {

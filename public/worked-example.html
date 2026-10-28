@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Make AI Work · Worked Example</title>
+<style>
+:root{
+  --bg:#f4f2ec; --stage:#ebe8e0; --panel:#ffffff; --ink:#122029; --mute:#5b6975; --faint:#8d98a1; --line:#d9d4c8;
+  --accent:#0b6b5c; --accent-ink:#ffffff; --accent-soft:#d9eee8;
+  --assist:#2f6fb3; --perform:#0b6b5c; --agent:#7448b3; --human:#b4621a; --warn:#b03a28; --warn-soft:#f6e1dc;
+  --shadow:0 1px 2px rgba(18,32,41,.06),0 6px 18px rgba(18,32,41,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e151a; --stage:#131c22; --panel:#1a252d; --ink:#e9eff2; --mute:#9aa8b2; --faint:#6f7e89; --line:#2a3943;
+    --accent:#43b9a1; --accent-ink:#04201a; --accent-soft:#163a33;
+    --assist:#72aaea; --perform:#43b9a1; --agent:#b496ea; --human:#e6a462; --warn:#ea8b78; --warn-soft:#3b231e;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e151a; --stage:#131c22; --panel:#1a252d; --ink:#e9eff2; --mute:#9aa8b2; --faint:#6f7e89; --line:#2a3943;
+  --accent:#43b9a1; --accent-ink:#04201a; --accent-soft:#163a33;
+  --assist:#72aaea; --perform:#43b9a1; --agent:#b496ea; --human:#e6a462; --warn:#ea8b78; --warn-soft:#3b231e;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+
+/* ---- top bar ---- */
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 28px;border-bottom:1px solid var(--line)}
+.brand{font-weight:800;font-size:13px;letter-spacing:.14em}
+.brand b{color:var(--accent)}
+.ctx{font-size:13px;color:var(--mute)}
+@media (max-width:640px){.ctx{display:none}.topbar{padding:12px 16px}}
+.sp{flex:1}
+.tbtn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--mute);cursor:pointer}
+.tbtn.on{color:var(--accent);border-color:var(--accent)}
+
+/* ---- layout ---- */
+.wrap{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:40px;max-width:1360px;margin:0 auto;padding:36px 28px 120px}
+@media (max-width:980px){.wrap{grid-template-columns:minmax(0,1fr);gap:20px;padding:22px 16px 120px}}
+
+/* ---- story ---- */
+.story{position:sticky;top:24px;align-self:start}
+@media (max-width:980px){.story{position:static}}
+.kicker{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.kicker .ch{color:var(--faint);font-weight:700;letter-spacing:.06em;margin-left:6px}
+.story h1{font-size:clamp(28px,3.2vw,42px);line-height:1.08;letter-spacing:-.025em;margin:10px 0 16px;font-weight:800}
+.story p{color:var(--mute);font-size:17px;margin:0;max-width:44ch}
+.story .swap{transition:opacity .35s ease,transform .35s ease}
+.story .swap.out{opacity:0;transform:translateY(6px)}
+.notes{margin-top:22px;border-left:3px solid var(--accent);background:var(--panel);padding:12px 14px;border-radius:0 10px 10px 0;font-size:14px;color:var(--ink);box-shadow:var(--shadow);display:none}
+.notes.on{display:block}
+.notes .h{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+
+/* ---- stage ---- */
+.stage{background:var(--stage);border-radius:22px;padding:28px;min-height:560px;position:relative;overflow:hidden}
+@media (max-width:980px){.stage{padding:16px;border-radius:16px;min-height:0}}
+.board{position:relative;transition:height .6s cubic-bezier(.2,.7,.2,1)}
+.panel{position:absolute;left:0;right:0;top:0;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease}
+.panel.on{opacity:1;pointer-events:auto;transform:none}
+
+/* contents */
+.toc-wrap{padding:4px}
+.tochead{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 14px}
+.toc{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.toc li{opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
+.panel.on .toc li{opacity:1;transform:none}
+.toc button{width:100%;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;text-align:left;background:var(--panel);border:0;border-radius:14px;padding:14px 18px;box-shadow:var(--shadow);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.toc button:hover{transform:translateX(4px);box-shadow:0 0 0 2px var(--accent),var(--shadow)}
+.toc .no{font-size:28px;font-weight:850;letter-spacing:-.03em;color:var(--accent)}
+.toc .nm{font-weight:800;font-size:18px;letter-spacing:-.01em}
+.toc .ds{color:var(--mute);font-size:14.5px;margin-top:1px}
+.toc .bk{font-size:11.5px;font-weight:700;color:var(--faint);white-space:nowrap}
+.tocfoot{margin-top:14px;font-size:14px;color:var(--mute);padding-left:4px}
+@media (max-width:640px){.toc button{grid-template-columns:32px 1fr;padding:12px 14px}.toc .bk{display:none}}
+
+/* strategy */
+.strat{display:grid;gap:14px}
+.answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.ans{background:var(--panel);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease}
+.panel.on .ans{opacity:1;transform:none}
+.ans .q{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.ans .a{font-weight:700;font-size:14.5px;margin-top:1px;line-height:1.25}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pk{text-align:left;border:2px solid transparent;background:var(--panel);border-radius:16px;padding:14px 18px;box-shadow:var(--shadow);cursor:pointer;transition:border-color .3s,background .3s,transform .3s}
+.pk:hover{transform:translateY(-2px)}
+.pk .pn{display:block;font-size:21px;font-weight:850;letter-spacing:-.02em}
+.pk .pd{display:block;font-size:13.5px;color:var(--mute);margin-top:2px}
+.strat.s-evo .pk[data-s=evo]{border-color:var(--accent);background:var(--accent-soft)}
+.strat.s-rev .pk[data-s=rev]{border-color:var(--agent);background:color-mix(in srgb,var(--agent) 14%,var(--panel))}
+.rail{position:relative;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--line) 50%,var(--agent));margin:8px 8px 6px}
+.needle{position:absolute;top:50%;left:50%;width:22px;height:22px;border-radius:50%;background:var(--panel);border:4px solid var(--ink);transform:translate(-50%,-50%);transition:left .9s cubic-bezier(.3,.8,.2,1),border-color .5s}
+.strat.s-evo .needle{left:12%;border-color:var(--accent)}
+.strat.s-rev .needle{left:88%;border-color:var(--agent)}
+.conseq{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:760px){.conseq{grid-template-columns:1fr 1fr}}
+.cq{background:var(--panel);border-radius:14px;padding:16px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease}
+.strat.has .cq{opacity:1;transform:none}
+.cq .h{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.cq .v{font-size:21px;font-weight:850;letter-spacing:-.02em;margin-top:4px;line-height:1.15}
+.cq .s{font-size:13px;color:var(--mute);margin-top:4px;line-height:1.35}
+.strat.s-evo .cq .v{color:var(--accent)}
+.strat.s-rev .cq .v{color:var(--agent)}
+.verdict{border-radius:12px;padding:14px 18px;font-size:15.5px;background:var(--panel);box-shadow:var(--shadow);transition:background .4s}
+.strat.s-evo .verdict{background:var(--accent-soft)}
+.strat.s-rev .verdict{background:var(--warn-soft)}
+.full{background:var(--panel);border-radius:12px;box-shadow:var(--shadow);padding:0 16px}
+.full summary{cursor:pointer;list-style:none;padding:13px 0;font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:10px}
+.full summary::-webkit-details-marker{display:none}
+.full summary::before{content:"";width:8px;height:8px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(-45deg);transition:transform .25s;margin-right:2px}
+.full[open] summary::before{transform:rotate(45deg)}
+.full summary span{font-weight:600;color:var(--faint);font-size:13px}
+.cons{display:grid;gap:6px;padding:0 0 16px}
+.cr{display:grid;grid-template-columns:116px 1fr 1fr;gap:8px}
+.cr>div{background:var(--bg);border-radius:9px;padding:8px 12px;font-size:13.5px;line-height:1.35;transition:opacity .4s,box-shadow .4s}
+.cr .rl{background:transparent;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);align-self:center;padding:0 2px}
+.cr.hd>div{background:transparent;font-weight:850;font-size:14.5px;padding-bottom:0}
+.strat.s-evo .cr .r,.strat.s-rev .cr .e{opacity:.35}
+.strat.s-evo .cr:not(.hd) .e{box-shadow:inset 0 0 0 2px var(--accent)}
+.strat.s-rev .cr:not(.hd) .r{box-shadow:inset 0 0 0 2px var(--agent)}
+@media (max-width:640px){
+  .pick{grid-template-columns:1fr}
+  .cr{grid-template-columns:1fr}.cr.hd{display:none}
+  .cr .e::before,.cr .r::before{display:block;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
+  .cr .e::before{content:"Evolutionary"}.cr .r::before{content:"Revolutionary"}
+}
+
+/* workflow */
+.wfgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:760px){.wfgrid{grid-template-columns:1fr}}
+.wfc{background:var(--panel);border-radius:14px;padding:16px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:opacity .5s,box-shadow .5s,transform .5s}
+.panel.on .wfc{opacity:1;transform:none}
+.wfc h3{margin:0 0 4px;font-size:17px;letter-spacing:-.01em}
+.wfc p{margin:0 0 10px;color:var(--mute);font-size:14px}
+.wfc .m{font-size:12.5px;color:var(--faint);line-height:1.6}
+.wfc .tie{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:13px;font-weight:650;color:var(--accent)}
+.panel.b1 .wfc{opacity:.4}
+.panel.b1 .wfc.pickd{opacity:1;box-shadow:0 0 0 2.5px var(--accent),var(--shadow)}
+.crit{font-size:13px;color:var(--mute);margin:12px 4px 0}
+.whys{display:grid;gap:10px;margin-top:14px}
+.why3{display:grid;grid-template-columns:34px 1fr;gap:12px;background:var(--panel);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);opacity:0;transform:translateX(12px);transition:opacity .45s,transform .45s}
+.b2 .why3{opacity:1;transform:none}
+.why3 .n{font-size:24px;font-weight:850;color:var(--warn);line-height:1.1}
+.why3 .q{font-weight:800}
+.why3 .a{color:var(--mute);font-size:14px}
+.vd{margin:12px 4px 0;font-weight:800;color:var(--accent);opacity:0;transition:opacity .5s 1s}
+.b2 .vd{opacity:1}
+
+/* cards */
+.card{position:absolute;left:0;top:0;background:var(--panel);border-radius:14px;box-shadow:var(--shadow);display:flex;align-items:stretch;overflow:hidden;
+  opacity:0;transition:transform .7s cubic-bezier(.2,.75,.2,1),opacity .5s ease,width .7s cubic-bezier(.2,.75,.2,1),background .4s,box-shadow .4s}
+.card .bar{width:6px;flex:none;background:var(--line);transition:background .4s}
+.card .body{flex:1;min-width:0;padding:11px 16px;display:flex;flex-direction:column;justify-content:center;gap:5px}
+.card .txt{font-weight:650;font-size:15.5px;line-height:1.3;transition:color .4s;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card.aside .txt{font-size:14px}
+.card.aside.scored .sc{width:100px}
+.card .num{display:inline-block;min-width:22px;color:var(--faint);font-weight:700}
+.card .meta{flex:none;display:flex;gap:8px;align-items:center;height:0;opacity:0;overflow:hidden;transition:height .35s,opacity .35s}
+.card.labeled .meta{height:20px;opacity:1}
+.chip{font-size:11.5px;font-weight:800;letter-spacing:.02em;border-radius:6px;padding:2px 8px;color:#fff;opacity:0;transform:translateX(-6px);transition:opacity .35s,transform .35s}
+.chip svg{width:10px;height:10px;vertical-align:-1px;margin-right:4px}
+.card.labeled .chip{opacity:1;transform:none}
+.card[data-l=agent].labeled .bar,.card[data-l=agent] .chip{background:var(--agent)}
+.card[data-l=assist].labeled .bar,.card[data-l=assist] .chip{background:var(--assist)}
+.card[data-l=perform].labeled .bar,.card[data-l=perform] .chip{background:var(--perform);color:var(--accent-ink)}
+.card[data-l=human].labeled .bar,.card[data-l=human] .chip{background:var(--human)}
+.hint{font-size:12px;color:var(--faint);opacity:0;transition:opacity .4s;white-space:nowrap}
+.card.dim .hint,.card.aside .hint{opacity:1}
+.card.dim{opacity:.55!important}
+/* why bubble */
+.why{flex:none;align-self:center;margin-right:14px;max-width:46%;background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:7px 11px;font-size:13px;line-height:1.3;opacity:0;transform:translateX(10px) scale(.96);transition:opacity .4s,transform .4s}
+.why b{color:var(--warn)}
+.card.why-on .why{opacity:1;transform:none}
+.card.del{background:var(--warn-soft)}
+.card.del .txt{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--warn);text-decoration-thickness:2px}
+/* score */
+.sc{flex:none;display:flex;align-items:center;gap:12px;padding-right:16px;width:0;opacity:0;overflow:hidden;transition:opacity .4s,width .5s}
+.card.scored .sc{width:118px;opacity:1}
+.bars{display:flex;align-items:flex-end;gap:4px;height:34px}
+.bars i{display:block;width:9px;height:100%;border-radius:3px;background:var(--line);position:relative;overflow:hidden}
+.bars i::after{content:"";position:absolute;left:0;right:0;bottom:0;height:calc(var(--v)*20%);background:var(--accent);transform:scaleY(0);transform-origin:bottom;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.card.scored .bars i::after{transform:scaleY(1)}
+.card.aside .bars i::after{background:var(--faint)}
+.tot{font-size:22px;font-weight:850;letter-spacing:-.02em;min-width:30px;text-align:right}
+.tot small{display:block;font-size:10px;font-weight:700;color:var(--faint);letter-spacing:.06em;text-align:right;margin-top:-3px}
+.card.top{box-shadow:0 0 0 2.5px var(--accent),var(--shadow)}
+.star{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);opacity:0;transition:opacity .4s .3s;white-space:nowrap}
+.card.top .star{opacity:1}
+.colhead{position:absolute;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);opacity:0;transition:opacity .5s,transform .7s cubic-bezier(.2,.75,.2,1)}
+.colhead.on{opacity:1}
+.colhead small{display:block;text-transform:none;letter-spacing:0;font-weight:500;font-size:13px;color:var(--faint);margin-top:2px;max-width:40ch}
+
+/* canvas */
+.canvas{position:absolute;left:0;right:0;opacity:0;pointer-events:none;transition:opacity .4s}
+.canvas.on{opacity:1;pointer-events:auto}
+.cvtop{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.cvgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cvgrid .key{grid-column:1/-1}
+@media (max-width:640px){.cvgrid{grid-template-columns:1fr}}
+@media (max-width:640px){.cvtop{grid-template-columns:1fr}}
+.cell{background:var(--panel);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:opacity .45s ease,transform .45s ease}
+.canvas.on .cell{opacity:1;transform:none}
+.cell .h{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.cell .v{font-size:14.5px;margin-top:3px;line-height:1.4}
+.cell.meta{background:transparent;box-shadow:none;border:1.5px dashed var(--line)}
+.cell.key{box-shadow:0 0 0 2px var(--human),var(--shadow)}
+.cell.key .h{color:var(--human)}
+.cls{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.cls span{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--faint)}
+.cls span.hit{background:var(--human);border-color:var(--human);color:#fff}
+
+/* funnel */
+.funnel{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:stretch}
+@media (max-width:760px){.funnel{grid-template-columns:repeat(2,1fr)}}
+.fn{background:var(--panel);border-radius:16px;padding:22px 18px;box-shadow:var(--shadow);position:relative;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
+.panel.on .fn{opacity:1;transform:none}
+.fn .n{font-size:clamp(46px,6vw,72px);font-weight:850;letter-spacing:-.04em;line-height:1}
+.fn .l{font-size:14px;color:var(--mute);margin-top:6px;font-weight:600}
+.fn.last{background:var(--accent);color:var(--accent-ink)}
+.fn.last .l{color:inherit;opacity:.85}
+.next2{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.next2 .cell{opacity:1;transform:none}
+.cta{display:inline-flex;align-items:center;gap:10px;margin-top:20px;background:var(--ink);color:var(--bg);text-decoration:none;font-weight:800;border-radius:12px;padding:14px 20px;font-size:16px}
+
+/* ---- controls ---- */
+.ctrl{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+.ctrl .in{max-width:1360px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;gap:16px}
+@media (max-width:980px){.ctrl .in{padding:10px 16px;gap:10px}}
+.nb{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer}
+.nb.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);padding:10px 22px}
+.nb:disabled{opacity:.35;cursor:default}
+.prog{flex:1;display:flex;gap:6px}
+.prog button{flex:1;height:30px;border:0;background:transparent;cursor:pointer;padding:0;position:relative}
+.prog button::before{content:"";position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;border-radius:3px;background:var(--line);transition:background .4s}
+.prog button.done::before{background:var(--accent)}
+.prog button.cur::before{background:var(--ink)}
+.prog button span{position:absolute;left:0;right:0;top:-12px;font-size:10.5px;font-weight:700;color:var(--faint);letter-spacing:.04em;text-align:center;white-space:nowrap;overflow:hidden;opacity:0;transition:opacity .2s}
+.prog button:hover span,.prog button.cur span{opacity:1}
+@media (max-width:760px){.prog button span{display:none}}
+.keys{font-size:12px;color:var(--faint);white-space:nowrap}
+@media (max-width:760px){.keys{display:none}}
+
+.instant *,.instant *::before,.instant *::after{transition:none!important}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;transition-delay:0ms!important}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MAKE <b>AI</b> WORK</div>
+  <div class="ctx" id="ctx">Worked example · Post-discharge follow-up</div>
+  <div class="sp"></div>
+  <button class="tbtn" id="themeBtn" title="Light / dark">◐</button>
+</div>
+
+<div class="wrap">
+  <aside class="story">
+    <div class="swap" id="story"></div>
+  </aside>
+
+  <section class="stage">
+    <div class="board" id="board">
+      <!-- contents -->
+      <div class="panel" id="p-title"><div class="toc-wrap">
+        <div class="tochead">What we’ll cover</div>
+        <ol class="toc" id="toc"></ol>
+        <div class="tocfoot">Then: one workflow of yours, run live through the same steps.</div>
+      </div></div>
+
+      <!-- strategy -->
+      <div class="panel" id="p-strategy"><div class="strat" id="strat">
+        <div class="pick">
+          <button class="pk" data-s="evo"><span class="pn">Evolutionary</span><span class="pd">Build gradually. A turbocharger on the car you already run.</span></button>
+          <button class="pk" data-s="rev"><span class="pn">Revolutionary</span><span class="pd">Rethink everything. A new electric vehicle, built from scratch.</span></button>
+        </div>
+        <div class="rail"><div class="needle"></div></div>
+        <div class="conseq" id="conseq"></div>
+        <div class="verdict" id="verdict"></div>
+        <details class="full" id="full"><summary>Full comparison <span>8 factors, both paths</span></summary><div class="cons" id="cons"></div></details>
+      </div></div>
+
+      <!-- workflow -->
+      <div class="panel" id="p-workflow">
+        <div class="wfgrid" id="wfgrid"></div>
+        <div class="crit">Pick the workflow that is tied to the goal, common across sites, and slow or frustrating today.</div>
+        <div class="whys" id="whys"></div>
+        <div class="vd">Verdict: validated. Keep it, and look for what can be simpler.</div>
+      </div>
+
+      <!-- cards + headings are injected -->
+      <div class="colhead" id="h-main">Best candidates for AI<small>Rated 1–5: predictable · data ready · simple · frequent</small></div>
+      <div class="colhead" id="h-aside">Automation, not AI<small>Rules need a workflow tool, not a model.</small></div>
+
+      <!-- canvas -->
+      <div class="canvas" id="canvas">
+        <div class="cvtop">
+          <div class="cell meta"><div class="h">Owner</div><div class="v">Discharge-care manager</div></div>
+          <div class="cell meta"><div class="h">Baseline</div><div class="v">Today’s 48-hour follow-up rate, measured on last month</div></div>
+          <div class="cell meta"><div class="h">Target</div><div class="v">Agreed with the owner once the baseline is known</div></div>
+        </div>
+        <div class="cvgrid" id="cvgrid"></div>
+      </div>
+
+      <!-- funnel -->
+      <div class="panel" id="p-funnel">
+        <div class="funnel" id="funnel"></div>
+        <div class="next2">
+          <div class="cell"><div class="h">First test · next two weeks</div><div class="v">Run it on 20 past discharges. A nurse compares every output with what actually happened and logs each difference.</div></div>
+          <div class="cell"><div class="h">Then</div><div class="v">The same method on the next workflow. One workflow at a time, each with a baseline and a number.</div></div>
+        </div>
+        <a class="cta" href="/pick-your-task">Try it on your own process <span>→</span></a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="ctrl"><div class="in">
+  <button class="nb" id="back">←</button>
+  <div class="prog" id="prog"></div>
+  <span class="keys">← → · space</span>
+  <button class="nb primary" id="next">Next →</button>
+</div></div>
+
+<script>
+"use strict";
+const CLIENT=null;
+/* ---------------- content ---------------- */
+const LOCK='<svg viewBox="0 0 10 10" fill="currentColor"><path d="M3 4V3a2 2 0 1 1 4 0v1h.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5H3zm1 0h2V3a1 1 0 1 0-2 0v1z"/></svg>';
+const LABEL={agent:"Agent runs it",assist:"AI assists",perform:"AI performs",human:LOCK+"Stays human"};
+const STEPS=[
+  {id:"pull",  t:"Pull the list of patients discharged in the last 48 hours", l:"agent", rule:true, sc:[5,5,5,5]},
+  {id:"print", t:"Print the list and hand it to the nurse on shift", del:true, why:"The list is already on screen. Who reads the paper?"},
+  {id:"check", t:"Check whether a follow-up has already happened", l:"agent", rule:true, sc:[5,4,5,4]},
+  {id:"call",  t:"Contact the patient with the symptom checklist", l:"assist", sc:[3,4,3,4]},
+  {id:"record",t:"Record and structure the answers in the file", l:"perform", sc:[4,4,4,4], top:true},
+  {id:"flag",  t:"Flag answers that suggest deterioration", l:"assist", sc:[3,3,2,3]},
+  {id:"decide",t:"Decide on escalation or a return visit", l:"human", hint:"Clinical judgment — not scored"},
+  {id:"copy",  t:"Copy the results into a separate spreadsheet", del:true, why:"The record already holds them. Who uses the copy?"}
+];
+const CANVAS=[
+  ["1 · Action","Record each patient’s follow-up answers after discharge."],
+  ["2 · AI’s job","Turn call notes or message replies into structured fields, and highlight any answer outside the checklist."],
+  ["3 · Judgment & authority","A nurse reviews every highlighted answer and decides on escalation. The AI never decides whether a patient comes back.",true],
+  ["4 · Input","The patient’s answers, the discharge summary, the checklist."],
+  ["5 · Training data & context","Past follow-up notes with the fields completed from them; checklist and field definitions."],
+  ["6 · Feedback & record","Log every nurse edit, and which highlighted answers led to a clinical action."],
+  ["7 · Outcome","More discharges with a complete, structured follow-up within 48 hours, without more nurse time."]
+];
+const total=s=>s.sc?s.sc.reduce((a,b)=>a+b,0):0;
+const KEPT=STEPS.filter(s=>!s.del), AI=KEPT.filter(s=>s.sc&&!s.rule);
+
+const I={start:0,strategy:1,workflow:2,map:3,del:4,label:5,score:6,canvas:7,result:8};
+const SCENES=[
+  {name:"Contents", panel:"title", k:"Worked example", ch:"",
+   h:"From one workflow to one task you can build.",
+   p:"The problem is no longer access to intelligence. It is turning it into better work and decisions. Six steps, shown on one real workflow. Click any step to jump to it.",
+   beats:[0]},
+  {name:"Strategy", panel:"strategy", k:"Step 1 · Strategy", ch:"Book ch. 2–4",
+   h:"Choose the pace before the task.",
+   p:"This team works by hand today and needs results within months. Each path commits you to a different investment, timeline, data effort and change for people. Click either one.",
+   beats:[0,1500]},
+  {name:"Workflow", panel:"workflow", k:"Step 2 · Workflow", ch:"Book ch. 5",
+   h:"Choose one workflow. Ask why three times.",
+   p:"Three candidates. Pick the one tied to the goal, common across sites, and slow today. Then question whether it should exist at all, before mapping anything.",
+   beats:[0,1400,2800]},
+  {name:"Map", panel:"cards", k:"Step 3 · Map & delete", ch:"Book ch. 5 · 8",
+   h:"Map it as it runs today.",
+   p:"Eight steps, one action each. No improvements yet. The real process, including the parts nobody likes to admit.",
+   beats:[0]},
+  {name:"Delete", panel:"cards", k:"Step 3 · Map & delete", ch:"Book ch. 5",
+   h:"Ask why. Then delete.",
+   p:"Every step has to justify itself before anything is automated. Two of these copy information that already exists. Automating them would only make waste faster.",
+   beats:[0,1700,2700]},
+  {name:"Label", panel:"cards", k:"Step 4 · Label", ch:"Book ch. 6 · 8",
+   h:"Decide who does each step.",
+   p:"Every surviving step gets one label. Two are rules an agent can run end to end. Three need AI with a person checking. The clinical decision stays human, now in writing rather than by habit.",
+   beats:[0]},
+  {name:"Score", panel:"cards", k:"Step 5 · Score", ch:"Book ch. 6",
+   h:"Score, and separate rules from AI.",
+   p:"Each step is rated 1–5: predictable, data ready, simple, frequent. Steps that only follow a rule need a workflow tool, not a model. One task rises to the top.",
+   beats:[0,1500]},
+  {name:"Canvas", panel:"canvas", k:"Step 6 · AI Task Canvas", ch:"Book ch. 7 · 8",
+   h:"One task. Seven decisions.",
+   p:"The Canvas turns the task into something a developer or vendor can build: what AI does, where its authority stops, what it needs, and how we will know it worked.",
+   beats:[0]},
+  {name:"Result", panel:"funnel", k:"Result", ch:"",
+   h:"Eight steps. One task. Two weeks to a test.",
+   p:"Not a list of AI ideas: one intervention, specified, with a baseline and a number that says whether it worked.",
+   beats:[0]}
+];
+
+/* ---------------- build DOM ---------------- */
+const $=s=>document.querySelector(s);
+const board=$("#board");
+if(CLIENT){ $("#ctx").textContent=`Prepared for ${CLIENT.name} · Worked example`; SCENES[0].k=`Worked example for ${CLIENT.short}`; }
+STEPS.forEach((s,i)=>{
+  const el=document.createElement("div");
+  el.className="card"; el.id="c-"+s.id; if(s.l) el.dataset.l=s.l;
+  el.innerHTML=`<div class="bar"></div>
+    <div class="body"><div class="txt"><span class="num">${i+1}</span>${s.t}</div>
+      <div class="meta"><span class="chip">${s.l?LABEL[s.l]:""}</span><span class="hint">${s.hint||(s.rule?"Rule-based":"")}</span>${s.top?`<span class="star">★ First task</span>`:""}</div></div>
+    ${s.why?`<div class="why"><b>Why?</b> ${s.why}</div>`:""}
+    ${s.sc?`<div class="sc"><div class="bars">${s.sc.map(v=>`<i style="--v:${v}"></i>`).join("")}</div><div class="tot">${total(s)}<small>/20</small></div></div>`:""}
+    `;
+  board.appendChild(el); s.el=el;
+});
+const TOC=[
+  ["strategy","Strategy","Evolutionary or revolutionary, from your starting point.","Book ch. 2–4"],
+  ["workflow","Workflow","Choose one, and ask why three times.","Book ch. 5"],
+  ["map","Map & delete","Lay out the steps; cut what should not exist.","Book ch. 5"],
+  ["label","Label","AI assists, AI performs, agent runs it, stays human, not worth changing.","Book ch. 6 · 8"],
+  ["score","Score","Predictable, data ready, simple, frequent.","Book ch. 6"],
+  ["canvas","Canvas","Seven decisions that turn one task into something buildable, plus where an agent stops.","Book ch. 7 · 8"]];
+$("#toc").innerHTML=TOC.map((t,i)=>`<li style="transition-delay:${120+i*110}ms"><button data-to="${t[0]}"><span class="no">${i+1}</span><span><div class="nm">${t[1]}</div><div class="ds">${t[2]}</div></span><span class="bk">${t[3]}</span></button></li>`).join("");
+
+const CONSEQ={
+  evo:[["Investment & risk","Lower","Minimal disruption to the wider organisation."],
+       ["Timeline","3–6 months","To the first visible win."],
+       ["Data","What exists","Existing sources, light cleanup."],
+       ["People","Little change","1–3 focused pilots."]],
+  rev:[["Investment & risk","Higher","Higher potential reward."],
+       ["Timeline","12–18+ months","For major phases."],
+       ["Data","Rebuild","New infrastructure or a major overhaul."],
+       ["People","New roles","New workflows, roles and skills."]]};
+const ROWS=[
+  ["Investment & risk","Lower. Minimal disruption to the wider organisation.","Higher, with higher potential reward."],
+  ["Timeline","First wins in 3–6 months.","12–18 months or more for major phases."],
+  ["Scope","1–3 focused pilots.","Cross-functional or company-wide; parallel workstreams."],
+  ["Data","Existing sources, light cleanup.","New infrastructure or a major overhaul."],
+  ["People","Little change to how teams work.","New workflows, roles and skills."],
+  ["Later: delete","Check that improving this workflow is the best use of effort.","Removing legacy workflows may be the goal."],
+  ["Later: score","Favour simple tasks on data you already have.","May target complex, high-impact tasks."],
+  ["Fits when","Manual process or existing software. Low risk tolerance. ROI needed quickly.","New problem or a broken system. Executive sponsorship. Ready to invest."]];
+$("#cons").innerHTML=`<div class="cr hd"><div></div><div class="e">Evolutionary</div><div class="r">Revolutionary</div></div>`+
+  ROWS.map(r=>`<div class="cr"><div class="rl">${r[0]}</div><div class="e">${r[1]}</div><div class="r">${r[2]}</div></div>`).join("");
+$("#full").addEventListener("toggle",()=>layout());
+const VERDICT={
+  none:"Click a path to see what it commits you to.",
+  evo:"<b>Fits this team:</b> work done by hand today, results needed within months.",
+  rev:"<b>Not this team’s fit:</b> it needs executive sponsorship and ready foundations. Don’t choose on ambition alone."};
+let strat=null;
+function setStrat(v){
+  strat=v; const el=$("#strat");
+  el.classList.toggle("s-evo",v==="evo"); el.classList.toggle("s-rev",v==="rev");
+  $("#verdict").innerHTML=VERDICT[v||"none"];
+  el.classList.remove("has");
+  if(v) $("#conseq").innerHTML=CONSEQ[v].map((c,i)=>`<div class="cq" style="transition-delay:${i*90}ms"><div class="h">${c[0]}</div><div class="v">${c[1]}</div><div class="s">${c[2]}</div></div>`).join("");
+  void el.offsetWidth; el.classList.toggle("has",!!v);
+  document.querySelectorAll(".pk").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.s===v)));
+}
+const WF=[
+  {n:"Insurance pre-authorisation",d:"High volume and document-heavy, with a clinical judgment in the middle.",m:["Daily, many per day","Moderate: record + payer criteria"]},
+  {n:"Outpatient referral intake",d:"Unstructured letters in, a booked appointment out.",m:["Daily, dozens per day","Messy: letters, fax, email"]},
+  {n:"Post-discharge follow-up",d:"Close the loop 48 hours after a patient goes home.",m:["Daily, every discharge","Good: discharge list in the system"],pick:true}];
+$("#wfgrid").innerHTML=WF.map((w,i)=>`<div class="wfc ${w.pick?"pickd":""}" style="transition-delay:${i*130}ms"><h3>${w.n}</h3><p>${w.d}</p><div class="m">${w.m.join("<br>")}</div>${CLIENT?`<div class="tie">${CLIENT.ties[i]}</div>`:""}</div>`).join("");
+const WHYS=[["Why does it exist?","Patients can deteriorate after leaving. A check-in catches problems early."],
+  ["Why is that necessary?","Early contact cuts avoidable return visits and shows patients they are followed."],
+  ["Why this way?","Not every discharge needs the same contact. A risk-based version may beat calling everyone."]];
+$("#whys").innerHTML=WHYS.map((w,i)=>`<div class="why3" style="transition-delay:${i*350}ms"><div class="n">${i+1}</div><div><div class="q">${w[0]}</div><div class="a">${w[1]}</div></div></div>`).join("");
+$("#cvgrid").innerHTML=CANVAS.map((c,i)=>`<div class="cell ${c[2]?"key":""}" style="transition-delay:${250+i*170}ms"><div class="h">${c[0]}</div><div class="v">${c[1]}</div>${c[2]?`<div class="cls"><span>machine can check</span><span>can check with proof</span><span class="hit">needs a person’s judgment</span><span>needs more authority</span></div>`:""}</div>`).join("");
+document.querySelectorAll(".cvtop .cell").forEach((c,i)=>c.style.transitionDelay=(120+i*90)+"ms");
+const FN=[[STEPS.length,"steps mapped"],[KEPT.length,"kept after “why?”"],[AI.length,"AI candidates"],[1,"task, specified"]];
+$("#funnel").innerHTML=FN.map((f,i)=>`<div class="fn ${i===3?"last":""}" style="transition-delay:${i*180}ms"><div class="n">${f[0]}</div><div class="l">${f[1]}</div></div>`).join("");
+$("#prog").innerHTML=SCENES.map((s,i)=>`<button data-i="${i}" aria-label="${s.name}"><span>${s.name}</span></button>`).join("");
+
+/* ---------------- state per scene/beat ---------------- */
+function cardState(sc,b){
+  const m={};
+  STEPS.forEach((s,i)=>{
+    const c={show:sc>=I.map,why:false,del:false,gone:false,labeled:sc>=I.label,scored:false,dim:false,aside:false,top:false,delay:0};
+    if(sc===I.map) c.delay=i*90;
+    if(s.del){
+      if(sc===I.del){c.why=true;c.del=b>=1;c.gone=b>=2}
+      if(sc>I.del) c.gone=true;
+    }
+    if(sc===I.label) c.delay=KEPT.indexOf(s)*140;
+    if(sc>=I.score){
+      c.scored=!!s.sc; c.dim=s.l==="human";
+      if(b>=1||sc>I.score){c.aside=!!s.rule; c.top=!!s.top}
+    }
+    if(sc>=I.canvas && !s.top) c.gone=true;
+    if(sc>=I.result) c.gone=true;
+    m[s.id]=c;
+  });
+  return m;
+}
+
+let cur=-1, beat=0, timers=[], CS={};
+function apply(sc,b){
+  beat=b;
+  const S=SCENES[sc];
+  ["title","strategy","workflow","funnel"].forEach(p=>$("#p-"+p).classList.toggle("on",S.panel===p));
+  const wfp=$("#p-workflow"); wfp.classList.toggle("b1",sc===I.workflow&&b>=1); wfp.classList.toggle("b2",sc===I.workflow&&b>=2);
+  if(sc===I.strategy) setStrat(b>=1?"evo":null);
+  $("#canvas").classList.toggle("on",S.panel==="canvas");
+  CS=cardState(sc,b);
+  STEPS.forEach(s=>{
+    const c=CS[s.id], el=s.el;
+    el.classList.toggle("why-on",c.why); el.classList.toggle("del",c.del);
+    el.classList.toggle("labeled",c.labeled); el.classList.toggle("scored",c.scored);
+    el.classList.toggle("dim",c.dim&&!c.gone); el.classList.toggle("aside",c.aside); el.classList.toggle("top",c.top);
+    const d=c.delay+"ms";
+    el.style.transitionDelay=d; el.querySelector(".chip").style.transitionDelay=d;
+  });
+  const split=sc===I.score&&b>=1;
+  $("#h-main").classList.toggle("on",split); $("#h-aside").classList.toggle("on",split);
+  layout();
+}
+
+function layout(){
+  const W=board.clientWidth, wide=W>=760, narrow=W<560;
+  const sc=cur, split=sc===I.score&&beat>=1;
+  const CH=narrow?92:(split?84:74), G=10, HEAD=narrow?64:62;
+  let main=[],aside=[];
+  STEPS.forEach(s=>{const c=CS[s.id]; if(!c.show||c.gone) return; (c.aside?aside:main).push(s)});
+  if(split||sc===I.canvas) main.sort((a,b)=>(a.l==="human")-(b.l==="human")||total(b)-total(a));
+  let h=0;
+  const place=(s,x,y,w)=>{s.pos={x,y,w}};
+  if(split){
+    const mx=0, mw=wide?Math.round(W*.53)-8:W, ax=wide?Math.round(W*.53)+8:0, aw=wide?W-ax:W;
+    main.forEach((s,i)=>place(s,mx,HEAD+i*(CH+G),mw));
+    const ay0=wide?HEAD:HEAD+main.length*(CH+G)+18+HEAD;
+    aside.forEach((s,i)=>place(s,ax,ay0+i*(CH+G),aw));
+    pos("#h-main",mx,0,mw); pos("#h-aside",ax,wide?0:ay0-HEAD,aw);
+    h=Math.max(HEAD+main.length*(CH+G), ay0+aside.length*(CH+G));
+  }else{
+    main.forEach((s,i)=>place(s,0,i*(CH+G),W));
+    h=main.length*(CH+G);
+  }
+  STEPS.forEach((s,i)=>{
+    const c=CS[s.id], el=s.el;
+    if(!s.pos) s.pos={x:0,y:i*(CH+G),w:W};
+    const visible=c.show&&!c.gone;
+    if(!c.show){ s.pos={x:0,y:i*(CH+G),w:W}; }
+    el.style.width=s.pos.w+"px"; el.style.height=CH+"px";
+    const lift=!c.show?-14:(c.gone?6:0), scale=c.gone?.97:1;
+    el.style.transform=`translate(${s.pos.x}px,${s.pos.y+lift}px) scale(${scale})`;
+    el.style.opacity=visible?(c.dim?.55:1):0;
+    el.style.pointerEvents=visible?"auto":"none";
+  });
+  const P=SCENES[sc].panel;
+  if(P==="canvas"){ const cv=$("#canvas"); cv.style.top=(CH+22)+"px"; h=CH+22+cv.offsetHeight; }
+  else if(P!=="cards"){ h=$("#p-"+P).offsetHeight; }
+  board.style.height=Math.max(h,40)+"px";
+}
+function pos(sel,x,y,w){const e=$(sel); e.style.transform=`translate(${x}px,${y}px)`; e.style.width=w+"px"}
+
+/* ---------------- navigation ---------------- */
+function story(sc){
+  const S=SCENES[sc], el=$("#story");
+  el.classList.add("out");
+  setTimeout(()=>{
+    el.innerHTML=`<div class="kicker">${S.k}${S.ch?`<span class="ch">${S.ch}</span>`:""}</div><h1>${S.h}</h1><p>${S.p}</p>`;
+    el.classList.remove("out");
+  },cur<0?0:180);
+}
+function go(sc,instant){
+  sc=Math.max(0,Math.min(SCENES.length-1,sc));
+  timers.forEach(clearTimeout); timers=[];
+  const fromBack=sc<cur;
+  cur=sc; story(sc);
+  const B=SCENES[sc].beats;
+  if(instant||fromBack){
+    document.body.classList.add("instant"); apply(sc,B.length-1);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove("instant")));
+  }else{
+    apply(sc,0);
+    B.slice(1).forEach((t,i)=>timers.push(setTimeout(()=>{apply(sc,i+1); if(i+2===B.length) timers=[]},t)));
+  }
+  document.querySelectorAll("#prog button").forEach((b,i)=>{b.classList.toggle("done",i<sc);b.classList.toggle("cur",i===sc)});
+  $("#back").disabled=sc===0; $("#next").disabled=sc===SCENES.length-1;
+  $("#next").textContent=sc===SCENES.length-2?"Result →":"Next →";
+  try{history.replaceState(null,"","#"+sc)}catch(e){}
+}
+function next(){
+  if(timers.length){ timers.forEach(clearTimeout); timers=[]; apply(cur,SCENES[cur].beats.length-1); return; }
+  go(cur+1);
+}
+$("#next").onclick=next;
+$("#back").onclick=()=>go(cur-1);
+$("#prog").onclick=e=>{const b=e.target.closest("button"); if(b) go(+b.dataset.i, true)};
+document.addEventListener("click",e=>{
+  const pk=e.target.closest(".pk"); if(pk){ timers.forEach(clearTimeout); timers=[]; setStrat(strat===pk.dataset.s?null:pk.dataset.s); return; }
+  const to=e.target.closest("[data-to]"); if(to){ go(I[to.dataset.to]); }
+});
+document.addEventListener("keydown",e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(e.key==="ArrowRight"||e.key===" "||e.key==="PageDown"){e.preventDefault();next()}
+  else if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();go(cur-1)}
+  else if(e.key==="r"||e.key==="R"){const c=cur; cur=-2; go(c)}
+  else if((e.key==="e"||e.key==="E")&&cur===I.strategy){timers.forEach(clearTimeout);timers=[];setStrat("evo")}
+  else if((e.key==="v"||e.key==="V")&&cur===I.strategy){timers.forEach(clearTimeout);timers=[];setStrat("rev")}
+  else if(e.key==="Home") go(0,true);
+  else if(e.key==="End") go(SCENES.length-1,true);
+});
+$("#themeBtn").onclick=()=>{const r=document.documentElement;const dark=matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark=r.dataset.theme?r.dataset.theme==="dark":dark; r.dataset.theme=isDark?"light":"dark"};
+let lastW=0;
+new ResizeObserver(()=>{
+  const w=board.clientWidth; if(w===lastW||cur<0) return; lastW=w;
+  document.body.classList.add("instant"); layout(); requestAnimationFrame(()=>document.body.classList.remove("instant"));
+}).observe(board);
+
+const start=parseInt((location.hash||"").slice(1),10);
+go(isNaN(start)?0:start, !isNaN(start)&&start>0);
+</script>
+</body>
+</html>
